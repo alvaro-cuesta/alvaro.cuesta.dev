@@ -68,10 +68,10 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
     metadata: {
       [sitemapPluginKey]: isHome
         ? { priority: 1.0 }
-        : isBlogArticle
-          ? { priority: 0.9 }
-          : isBlogArticleList
-            ? { priority: 0.8 }
+        : isBlogArticleList
+          ? { priority: 0.7 }
+          : isBlogArticle
+            ? { priority: 0.9 }
             : isBlogGenericRoute
               ? { priority: 0.6 }
               : undefined,
