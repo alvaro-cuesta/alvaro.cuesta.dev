@@ -86,7 +86,7 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
         <article>
           This page is <strong>currently under construction</strong> 🚧 with my
           own static site generator,{" "}
-          <Link href="https://github.com/alvaro-cuesta/alvaro-cuesta.github.io/tree/master/xenon-ssg">
+          <Link href="https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg">
             Xenon SSG
           </Link>
           . Please be patient while I finish it!
@@ -140,7 +140,7 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
         <ul>
           <Project
             name="Xenon SSG"
-            codeLink="https://github.com/alvaro-cuesta/alvaro-cuesta.github.io/tree/master/xenon-ssg"
+            codeLink="https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg"
           >
             A React static site generator written in TypeScript. It powers this
             very website!

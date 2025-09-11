@@ -1,5 +1,5 @@
 {
-  "name": "alvaro-cuesta.github.io",
+  "name": "alvaro.cuesta.dev",
   "private": true,
   "version": "1.0.0",
   "description": "Álvaro Cuesta's personal website.",
@@ -14,13 +14,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alvaro-cuesta/alvaro-cuesta.github.io.git"
+    "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git"
   },
   "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
   "bugs": {
-    "url": "https://github.com/alvaro-cuesta/alvaro-cuesta.github.io/issues"
+    "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro-cuesta.github.io#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev#readme",
   "dependencies": {
     "@mdx-js/node-loader": "^3.0.1",
     "@picocss/pico": "^2.0.6",

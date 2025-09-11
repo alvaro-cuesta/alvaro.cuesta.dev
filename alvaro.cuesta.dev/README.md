@@ -1,6 +1,6 @@
-# https://alvaro-cuesta.github.io
+# https://alvaro.cuesta.dev
 
-[![Deploy to GitHub Pages](https://github.com/alvaro-cuesta/alvaro-cuesta.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/alvaro-cuesta/alvaro-cuesta.github.io/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/alvaro-cuesta/alvaro.cuesta.dev/actions/workflows/deploy.yml/badge.svg)](https://github.com/alvaro-cuesta/alvaro.cuesta.dev/actions/workflows/deploy.yml)
 
 ## TODO
 

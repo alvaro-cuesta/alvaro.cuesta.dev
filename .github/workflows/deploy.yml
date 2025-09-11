@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUILD_PATH: alvaro-cuesta.github.io
+  BUILD_PATH: alvaro.cuesta.dev
 
 jobs:
   lint:
