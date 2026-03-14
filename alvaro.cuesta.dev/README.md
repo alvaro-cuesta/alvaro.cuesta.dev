@@ -8,7 +8,6 @@
   components renders SVG instead of fonts)
 - Blog posts
   - Comments from GH issues?
-  - Add manual description OR autodescription https://github.com/rehypejs/rehype-infer-description-meta
   - Add reading time https://github.com/rehypejs/rehype-infer-reading-time-meta
   - Add autoembed
     - https://github.com/PaulieScanlon/mdx-embed
