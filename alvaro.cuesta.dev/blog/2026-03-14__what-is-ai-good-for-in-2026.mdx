@@ -1,0 +1,246 @@
+export const title = "What is AI good for in 2026?";
+export const slug = "what-is-ai-good-for-in-2026";
+export const tags = ["ai", "llms", "experiments", "programming"];
+
+> **Disclaimer:** this post has been hand-crafted by me (and only me), with only very minor editorial assistance from AI, to improve wording and clarity. All _em-dashes_ are mine, and only mine 😉
+
+<TableOfContents maxDepth={1} />
+
+# Me, myself and AI
+
+I have always been suspicious of **AI hype**, but I am not the kind of engineer who dismisses things outright. I have been following AI for years through hands-on use and plenty of reading across forums and social media. I have seen multiple hype waves come and go, and I have also seen real progress in the field.
+
+What has always bothered me is how many **AI people**[^ai-people] make huge claims about LLMs for software engineering without giving practical examples. You hear _"AI is amazing, it can do X, Y, and Z"_, but rarely see **concrete evidence** in a real project.
+
+So I kept asking myself:
+
+- Are the hype and claims justified?
+- Is it only useful on small projects?
+- Is it mainly for junior developers, or can it help experienced engineers too?
+- Is it just boilerplate generation, or can it solve non-trivial problems?
+- Does it make experienced developers faster or slower?
+- Does it make them better engineers, or only faster typists?
+- Will it hurt long-term maintainability?
+
+In short: **are LLMs actually useful** in real projects for experienced engineers, or are they mostly just another buzzword in the current AI startup wave?
+
+I wanted to find out with **experience, not vibes**.
+
+# Combating AI hype with experience
+
+I had already used LLMs in personal and professional work, but mostly in limited, tactical ways. I had never really tested them end-to-end, so I gave it a fair shot.
+
+Because I am an open source advocate, and my work is public on GitHub, I am in a good position to share evidence. My goal was simple: fight _AI hype_ with _hard data_ and document where these tools help, and where they still fail.
+
+Here is what the experiment looks like:
+
+- I have a personal project ([Lambda Musika](https://lambda.cuesta.dev), code available on [GitHub](https://github.com/alvaro-cuesta/lambda-musika)) that I do not think can be classified as common, regurgitated[^regurgitation], or just-another-CRUD[^crud]-slop.
+- The project is a web-based music production environment, scriptable with JavaScript and running completely in the browser.
+- It is still in the early stages, but already a non-trivial codebase with a few thousand lines and multiple features. It is not a toy project, but it is also not a large-scale production system.
+- Written in TypeScript with React.
+- My tooling was just GitHub Copilot in VSCode, using GPT-5.3-Codex. I have not tried other models or tools, so I cannot speak for them (yet).
+- The project is set up with extensive linting and automated testing.
+- My workflow uses agent mode plus a medium-sized `copilot-instructions.md`. I will be in the loop at all times (no vibe coding).
+
+I hope this experiment is useful for other skeptical engineers who still want to test whether AI can actually help in real projects.
+
+# Where AI surprised me
+
+## Experiment 1: replace the editor library
+
+Lambda Musika features a code editor that allows users to write scripts that drive the music generation. I had originally implemented it with the [Ace editor](https://ace.c9.io/), which is mature and widely used. However, I wanted to experiment with migrating to VSCode's [Monaco editor](https://microsoft.github.io/monaco-editor/), which is more modern and has better TypeScript support.
+
+_(Note that this is currently a branch in progress and unmaintained, so the code is not publicly available yet. I will update this post with links once it is ready.)_
+
+To achieve feature parity during the migration, I asked Copilot to generate a full inventory of existing editor features and quirks. Then I asked it to (1) migrate to Monaco while preserving behavior and configuration and (2) integrate TypeScript type-checking into the editor, including types from my internal library. It got **surprisingly close on the first try**.
+
+## Experiment 2: refactor internal library into a separate package
+
+As part of the preparation for [Experiment 1](#experiment-1-replace-the-editor-library), I wanted to share types from an internal library with the editor package. This required a significant refactor of the project structure, including setting up a monorepo, migrating to [pnpm](https://pnpm.io/), and configuring TypeScript paths and build scripts.
+
+**Copilot struggled with this one**, often getting lost in the details and making mistakes in the configuration, and I had to stop Copilot in its tracks. However, after migrating the project structure and setting up the monorepo's first couple packages myself, it still provided a **huge amount of help** migrating additional packages.
+
+## Experiment 3: build a Vite plugin for the editor types
+
+After the refactor in [Experiment 2](#experiment-2-refactor-internal-library-into-a-separate-package), I needed to build a custom [Vite](https://vitejs.dev/) plugin to serve the internal library types to the editor across packages. This was a non-trivial task that involved understanding Vite's plugin API, configuring TypeScript compilation, and handling different behavior in development and production modes.
+
+In particular, the plugin needed to:
+
+1. Compile the internal library types using TSC and make it available via `import musikaTypes from "@lambda-musika/musika?types"` (note the `?types` suffix).
+2. Serve and hot-reload the compiled types from a virtual Vite import in development mode.
+3. Emit a static asset with the compiled types in production mode.
+
+Then I needed to integrate the output of this plugin into the editor setup to provide type-checking for user scripts.
+
+Copilot got **most of this right on the first attempt** with little assistance. I had to correct some details and add some missing pieces, but overall it was a **huge time saver** for a complex task.
+
+## Experiment 4: accessibility improvements
+
+As part of my previous work in [Deedmob](https://deedmob.com/), I had done extensive accessibility audits and improvements, learning a lot in the process. I had a good mental model of common [ARIA](https://www.w3.org/WAI/standards-guidelines/aria/) issues and best practices for web accessibility.
+
+Accessibility is surprisingly complex and nuanced, and it requires a good understanding of both the technical aspects and the user experience. I wanted to see whether Copilot could help me identify and fix accessibility issues in my project.
+
+One particular aspect that is often overlooked is the accessibility of dropdown menus and other "expandable" UI elements. These can be tricky to get right, especially when it comes to keyboard navigation and screen reader support. There are lots of nuances, like attaching `aria-expanded` and `aria-controls` to the right element, managing focus properly, and ensuring that the expanded content is accessible to screen readers.
+
+Lambda Musika features a bottom bar with multiple expandable panels, and I wanted to improve their accessibility. I asked Copilot to audit the existing implementation and suggest improvements, then implement them. **It got most of the ARIA attributes right on the first try**, including focus management and keyboard navigation (which I did not even ask for!)
+
+It also helped spot some redundant attributes and text content that would have added noise for screen reader users, as well as some missing group roles, which was a nice bonus.
+
+You can see the implementation in commits [`0b3795c`](https://github.com/alvaro-cuesta/lambda-musika/commit/0b3795c4776277a2cb119f3af545347a62425717) and [`49123ce`](https://github.com/alvaro-cuesta/lambda-musika/commit/49123ce6240d2dc7d30fb755267060af8671abfa).
+
+## Experiment 5: end-to-end feature implementation
+
+I wanted to implement a new feature from scratch, starting with the design and user experience, then moving on to the implementation and testing.
+
+The feature was to add support for metadata in user scripts, which would allow users to add custom information (like title, author, description...) to their scripts and have it displayed in the UI. This was a non-trivial feature because the scripting system is a bit quirky due to browser limitations, and it required changes in multiple parts of the codebase, including script parsing, editor integration, and the UI for displaying the metadata.
+
+_(Code is publicly available in branch [`feat/metadata`](https://github.com/alvaro-cuesta/lambda-musika/tree/feat/metadata) ([PR#7](https://github.com/alvaro-cuesta/lambda-musika/pull/7)).)_
+
+### Experiment 5.1: metadata in comments
+
+The first iteration I asked for was to [extract metadata from script comments](https://strudel.cc/learn/metadata/), which is a common approach in many scripting environments like [Strudel](https://strudel.cc/). **Copilot got the implementation right on its first attempt**, but I quickly realized that the approach was suboptimal for my use case.
+
+### Experiment 5.2: metadata as exports
+
+This was a perfect opportunity to test the model's ability to adapt and iterate based on feedback. I explained the issues with the comment-based approach and asked it to come up with a better solution. Copilot's response was to migrate the scripts to a [CommonJS](https://nodejs.org/api/modules.html#modules-commonjs-modules)-like interface (which is exactly what I had in mind!), where the metadata would be defined as an export from the script file.
+
+This meant a significant refactor of the existing scripts (which were mostly written in a simple, ad-hoc style) to support this new module system.
+
+I decided to keep all the existing metadata-handling code and let the model iterate on top of its previous implementation. This way, I could test its ability to adapt and improve without starting from scratch.
+
+The model **got the new implementation mostly right on the first try**, but after the refactor there was a lot of leftover code from the previous implementation that I had to explicitly ask to be removed. Iteration also generated very similar functions that should have been part of the same metadata pipeline. For example, it created ad-hoc functions for each metadata field instead of a unified approach that handled all fields consistently. This was a bit of a mess, but it was still a huge time saver compared to doing the whole thing myself, since the model was able to fix the issues once I pointed them out.
+
+Additionally, the model did not really handle the user-facing documentation updates properly: it generated documentation, but often forgot to update it as we iterated on the implementation, and it ended up reflecting implementation details that were irrelevant to users.
+
+### Experiment 5.3: use metadata for filename generation
+
+After the migration to the new metadata system, I wanted to make use of the metadata for something practical. One idea I had was to use the title from the metadata to generate more human-friendly filenames for the scripts when they are exported or saved. For example, instead of exporting a script as `script-20260314.musika`, it could be exported as `Author - Title.musika` based on its metadata.
+
+This was a relatively simple change, but it required understanding the new metadata structure and integrating it into the export logic. I asked Copilot to implement this feature, and it **got it right on the first try without any guidance**, which was a nice surprise. It handled all the edge cases gracefully (like missing metadata fields, multiple metadata fields like multiple authors, etc.), which showed an impressive understanding of the task.
+
+One aspect that left me a bit unsatisfied was that the model opted to implement filename sanitization manually instead of reusing an existing library.
+
+### Experiment 5.4: add metadata panel in the UI
+
+Finally, I asked Copilot to add a human-friendly metadata panel in the UI to display this information. The feature is currently stuck in a draft PR because the generated UI was not up to my standards, and I have not yet found the time to iterate on it. The implementation was mostly correct, but the visual design was not good enough for my taste, and I did not want to merge it as is.
+
+The generated UI was functionally correct but visually poor, which is not surprising given LLMs' limitations with visual design. Iterating on the visual issues did not work well, and it often generated ad-hoc solutions that were inconsistent with the rest of the UI or were contrary to best practices.
+
+# What AI still gets wrong
+
+## Good coder, bad engineer
+
+LLMs are very good at writing code, but still weak at _engineering_.
+
+What I mean is: they can produce working code, but they often miss the bigger picture: (1) how code fits into the system, (2) how it will be maintained, (3) how it will evolve, and therefore (4) which architectural and design tradeoffs to make.
+
+Some actual drawbacks I experienced:
+
+- It had trouble with architectural decisions, often making suboptimal choices that I had to correct as seen in [Experiment 2](#experiment-2-refactor-internal-library-into-a-separate-package).
+- It often duplicates logic instead of abstracting it. I frequently saw near-identical code blocks side by side with tiny variations that I had to abstract manually or ask the model to abstract.
+- It often writes tests that assert too many concerns at once. Asking it to split tests and improve naming helps, but still requires supervision.
+- Comments and test names often explain _"what" but not "why"_[^what-and-not-why]. Newer models generate fewer useless comments (good), but often swing too far toward under-commenting (bad).
+
+I wonder if these are particular tendencies in GPT-5.3-Codex, Copilot, or if it's a common issue in the current state of AI-assisted coding.
+
+## Diligent but not smart
+
+Current models follow instructions very well, but they do not reliably reason about context and consequences. They execute what you ask, often literally, without strong critical judgment about what to avoid. That means they can produce valid code that is still **the wrong strategic choice**.
+
+## Sloppy before lazy
+
+Models tend to reimplement code that already exists in the project instead of reusing it. Sometimes that is fine, but often it creates duplicate logic and avoidable technical debt.
+
+They also show a kind of NIH _(Not Invented Here)_[^nih] behavior with ecosystem tooling, rebuilding things that mature libraries already solve. Adding dependencies is not always right, but this is a tradeoff call LLMs still struggle to make.
+
+## Not visual thinkers
+
+They are weak at visual work. They can generate UI code, but they are still poor at making interfaces actually look good or improving them through iteration. Feeding them images of the current state and asking for improvements does _not_ work well.
+
+This limitation showed up very clearly in [Experiment 5.4](#experiment-54-add-metadata-panel-in-the-ui).
+
+I wonder if this is a fundamental limitation of LLMs, GPT-5.3-Codex in particular, or just a sign that we haven't yet found the right prompting strategy.
+
+## When "documenting" is not "documentation"
+
+They can output documentation, but they are still inconsistent at producing _useful_ documentation. Without guidance, they often produce too much or too little, and they miss key project-specific details. Unimportant quirks and implementation details are often over-documented, while important design decisions and tradeoffs are under-documented or not documented at all. In user-facing documentation, they often focus on implementation details instead of user needs and mental models.
+
+In particular, I noticed they tend to replicate and reword your original instructions instead of documenting the actual information that would help newcomers understand the code, the project, or the rationale behind decisions. This is a problem because it creates a false sense of security, and wastes the reader's time.
+
+# Best practices I learned
+
+## Static types are a must
+
+LLMs are much more effective when working with statically typed languages. The type system provides a strong safety net that allows the model to experiment and iterate with **less risk**. It also provides a **clear contract**, which helps the model **understand structure and intent** more reliably.
+
+TypeScript in particular proved essential for this experiment, and working with it made me appreciate it even more than I already did.
+
+## Copilot instructions
+
+Having a good `copilot-instructions.md` file is a **game changer**. It lets you set up shared context and guidelines for the model, which improves consistency and reduces the need for repeated instructions. I highly recommend it for any project using Copilot.
+
+- **Does the model keep repeating the same mistake over and over?** Add a section in the instructions about it, with examples of how to do it right and how to avoid doing it wrong.
+- **Is the model wasting effort in understanding the project structure and conventions?** Add a section in the instructions about it, with an inventory of existing patterns, key files and directories, and examples of how to follow them.
+- **Do you want the model to follow a certain workflow or process?** Add a section in the instructions about it, with a step-by-step guide and examples of how to execute it.
+
+To top it off: you can ask the model to improve the instructions themselves! This is a great way to keep them up to date and relevant as the project evolves.
+
+See the [latest version of Lambda Musika's `copilot-instructions.md`](https://github.com/alvaro-cuesta/lambda-musika/blob/main/.github/copilot-instructions.md) file for a practical example of how I use it in my project.
+
+## Affordances and guardrails
+
+It is very important to have good affordances and guardrails when using LLMs. This means having a **solid test suite, good linting**, and, in general, a workflow that allows you to **quickly catch mistakes** and prevent wasteful detours.
+
+These tools are not just safety nets, but also enablers. They allow the model to experiment and iterate without your explicit supervision on every change. They also make it easier to trust the model, which can lead to faster development and more ambitious use of AI assistance.
+
+This was especially visible in [Experiment 5](#experiment-5-end-to-end-feature-implementation), where linting and tests helped catch regressions quickly while we iterated across parser, editor, and UI layers.
+
+## Human in the loop
+
+LLMs are not yet at the point where you can just ask them to do something and forget about it. You need to **be in the loop**, reviewing their output, guiding them with feedback, and making **strategic decisions** about when to accept or reject their suggestions.
+
+Always keep human review and judgment in the decision path, especially for architectural choices, risk acceptance, and quality tradeoffs.
+
+Take every opportunity to steer the model toward better choices. Do not just ask it to do something and hope for the best. Review its output, give feedback, and iterate as it goes. Otherwise, the model might get trapped in a local minimum of bad choices, **wasting time and effort** on suboptimal solutions that a bit of guidance could have avoided.
+
+The shift from [Experiment 5.1](#experiment-51-metadata-in-comments) to [Experiment 5.2](#experiment-52-metadata-as-exports) is a good example: the first solution worked, but only human review surfaced that it was the wrong fit for user experience.
+
+## Preparation before execution
+
+One strategy I found useful for end-to-end, large-scale tasks is to first **ask the model to explore the code, prepare, and document a guide for the task**. Spend some time reviewing that guide, giving feedback, and iterating until you are happy with it.
+
+Once the guide is ready, **start the session from scratch** (to clear the model's context window) and let it execute the task following the guide. This way, you can ensure that the model has a clear plan and understanding of the task before it starts writing code, which can lead to better results and fewer mistakes along the way.
+
+Context pollution[^context-pollution] is a real issue, and starting with a clean slate after preparation can help mitigate it.
+
+This strategy was really helpful in [Experiment 1](#experiment-1-replace-the-editor-library), where the task was complex and required a good understanding of the project and the desired outcome.
+
+## Copilot as Co-Reviewer
+
+One workflow I brought over from my day job is using Copilot in GitHub PRs to review code, whether written by me or generated by the model. This creates an interesting meta-dynamic: you are asking AI to review AI-generated code. It sounds circular, but in practice it still catches real issues you would otherwise miss.
+
+Copilot is nowhere near a perfect reviewer. It is hit-or-miss, and will sometimes insist on suggestions that are odd (or plain wrong). But it has caught genuine bugs and inconsistencies that I (and other human reviewers) had missed. When the same wrong suggestion keeps coming back, `copilot-instructions.md` ([see above](#copilot-instructions)) is the right tool to reduce noise, and one-off bad suggestions are fast enough to dismiss that the net cost is still positive.
+
+Does it replace human reviewers? Not at all. But it works well as a **first-pass filter**, catching the obvious issues early so that human review time can focus on what actually requires human judgment. At work, this pattern has measurably shortened our PR async review cycles.
+
+# Conclusion
+
+My current take: AI is already a strong coding assistant, but still a weak software engineer.
+
+I used to be firmly in the _"AI is impressive but it might be making me slower"_ camp. That is changing. **Rapidly.**
+
+If you are skeptical, my advice is simple: run your own controlled experiment on a real project following the [best practices above](#best-practices-i-learned). That is where the signal is, and how you will find out for yourself what works and what does not.
+
+I expect these tools to keep improving quickly, but today they still need an experienced human in the loop. Let's see if that changes in the next few months and I get the opportunity to turn this post into a series!
+
+[^ai-people]: Not AI researchers or practitioners, but rather those who loudly praise LLMs without backing it up.
+
+[^regurgitation]: The criticism that LLMs are only useful for boilerplate and repetitive tasks since they only regurgitate their training data.
+
+[^crud]: Acronym for _**C**reate, **R**ead, **U**pdate, **D**elete_. Apps that are mostly boilerplate, with no logic beyond basic database operations.
+
+[^what-and-not-why]: The _"what"_ is usually visible in the code itself. The _"why"_ (and especially _"why not"_) is what actually drives maintainability, and is consistently missing from both AI-generated and junior-written comments.
+
+[^nih]: The tendency to rebuild solutions from scratch just because they were not created in-house.
+
+[^context-pollution]: Long sessions accumulate stale, irrelevant, or conflicting details that gradually degrade model performance and decision quality.
