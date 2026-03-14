@@ -140,7 +140,7 @@ const toRssItemDocument = (item: FeedItem): RssItemDocument => {
 
   return {
     ...(item.title ? { title: item.title } : {}),
-    ...(description ? { description } : {}),
+    ...(description !== undefined ? { description } : {}),
     ...(item.url ? { link: item.url } : {}),
     ...(item.id
       ? {
@@ -151,7 +151,7 @@ const toRssItemDocument = (item: FeedItem): RssItemDocument => {
           },
         }
       : {}),
-    ...(item.contentHtml
+    ...(item.contentHtml !== undefined
       ? {
           content: {
             encoded: item.contentHtml,
@@ -272,11 +272,11 @@ export const serializeRssDocument = (
         .txt(item.guid.value);
     }
 
-    if (item.description) {
+    if (item.description !== undefined) {
       rssItem.ele("description").txt(item.description);
     }
 
-    if (item.content?.encoded) {
+    if (item.content?.encoded !== undefined) {
       rssItem.ele("content:encoded").dat(item.content.encoded);
     }
 

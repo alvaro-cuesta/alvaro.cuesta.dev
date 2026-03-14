@@ -342,7 +342,7 @@ export const serializeAtomDocument = (
         ...(entry.content.src ? { src: entry.content.src } : {}),
       });
 
-      if (entry.content.value) {
+      if (entry.content.value !== undefined) {
         content.txt(entry.content.value);
       }
     }
