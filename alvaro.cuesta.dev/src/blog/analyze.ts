@@ -32,8 +32,7 @@ const RESERVED_SLUGS = new Set(["years", "tags"]);
 export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
   const allSortedByDescendingDate = items.toSorted(
     (a, b) =>
-      compareBlogItemDates(b.module.publicationDate, a.module.publicationDate) *
-      -1,
+      compareBlogItemDates(b.module.publicationDate, a.module.publicationDate),
   );
 
   const allSortedByDescendingDateByPage = new Map<number, BlogItem[]>();
