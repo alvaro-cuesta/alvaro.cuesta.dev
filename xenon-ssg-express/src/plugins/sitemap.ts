@@ -36,6 +36,28 @@ export type SitemapPluginMetadata = {
 
 export const sitemapPluginKey = Symbol("SitemapPlugin");
 
+const ABSOLUTE_URL_PATTERN = /^[a-z][a-z\d+.-]*:\/\//i;
+
+const toSitemapLoc = (baseUrl: string, pathOrUrl: string): string => {
+  const trimmed = pathOrUrl.trim();
+
+  if (!trimmed) {
+    throw new Error("[Sitemap] Path must not be empty.");
+  }
+
+  if (ABSOLUTE_URL_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (!trimmed.startsWith("/")) {
+    throw new Error(
+      `[Sitemap] Path must start with \"/\" or be an absolute URL: ${pathOrUrl}`,
+    );
+  }
+
+  return `${baseUrl}${trimmed}`;
+};
+
 export const sitemapPlugin =
   ({
     robotsTxtContent,
@@ -93,7 +115,9 @@ export const sitemapPlugin =
       for (const generatedPage of generatedPages) {
         const url = urlset.ele("url");
 
-        url.ele("loc").txt(`${siteMeta.baseUrl}${generatedPage.pathname}`);
+        url
+          .ele("loc")
+          .txt(toSitemapLoc(siteMeta.baseUrl, generatedPage.pathname));
 
         if (
           generatedPage.metadata[sitemapPluginKey]?.lastModified !== undefined
@@ -124,7 +148,7 @@ export const sitemapPlugin =
       for (const additionalPathname of await resolveAdditionalPathnames()) {
         const url = urlset.ele("url");
 
-        url.ele("loc").txt(`${siteMeta.baseUrl}${additionalPathname}`);
+        url.ele("loc").txt(toSitemapLoc(siteMeta.baseUrl, additionalPathname));
       }
 
       const xml = root.end();
