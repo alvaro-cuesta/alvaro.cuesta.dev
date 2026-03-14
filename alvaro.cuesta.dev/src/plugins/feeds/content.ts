@@ -56,10 +56,18 @@ const toFeedItemModel = async (
   content: Required<FeedContentOptions>,
 ): Promise<FeedItem> => {
   const url = toAbsoluteUrl(baseUrl, item.pathname);
-  const fullContentHtml = await item.render();
-  const fullContentText = htmlToPlainText(fullContentHtml);
   const summary = item.summary;
   const authors = item.authors ?? defaultAuthors;
+  let fullContentHtml: string | undefined;
+  let fullContentText: string | undefined;
+
+  if (content.html === "full" || content.text === "full") {
+    fullContentHtml = await item.render();
+
+    if (content.text === "full") {
+      fullContentText = htmlToPlainText(fullContentHtml);
+    }
+  }
 
   if ((content.html === "summary" || content.text === "summary") && !summary) {
     throw new Error(
