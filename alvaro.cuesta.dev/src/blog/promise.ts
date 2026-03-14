@@ -6,40 +6,36 @@ import { analyzeBlogItems } from "./analyze";
 
 const blogFolderPath = path.join(__dirname, "..", "..", "blog");
 
-const { use, reset } = suspendablePromiseMaker(
-  async () => {
-    const blogFolderUrl = new URL(`../../blog/`, import.meta.url);
+const loadBlogItems = async () => {
+  const blogFolderUrl = new URL(`../../blog/`, import.meta.url);
 
-    const filelist = await fs.readdir(blogFolderPath);
+  const filelist = await fs.readdir(blogFolderPath);
 
-    const importedItems = await Promise.all(
-      filelist
-        .filter((filename) => filename.endsWith(".mdx"))
-        .map(async (filename) => {
-          const fileUrl = new URL(filename, blogFolderUrl);
-          const rawModule = await import(`${fileUrl}?${Date.now()}`);
-          const module = parseBlogItemModuleFromImportModule(
-            filename,
-            rawModule,
-          );
+  const importedItems = await Promise.all(
+    filelist
+      .filter((filename) => filename.endsWith(".mdx"))
+      .map(async (filename) => {
+        const fileUrl = new URL(filename, blogFolderUrl);
+        const rawModule = await import(`${fileUrl}?${Date.now()}`);
+        const module = parseBlogItemModuleFromImportModule(filename, rawModule);
 
-          return {
-            filename,
-            module,
-          };
-        }),
-    );
+        return {
+          filename,
+          module,
+        };
+      }),
+  );
 
-    const filteredImportedItems = importedItems.filter(
-      (item) => process.env["NODE_ENV"] === "development" || !item.module.draft,
-    );
+  const filteredImportedItems = importedItems.filter(
+    (item) => process.env["NODE_ENV"] === "development" || !item.module.draft,
+  );
 
-    return analyzeBlogItems(filteredImportedItems);
-  },
-  {
-    lazy: true,
-  },
-);
+  return analyzeBlogItems(filteredImportedItems);
+};
+
+const { use, reset } = suspendablePromiseMaker(loadBlogItems, {
+  lazy: true,
+});
 
 // Watch blog folder for changes. This is needed because `tsx` already detects changes in the import chain, but not if
 // files are added or removed.
@@ -53,4 +49,5 @@ if (process.env["NODE_ENV"] === "development") {
   startWatch();
 }
 
+export const getBlogItems = loadBlogItems;
 export const useBlogItems = use;

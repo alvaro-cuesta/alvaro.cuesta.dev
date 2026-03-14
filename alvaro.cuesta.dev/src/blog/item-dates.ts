@@ -247,6 +247,13 @@ export const blogItemDateToUTCISO8601 = (blogItemDate: BlogItemDate): string =>
     .withTimeZone("UTC")
     .toString();
 
+export const blogItemDateToTemporalInstant = (
+  blogItemDate: BlogItemDate,
+): Temporal.Instant =>
+  blogItemDateToPlainDateTime(blogItemDate)
+    .toZonedDateTime(DATETIME_INPUT_TZ)
+    .toInstant();
+
 export const blogItemDateToUTCISO8601Z = (blogItemDate: BlogItemDate): string =>
   blogItemDateToUTCISO8601(blogItemDate)
     // I'm not sure if most machines would understand the '[UTC]' thingie even if it's ISO8601 so let's replace it

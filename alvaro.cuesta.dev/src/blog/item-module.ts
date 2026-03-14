@@ -69,6 +69,7 @@ type BlogItemModule = NodeModule & {
 
   // Known properties exportable from the MDX file
   title?: string | undefined;
+  summary?: string | undefined;
   creationDate?: BlogItemModuleDate | undefined;
   publicationDate?: BlogItemModuleDate | undefined;
   lastModificationDate?: BlogItemModuleDate | undefined;
@@ -108,6 +109,16 @@ function assertIsBlogItemModule(
   ) {
     throw new Error(
       `\`title\` in blog post is not a \`string\`, but a \`${typeof module.title}\`.`,
+    );
+  }
+
+  if (
+    "summary" in module &&
+    module.summary !== undefined &&
+    typeof module.summary !== "string"
+  ) {
+    throw new Error(
+      `\`summary\` in blog post is not a \`string\`, but a \`${typeof module.summary}\`.`,
     );
   }
 
@@ -197,6 +208,7 @@ export type BlogItemModuleParsed = {
   Component: MDXContent;
 
   title: string;
+  summary: string | null;
   creationDate: BlogItemDate;
   publicationDate: BlogItemDate;
   lastModificationDate: BlogItemDate | null;
@@ -248,6 +260,7 @@ export const parseBlogItemModuleFromImportModule = (
   return {
     Component: module.default,
     title: module.title ?? unslugify(slug),
+    summary: module.summary ?? null,
     creationDate,
     publicationDate,
     lastModificationDate,

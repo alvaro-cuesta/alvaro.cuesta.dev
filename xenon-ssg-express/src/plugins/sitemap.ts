@@ -14,6 +14,7 @@ type SitemapPluginOptions = {
   outputFilename: string;
   mountPointFragments?: string[];
   disableInjectMetaTag?: boolean;
+  additionalPathnames?: string[] | (() => string[] | Promise<string[]>);
 };
 
 export type SitemapPluginMetadata = {
@@ -35,24 +36,65 @@ export type SitemapPluginMetadata = {
 
 export const sitemapPluginKey = Symbol("SitemapPlugin");
 
+const ABSOLUTE_URL_PATTERN = /^[a-z][a-z\d+.-]*:\/\//i;
+
+const toSitemapLoc = (baseUrl: string, pathOrUrl: string): string => {
+  const trimmed = pathOrUrl.trim();
+
+  if (!trimmed) {
+    throw new Error("[Sitemap] Path must not be empty.");
+  }
+
+  if (ABSOLUTE_URL_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (!trimmed.startsWith("/")) {
+    throw new Error(
+      `[Sitemap] Path must start with \"/\" or be an absolute URL: ${pathOrUrl}`,
+    );
+  }
+
+  return `${baseUrl}${trimmed}`;
+};
+
 export const sitemapPlugin =
   ({
     robotsTxtContent,
     outputFilename,
     mountPointFragments = [],
     disableInjectMetaTag,
+    additionalPathnames = [],
   }: SitemapPluginOptions): Plugin<void, SitemapPluginMetadata> =>
   () => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
 
-    const attachToExpress: PluginAttachToExpressFunction | undefined =
-      robotsTxtContent
-        ? (app) => {
-            app.get("/robots.txt", async (_req, res) => {
-              res.status(200).contentType("text/plain").end(robotsTxtContent);
-            });
-          }
-        : undefined;
+    const attachToExpress: PluginAttachToExpressFunction = (app) => {
+      app.get(pathname, async (_req, res) => {
+        res
+          .status(404)
+          .contentType("text/plain")
+          .end(
+            [
+              "Sitemap is unavailable in dev mode.",
+              "Reason: sitemap.xml is generated from the full crawled URL graph only available in build mode.",
+              "Run the build command to generate sitemap.xml.",
+            ].join("\n"),
+          );
+      });
+
+      if (robotsTxtContent) {
+        app.get("/robots.txt", async (_req, res) => {
+          res.status(200).contentType("text/plain").end(robotsTxtContent);
+        });
+      }
+    };
+
+    const resolveAdditionalPathnames = async (): Promise<string[]> => {
+      return typeof additionalPathnames === "function"
+        ? await additionalPathnames()
+        : additionalPathnames;
+    };
 
     const buildPost: PluginBuildPostFunction<
       void,
@@ -73,7 +115,9 @@ export const sitemapPlugin =
       for (const generatedPage of generatedPages) {
         const url = urlset.ele("url");
 
-        url.ele("loc").txt(`${siteMeta.baseUrl}${generatedPage.pathname}`);
+        url
+          .ele("loc")
+          .txt(toSitemapLoc(siteMeta.baseUrl, generatedPage.pathname));
 
         if (
           generatedPage.metadata[sitemapPluginKey]?.lastModified !== undefined
@@ -99,6 +143,12 @@ export const sitemapPlugin =
             .ele("priority")
             .txt(generatedPage.metadata[sitemapPluginKey].priority.toString());
         }
+      }
+
+      for (const additionalPathname of await resolveAdditionalPathnames()) {
+        const url = urlset.ele("url");
+
+        url.ele("loc").txt(toSitemapLoc(siteMeta.baseUrl, additionalPathname));
       }
 
       const xml = root.end();

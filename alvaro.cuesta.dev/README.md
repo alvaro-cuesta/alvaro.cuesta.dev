@@ -8,7 +8,6 @@
   components renders SVG instead of fonts)
 - Blog posts
   - Comments from GH issues?
-  - Add manual description OR autodescription https://github.com/rehypejs/rehype-infer-description-meta
   - Add reading time https://github.com/rehypejs/rehype-infer-reading-time-meta
   - Add autoembed
     - https://github.com/PaulieScanlon/mdx-embed
@@ -16,7 +15,6 @@
   - Extract to mdx and blog packages
   - Infer last modified et al from Git?
   - Can we infer OG embed image from first image in MDX?
-- RSS?
 - Add global "last published/updated/whatever" meta tag on build
 - `ld+json` (e.g. a `BlogPosting`)
   ```
