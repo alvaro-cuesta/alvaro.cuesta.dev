@@ -64,7 +64,7 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
       <section>
         <h2>Full-stack software engineer</h2>
         <p>
-          Hello! I am Álvaro Cuesta, a{" "}
+          Hello! I am <Link href="/">Álvaro Cuesta</Link>, a{" "}
           <strong>full-stack software engineer</strong> based in Madrid, Spain.
         </p>
         <p>
