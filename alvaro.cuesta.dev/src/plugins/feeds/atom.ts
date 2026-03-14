@@ -135,21 +135,21 @@ const toAtomEntry = (item: FeedItem): AtomEntry => {
           ],
         }
       : {}),
-    ...(item.summary
+    ...(item.summary !== undefined
       ? {
           summary: {
             value: item.summary,
           },
         }
       : {}),
-    ...(item.contentHtml
+    ...(item.contentHtml !== undefined
       ? {
           content: {
             type: "html",
             value: item.contentHtml,
           },
         }
-      : item.contentText
+      : item.contentText !== undefined
         ? {
             content: {
               value: item.contentText,
