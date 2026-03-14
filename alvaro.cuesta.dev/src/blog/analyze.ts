@@ -30,9 +30,8 @@ const ITEMS_PER_PAGE = 10;
 const RESERVED_SLUGS = new Set(["years", "tags"]);
 
 export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
-  const allSortedByDescendingDate = items.toSorted(
-    (a, b) =>
-      compareBlogItemDates(b.module.publicationDate, a.module.publicationDate),
+  const allSortedByDescendingDate = items.toSorted((a, b) =>
+    compareBlogItemDates(b.module.publicationDate, a.module.publicationDate),
   );
 
   const allSortedByDescendingDateByPage = new Map<number, BlogItem[]>();
@@ -47,7 +46,9 @@ export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
   const byYear: AnalyzedBlogItems["byYear"] = new Map();
   const byTag: AnalyzedBlogItems["byTag"] = new Map();
 
-  for (const { filename, module } of allSortedByDescendingDate) {
+  for (const item of allSortedByDescendingDate) {
+    const { filename, module } = item;
+
     // Add article to slug map
     const oldBySlug = bySlug.get(module.slug);
     if (oldBySlug) {
@@ -62,7 +63,7 @@ export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
       );
     }
 
-    bySlug.set(module.slug, { filename, module });
+    bySlug.set(module.slug, item);
 
     // Add article to date map
     const year = getBlogItemDateYear(module.publicationDate);
@@ -81,7 +82,7 @@ export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
     }
 
     itemsInYear.totalCount++;
-    itemsInYear.byMonth.get(month)!.push({ filename, module });
+    itemsInYear.byMonth.get(month)!.push(item);
 
     // Add article to tag map
     const tags = module.tags.length === 0 ? [UNCATEGORIZED_TAG] : module.tags;
@@ -89,7 +90,7 @@ export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
       if (!byTag.has(tag)) {
         byTag.set(tag, []);
       }
-      byTag.get(tag)!.push({ filename, module });
+      byTag.get(tag)!.push(item);
     }
   }
 

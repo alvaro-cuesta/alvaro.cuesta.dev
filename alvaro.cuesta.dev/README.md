@@ -16,7 +16,6 @@
   - Extract to mdx and blog packages
   - Infer last modified et al from Git?
   - Can we infer OG embed image from first image in MDX?
-- RSS?
 - Add global "last published/updated/whatever" meta tag on build
 - `ld+json` (e.g. a `BlogPosting`)
   ```

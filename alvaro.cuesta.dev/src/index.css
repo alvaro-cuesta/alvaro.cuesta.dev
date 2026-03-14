@@ -196,6 +196,11 @@ blockquote {
   margin-bottom: 0;
 }
 
+.blog-article-list-item-summary {
+  color: var(--pico-secondary);
+  white-space: pre-line;
+}
+
 .bloglist-main > article > section > ul {
   ul,
   ol {

@@ -4,7 +4,13 @@ import type {
   XenonExpressSite,
 } from "xenon-ssg-express/src";
 import fs from "node:fs/promises";
-import { RENDER_TO_STREAM_OPTIONS } from "../config";
+import {
+  BLOG_BLURB_DESCRIPTION,
+  MY_NAME,
+  RENDER_TO_STREAM_OPTIONS,
+  SITE_SHORT_DESCRIPTION,
+  SITE_TITLE,
+} from "../config";
 import { staticFilePlugin } from "xenon-ssg-express/src/plugins/static-file";
 import { staticFolderPlugin } from "xenon-ssg-express/src/plugins/static-folder";
 import { singleLightningCssPlugin } from "xenon-ssg-express/src/plugins/single-lightningcss";
@@ -27,6 +33,9 @@ import {
   routeBlogYearList,
   routeHome,
 } from "./routes";
+import { feedsPlugin } from "./plugins/feeds";
+import { getBlogFeedSourceItems } from "./blog/feed-source";
+import { makeTitle } from "./utils/meta";
 
 export type SiteRenderMeta = XenonExpressRenderMeta & {
   defaultOgImage: string;
@@ -140,21 +149,40 @@ export const starryNightCss = singleLightningCssPlugin({
 export async function makeSite(): Promise<
   XenonExpressSite<SitemapPluginMetadata>
 > {
+  const feeds = feedsPlugin({
+    getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
+    homePagePathname: routeBlogArticleList.build({ page: null }),
+    mountPointFragments: ["blog"],
+    title: makeTitle(["Blog"], { disableReverse: true }),
+    description: BLOG_BLURB_DESCRIPTION,
+    authors: ({ baseUrl }) => [
+      {
+        name: MY_NAME,
+        url: baseUrl,
+      },
+    ],
+    content: {
+      html: "full",
+      text: "none",
+    },
+  });
+
   const sitemap = sitemapPlugin({
     robotsTxtContent: await fs.readFile(
       path.join(__dirname, "robots.txt"),
       "utf-8",
     ),
     outputFilename: "sitemap.xml",
+    additionalPathnames: () => feeds.getFeedSitemapPathnames(),
   });
 
   const favicon = await faviconPlugin({
     inputFilepath: path.join(__dirname, "favicon.svg"),
     faviconOptions: {
-      appName: "Álvaro Cuesta",
-      appShortName: "Álvaro Cuesta",
-      appDescription: "Álvaro Cuesta's personal website",
-      developerName: "Álvaro Cuesta",
+      appName: SITE_TITLE,
+      appShortName: SITE_TITLE,
+      appDescription: SITE_SHORT_DESCRIPTION,
+      developerName: MY_NAME,
       developerURL: "https://alvaro.cuesta.dev",
       background: "#13171f", // --pico-background-color
       theme_color: "#8999f9", // --pico-color
@@ -174,6 +202,7 @@ export async function makeSite(): Promise<
       fontawesomeWebfontsFolder,
       indexCss,
       starryNightCss,
+      feeds,
       sitemap,
     ],
   };

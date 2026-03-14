@@ -9,14 +9,19 @@ type BlogArticleListItemProps = {
 
 export const BlogArticleListItem: React.FC<BlogArticleListItemProps> = ({
   item: {
-    module: { title, publicationDate, draft, slug },
+    module: { title, summary, publicationDate, draft, slug },
   },
 }) => (
   <li>
-    [<BlogDateTime dropTime dateTime={publicationDate} />]{" "}
-    <b>
-      <Link href={routeBlogArticle.build({ slug })}>{title}</Link>
-    </b>
-    {draft ? " (draft)" : ""}
+    <div>
+      [<BlogDateTime dropTime dateTime={publicationDate} />]{" "}
+      <b>
+        <Link href={routeBlogArticle.build({ slug })}>{title}</Link>
+      </b>
+      {draft ? " (draft)" : ""}
+    </div>
+    {summary ? (
+      <small className="blog-article-list-item-summary">{summary}</small>
+    ) : null}
   </li>
 );

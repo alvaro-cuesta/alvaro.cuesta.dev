@@ -23,6 +23,10 @@ export const DATETIME_INPUT_TZ = "UTC";
 
 export const SITE_TITLE = "Álvaro Cuesta";
 
+export const MY_NAME = "Álvaro Cuesta";
+
+export const SITE_SHORT_DESCRIPTION = "Álvaro Cuesta's personal website";
+
 export const HOMEPAGE_BLURB_DESCRIPTION =
   "Álvaro Cuesta — full-stack software engineer, musician, and creator sharing insights on technology, art, and creative ideas.";
 

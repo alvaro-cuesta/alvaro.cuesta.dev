@@ -14,6 +14,7 @@ type SitemapPluginOptions = {
   outputFilename: string;
   mountPointFragments?: string[];
   disableInjectMetaTag?: boolean;
+  additionalPathnames?: string[] | (() => string[] | Promise<string[]>);
 };
 
 export type SitemapPluginMetadata = {
@@ -41,18 +42,37 @@ export const sitemapPlugin =
     outputFilename,
     mountPointFragments = [],
     disableInjectMetaTag,
+    additionalPathnames = [],
   }: SitemapPluginOptions): Plugin<void, SitemapPluginMetadata> =>
   () => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
 
-    const attachToExpress: PluginAttachToExpressFunction | undefined =
-      robotsTxtContent
-        ? (app) => {
-            app.get("/robots.txt", async (_req, res) => {
-              res.status(200).contentType("text/plain").end(robotsTxtContent);
-            });
-          }
-        : undefined;
+    const attachToExpress: PluginAttachToExpressFunction = (app) => {
+      app.get(pathname, async (_req, res) => {
+        res
+          .status(404)
+          .contentType("text/plain")
+          .end(
+            [
+              "Sitemap is unavailable in dev mode.",
+              "Reason: sitemap.xml is generated from the full crawled URL graph only available in build mode.",
+              "Run the build command to generate sitemap.xml.",
+            ].join("\n"),
+          );
+      });
+
+      if (robotsTxtContent) {
+        app.get("/robots.txt", async (_req, res) => {
+          res.status(200).contentType("text/plain").end(robotsTxtContent);
+        });
+      }
+    };
+
+    const resolveAdditionalPathnames = async (): Promise<string[]> => {
+      return typeof additionalPathnames === "function"
+        ? await additionalPathnames()
+        : additionalPathnames;
+    };
 
     const buildPost: PluginBuildPostFunction<
       void,
@@ -99,6 +119,12 @@ export const sitemapPlugin =
             .ele("priority")
             .txt(generatedPage.metadata[sitemapPluginKey].priority.toString());
         }
+      }
+
+      for (const additionalPathname of await resolveAdditionalPathnames()) {
+        const url = urlset.ele("url");
+
+        url.ele("loc").txt(`${siteMeta.baseUrl}${additionalPathname}`);
       }
 
       const xml = root.end();
