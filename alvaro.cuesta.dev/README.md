@@ -27,6 +27,5 @@
   </script>
   ```
 - Latest blog posts in frontpage
-- Last updated (maybe even guess from Git? override via blog post export anyways)
 - Preload fonts?
 - Font swap?
