@@ -1,6 +1,7 @@
 import type { MDXContent } from "mdx/types";
 import { parseBlogItemFilename } from "./item-filename";
 import {
+  compareBlogItemDates,
   dateToBlogItemDate,
   isBlogItemDate,
   type BlogItemDate,
@@ -218,6 +219,10 @@ export type BlogItemModuleParsed = {
   tableOfContents: Toc;
 };
 
+type BlogItemModuleInferredMetadata = {
+  lastModificationDate: BlogItemModuleDate | null;
+};
+
 const unslugify = (slug: string): string => {
   return slug
     .split("-")
@@ -228,6 +233,7 @@ const unslugify = (slug: string): string => {
 export const parseBlogItemModuleFromImportModule = (
   filename: string,
   module: NodeModule,
+  inferredMetadata: BlogItemModuleInferredMetadata,
 ): BlogItemModuleParsed => {
   assertIsBlogItemModule(module);
 
@@ -253,9 +259,17 @@ export const parseBlogItemModuleFromImportModule = (
     ? blogItemModuleDateToBlogItemDate(module.publicationDate)
     : creationDate;
 
+  const inferredLastModificationDate =
+    inferredMetadata.lastModificationDate === null
+      ? null
+      : blogItemModuleDateToBlogItemDate(inferredMetadata.lastModificationDate);
+
   const lastModificationDate = module.lastModificationDate
     ? blogItemModuleDateToBlogItemDate(module.lastModificationDate)
-    : null;
+    : inferredLastModificationDate !== null &&
+        compareBlogItemDates(inferredLastModificationDate, publicationDate) >= 0
+      ? inferredLastModificationDate
+      : null;
 
   return {
     Component: module.default,

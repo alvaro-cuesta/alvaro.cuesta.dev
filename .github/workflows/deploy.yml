@@ -43,6 +43,9 @@ jobs:
       - &checkout
         name: Check out Git repository
         uses: actions/checkout@v4
+        # We need the full history for "last modified" dates in blog posts
+        with:
+          fetch-depth: 0
 
       - &setup
         name: Set up Node.js

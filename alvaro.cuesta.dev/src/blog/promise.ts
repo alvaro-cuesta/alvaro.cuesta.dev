@@ -1,9 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { getGitLastModifiedDate, getGitWatchPaths } from "./git";
 import { parseBlogItemModuleFromImportModule } from "./item-module";
 import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
 import { analyzeBlogItems } from "./analyze";
 
+const siteRootPath = path.join(__dirname, "..", "..");
 const blogFolderPath = path.join(__dirname, "..", "..", "blog");
 
 const loadBlogItems = async () => {
@@ -16,8 +18,19 @@ const loadBlogItems = async () => {
       .filter((filename) => filename.endsWith(".mdx"))
       .map(async (filename) => {
         const fileUrl = new URL(filename, blogFolderUrl);
+        const lastModificationDate = await getGitLastModifiedDate(
+          siteRootPath,
+          path.posix.relative(
+            siteRootPath,
+            path.join(blogFolderPath, filename),
+          ),
+        );
         const rawModule = await import(`${fileUrl}?${Date.now()}`);
-        const module = parseBlogItemModuleFromImportModule(filename, rawModule);
+        const module = parseBlogItemModuleFromImportModule(
+          filename,
+          rawModule,
+          { lastModificationDate },
+        );
 
         return {
           filename,
@@ -40,13 +53,21 @@ const { use, reset } = suspendablePromiseMaker(loadBlogItems, {
 // Watch blog folder for changes. This is needed because `tsx` already detects changes in the import chain, but not if
 // files are added or removed.
 if (process.env["NODE_ENV"] === "development") {
-  const startWatch = async () => {
-    for await (const _ of fs.watch(blogFolderPath)) {
+  const startWatch = async (watchPath: string) => {
+    for await (const _ of fs.watch(watchPath)) {
       reset();
     }
   };
 
-  startWatch();
+  void startWatch(blogFolderPath);
+
+  // Also watch Git metadata for changes, which can affect the last modified dates of blog items.
+  void (async () => {
+    const gitWatchPaths = await getGitWatchPaths(siteRootPath);
+    for (const gitWatchPath of gitWatchPaths) {
+      void startWatch(gitWatchPath);
+    }
+  })();
 }
 
 export const getBlogItems = loadBlogItems;

@@ -13,9 +13,7 @@
     - https://github.com/PaulieScanlon/mdx-embed
     - https://mdxjs.com/guides/embed/
   - Extract to mdx and blog packages
-  - Infer last modified et al from Git?
   - Can we infer OG embed image from first image in MDX?
-- Add global "last published/updated/whatever" meta tag on build
 - `ld+json` (e.g. a `BlogPosting`)
   ```
   <script type="application/ld+json">
