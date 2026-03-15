@@ -26,5 +26,6 @@
   }
   </script>
   ```
+- Migrate somwhere else: GitHub Pages do not allow custom cache times (hardcoded to 600s!), and we could even be serving `immutable` for assets
 - Latest blog posts in frontpage
 - Microblog
