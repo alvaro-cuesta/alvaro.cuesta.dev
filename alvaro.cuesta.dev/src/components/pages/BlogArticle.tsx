@@ -38,9 +38,12 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
       publicationDate,
       lastModificationDate: lastModificationDateRaw,
       draft,
-      tags,
+      tags: tagsRaw,
     },
   } = article;
+
+  const tagOriginals = tagsRaw.map((tag) => tag.original);
+  const tagSlugs = tagsRaw.map((tag) => tag.slug);
 
   const lastModificationDate =
     lastModificationDateRaw &&
@@ -56,12 +59,12 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
 
   const description = summary
     ? summary
-    : tags.length >= 3
-      ? `Read about ${tags.slice(0, 2).join(", ")}, and more in this article by Álvaro Cuesta.`
-      : tags.length === 2
-        ? `Read about ${tags[0]} and ${tags[1]} in this article by Álvaro Cuesta.`
-        : tags.length === 1
-          ? `Read about ${tags[0]} in this article by Álvaro Cuesta.`
+    : tagOriginals.length >= 3
+      ? `Read about ${tagOriginals.slice(0, 2).join(", ")}, and more in this article by Álvaro Cuesta.`
+      : tagOriginals.length === 2
+        ? `Read about ${tagOriginals[0]} and ${tagOriginals[1]} in this article by Álvaro Cuesta.`
+        : tagOriginals.length === 1
+          ? `Read about ${tagOriginals[0]} in this article by Álvaro Cuesta.`
           : "Read this article by Álvaro Cuesta.";
 
   return (
@@ -75,7 +78,7 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
         openGraph: {
           type: "article",
           authorProfileUrl: siteRenderMeta.baseUrl,
-          tags,
+          tags: tagSlugs,
         },
         additional: (
           <>
@@ -116,11 +119,11 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
             <BlogDateTime dateTime={publicationDate} />
           </div>
 
-          {tags.length > 0 && (
+          {tagSlugs.length > 0 && (
             <div className="icon-field">
               <Icon fixedWidth name="tags" title="Tags" />{" "}
               <span>
-                {tags.map((tag, index) => (
+                {tagSlugs.map((tag, index) => (
                   <React.Fragment key={tag}>
                     {index > 0 && ", "}
                     <Link href={routeBlogTag.build({ tag })}>{tag}</Link>

@@ -205,6 +205,11 @@ function assertIsBlogItemModule(
   // At this point we'll assume tableOfContents is a Toc
 }
 
+type BlogItemModuleParsedTag = {
+  original: string;
+  slug: string;
+};
+
 export type BlogItemModuleParsed = {
   Component: MDXContent;
 
@@ -215,7 +220,7 @@ export type BlogItemModuleParsed = {
   lastModificationDate: BlogItemDate | null;
   draft: boolean;
   slug: string;
-  tags: string[];
+  tags: BlogItemModuleParsedTag[];
   tableOfContents: Toc;
 };
 
@@ -280,7 +285,10 @@ export const parseBlogItemModuleFromImportModule = (
     lastModificationDate,
     draft: module.draft ?? false,
     slug,
-    tags: module.tags ?? [],
+    tags: (module.tags ?? []).map((tag) => ({
+      original: tag,
+      slug: tag.toLowerCase().replace(/\s+/g, "-"),
+    })),
     tableOfContents: module.tableOfContents,
   };
 };

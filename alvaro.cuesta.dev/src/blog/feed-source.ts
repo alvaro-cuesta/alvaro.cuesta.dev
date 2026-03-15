@@ -47,7 +47,9 @@ function toFeedSourceItem(baseUrl: string, item: BlogItem): FeedSourceItem {
           ),
         }
       : {}),
-    ...(item.module.tags.length ? { tags: item.module.tags } : {}),
+    ...(item.module.tags.length
+      ? { tags: item.module.tags.map((tag) => tag.slug) }
+      : {}),
   };
 }
 

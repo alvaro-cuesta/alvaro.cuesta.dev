@@ -85,7 +85,10 @@ export const analyzeBlogItems = (items: BlogItem[]): AnalyzedBlogItems => {
     itemsInYear.byMonth.get(month)!.push(item);
 
     // Add article to tag map
-    const tags = module.tags.length === 0 ? [UNCATEGORIZED_TAG] : module.tags;
+    const tags =
+      module.tags.length === 0
+        ? [UNCATEGORIZED_TAG]
+        : module.tags.map((tag) => tag.slug);
     for (const tag of tags) {
       if (!byTag.has(tag)) {
         byTag.set(tag, []);
