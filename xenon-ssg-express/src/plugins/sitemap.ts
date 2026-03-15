@@ -20,6 +20,7 @@ type SitemapPluginOptions = {
 export type SitemapPluginMetadata = {
   [sitemapPluginKey]?:
     | {
+        exclude?: boolean;
         lastModified?: Temporal.ZonedDateTime;
         changeFrequency?:
           | "always"
@@ -113,6 +114,10 @@ export const sitemapPlugin =
       });
 
       for (const generatedPage of generatedPages) {
+        if (generatedPage.metadata[sitemapPluginKey]?.exclude) {
+          continue;
+        }
+
         const url = urlset.ele("url");
 
         url

@@ -29,5 +29,4 @@
 - Latest blog posts in frontpage
 - Preload fonts?
 - Font swap?
-- 404 is included in sitemap
 - Microblog

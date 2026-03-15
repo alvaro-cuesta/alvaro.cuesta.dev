@@ -31,6 +31,7 @@ import {
   routeBlogTagList,
   routeBlogYear,
   routeBlogYearList,
+  route404,
   routeHome,
 } from "./routes";
 import { feedsPlugin } from "./plugins/feeds";
@@ -64,6 +65,7 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
   };
 
   const isHome = routeHome.match(siteRenderMeta.pathname);
+  const is404 = route404.match(siteRenderMeta.pathname);
   const isBlogArticle = routeBlogArticle.match(siteRenderMeta.pathname);
   const isBlogArticleList = routeBlogArticleList.match(siteRenderMeta.pathname);
   const isBlogGenericRoute =
@@ -75,15 +77,17 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
   return {
     reactNode: <Root siteRenderMeta={siteRenderMeta} />,
     metadata: {
-      [sitemapPluginKey]: isHome
-        ? { priority: 1.0 }
-        : isBlogArticleList
-          ? { priority: 0.8 }
-          : isBlogGenericRoute
-            ? { priority: 0.6 }
-            : isBlogArticle
-              ? { priority: 0.9 }
-              : undefined,
+      [sitemapPluginKey]: is404
+        ? { exclude: true }
+        : isHome
+          ? { priority: 1.0 }
+          : isBlogArticleList
+            ? { priority: 0.8 }
+            : isBlogGenericRoute
+              ? { priority: 0.6 }
+              : isBlogArticle
+                ? { priority: 0.9 }
+                : undefined,
     },
   };
 };
