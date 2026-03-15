@@ -34,6 +34,7 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
   const {
     module: {
       title: articleTitle,
+      summary,
       publicationDate,
       lastModificationDate: lastModificationDateRaw,
       draft,
@@ -53,20 +54,24 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
 
   const articlePath = routeBlogArticle.build({ slug });
 
+  const description = summary
+    ? summary
+    : tags.length >= 3
+      ? `Read about ${tags.slice(0, 2).join(", ")}, and more in this article by Álvaro Cuesta.`
+      : tags.length === 2
+        ? `Read about ${tags[0]} and ${tags[1]} in this article by Álvaro Cuesta.`
+        : tags.length === 1
+          ? `Read about ${tags[0]} in this article by Álvaro Cuesta.`
+          : "Read this article by Álvaro Cuesta.";
+
   return (
     <Template
       siteRenderMeta={siteRenderMeta}
       metaTags={{
         title: makeTitle(["Blog", articleTitle]),
+        description,
         socialTitle: articleTitle,
-        socialDescription:
-          tags.length >= 3
-            ? `Read about ${tags.slice(0, 2).join(", ")}, and more in this article by Álvaro Cuesta.`
-            : tags.length === 2
-              ? `Read about ${tags[0]} and ${tags[1]} in this article by Álvaro Cuesta.`
-              : tags.length === 1
-                ? `Read about ${tags[0]} in this article by Álvaro Cuesta.`
-                : "Read this article by Álvaro Cuesta.",
+        socialDescription: description,
         openGraph: {
           type: "article",
           authorProfileUrl: siteRenderMeta.baseUrl,
