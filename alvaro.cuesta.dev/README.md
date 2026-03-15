@@ -29,3 +29,14 @@
 - Migrate somwhere else: GitHub Pages do not allow custom cache times (hardcoded to 600s!), and we could even be serving `immutable` for assets
 - Latest blog posts in frontpage
 - Microblog
+- Proper router
+- Sitemap improvements
+  - Add last modified that I am already injecting in `<meta>` tags
+  - Add last modified to feeds? Inferred from latest post last-modified
+  - Add priority to feeds?
+- Better way to inject metadata for sitemap plugin
+  - The page, and not the `render` function, should set its own metadata
+  - Maybe use global React.Context? Or even per-plugin Context?
+- Better way to emit URLs to sitemap
+  - Currently hardcoded via `feeds.getFeedSitemapPathnames`
+  - But maybe there's a way via hooks in plugins?
