@@ -42,14 +42,14 @@ jobs:
     steps:
       - &checkout
         name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         # We need the full history for "last modified" dates in blog posts
         with:
           fetch-depth: 0
 
       - &setup
         name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -100,7 +100,7 @@ jobs:
         working-directory: ${{ env.BUILD_PATH }}
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ${{ env.BUILD_PATH }}/dist
 
