@@ -6,7 +6,7 @@
     "xenon-ssg-express"
   ],
   "dependencies": {
-    "typescript": "^5.5.4"
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "prettier": "^3.3.3"
