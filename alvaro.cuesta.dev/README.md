@@ -27,6 +27,4 @@
   </script>
   ```
 - Latest blog posts in frontpage
-- Preload fonts?
-- Font swap?
 - Microblog

@@ -74,6 +74,16 @@ export const Template: React.FC<TemplateProps> = ({
         <meta name="darkreader-lock" />
 
         {siteRenderMeta.injectableCritical}
+        {siteRenderMeta.woff2PreloadPaths.map((path) => (
+          <link
+            key={path}
+            rel="preload"
+            href={`${siteRenderMeta.baseUrl}${path}`}
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+          />
+        ))}
 
         {/* Common */}
         <title>{metaTags.title}</title>

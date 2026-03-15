@@ -40,6 +40,7 @@ import { makeTitle } from "./utils/meta";
 
 export type SiteRenderMeta = XenonExpressRenderMeta & {
   defaultOgImage: string;
+  woff2PreloadPaths: string[];
 };
 
 // TODO: changing the type here won't make the other fail
@@ -59,9 +60,13 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
     );
   }
 
-  const siteRenderMeta = {
+  const siteRenderMeta: SiteRenderMeta = {
     ...renderMeta,
     defaultOgImage: `${renderMeta.baseUrl}${defaultOgImageHref}`,
+    woff2PreloadPaths: [
+      `${FONTAWESOME_MOUNT_POINT_PATH}/fa-solid-900.woff2`,
+      `${FONTAWESOME_MOUNT_POINT_PATH}/fa-brands-400.woff2`,
+    ],
   };
 
   const isHome = routeHome.match(siteRenderMeta.pathname);
@@ -119,9 +124,12 @@ const FONTAWESOME_WEBFONTS_PATH = path.join(
   "..", // @hack for some reason main is `attribution.js`
   "webfonts",
 );
+const FONTAWESOME_MOUNT_POINT_FRAGMENTS = ["css", "fontawesome", "webfonts"];
+const FONTAWESOME_MOUNT_POINT_PATH =
+  "/" + FONTAWESOME_MOUNT_POINT_FRAGMENTS.join("/");
 export const fontawesomeWebfontsFolder = staticFolderPlugin({
   inputFolder: FONTAWESOME_WEBFONTS_PATH,
-  mountPointFragments: ["css", "fontawesome", "webfonts"],
+  mountPointFragments: FONTAWESOME_MOUNT_POINT_FRAGMENTS,
 });
 
 /*
