@@ -147,6 +147,22 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
           </Project>
 
           <Project
+            name="Lambda Musika"
+            codeLink="https://github.com/alvaro-cuesta/lambda-musika"
+            liveLink="https://lambda.cuesta.dev"
+          >
+            A live-coding environment for procedural music generation.
+          </Project>
+
+          <Project
+            name="Fretium"
+            codeLink="https://github.com/alvaro-cuesta/fretium"
+            liveLink="https://fretium.cuesta.dev"
+          >
+            Fretboard diagram generator.
+          </Project>
+
+          <Project
             name="Instant Trivia"
             codeLink="https://github.com/alvaro-cuesta/instant-trivia"
             liveLink="https://trivia.cuesta.dev"
@@ -161,14 +177,6 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
           >
             View <Link href="https://www.shadertoy.com/">ShaderToy</Link>{" "}
             effects in Virtual Reality.
-          </Project>
-
-          <Project
-            name="Lambda Musika"
-            codeLink="https://github.com/alvaro-cuesta/lambda-musika"
-            liveLink="https://lambda.cuesta.dev"
-          >
-            A live-coding environment for procedural music generation.
           </Project>
 
           <Project
