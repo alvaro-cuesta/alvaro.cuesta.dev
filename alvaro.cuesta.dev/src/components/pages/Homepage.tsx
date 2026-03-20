@@ -14,6 +14,7 @@ const WEB_PROGRAMMING_START_YEAR = 2009;
 type ProjectProps = {
   name: string;
   codeLink: string;
+  logoUrl?: string;
   liveLink?: string;
   children?: ReactNode;
 };
@@ -21,6 +22,7 @@ type ProjectProps = {
 const Project: React.FC<ProjectProps> = ({
   name,
   codeLink,
+  logoUrl,
   liveLink,
   children,
 }) => {
@@ -28,8 +30,24 @@ const Project: React.FC<ProjectProps> = ({
 
   return (
     <li>
-      {liveLink ? <Link href={liveLink}>{nameElement}</Link> : nameElement} (
-      <Link href={codeLink}>code</Link>){children ? <> — {children}</> : null}
+      {liveLink ? (
+        <Link href={liveLink}>
+          {logoUrl ? (
+            <>
+              <img
+                src={logoUrl}
+                className="project-logo"
+                alt={`${name} logo`}
+                aria-hidden="true"
+              />{" "}
+            </>
+          ) : null}
+          {nameElement}
+        </Link>
+      ) : (
+        nameElement
+      )}{" "}
+      (<Link href={codeLink}>code</Link>){children ? <> — {children}</> : null}
     </li>
   );
 };
@@ -150,6 +168,7 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
             name="Lambda Musika"
             codeLink="https://github.com/alvaro-cuesta/lambda-musika"
             liveLink="https://lambda.cuesta.dev"
+            logoUrl={`${siteRenderMeta.baseUrl}/lambda-musika-logo.svg`}
           >
             A live-coding environment for procedural music generation.
           </Project>
@@ -158,6 +177,7 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
             name="Fretium"
             codeLink="https://github.com/alvaro-cuesta/fretium"
             liveLink="https://fretium.cuesta.dev"
+            logoUrl={`${siteRenderMeta.baseUrl}/fretium-logo.svg`}
           >
             Fretboard diagram generator.
           </Project>

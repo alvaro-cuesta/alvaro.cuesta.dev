@@ -132,12 +132,10 @@ export const fontawesomeWebfontsFolder = staticFolderPlugin({
   mountPointFragments: FONTAWESOME_MOUNT_POINT_FRAGMENTS,
 });
 
-/*
 const STATIC_FOLDER = path.join(__dirname, "..", "static");
 export const staticFolder = staticFolderPlugin({
   inputFolder: STATIC_FOLDER,
 });
-*/
 
 const INDEX_CSS_PATH = path.join(__dirname, "index.css");
 export const indexCss = singleLightningCssPlugin({
@@ -208,7 +206,7 @@ export async function makeSite(): Promise<
     renderToStreamOptions: RENDER_TO_STREAM_OPTIONS,
     plugins: [
       favicon,
-      // staticFolder,
+      staticFolder,
       picoCss,
       fontAwesomeCss,
       fontawesomeWebfontsFolder,
