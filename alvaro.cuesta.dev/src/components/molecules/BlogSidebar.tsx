@@ -41,7 +41,9 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ blogItems }) => {
               ))}
             {tagsDescendingByArticleCount.length > MAX_TAGS ? (
               <li>
-                <Link href={routeBlogTagList.build({})}>More...</Link>
+                <Link href={routeBlogTagList.build({})}>
+                  <i>(More...)</i>
+                </Link>
               </li>
             ) : null}
           </ul>
