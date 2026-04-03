@@ -1,3 +1,20 @@
+/*
+
+Pico breakpoints:
+
+@media (min-width: 576px) {
+}
+@media (min-width: 768px) {
+}
+@media (min-width: 1024px) {
+}
+@media (min-width: 1280px) {
+}
+@media (min-width: 1536px) {
+}
+
+*/
+
 html,
 body {
   width: 100%;
@@ -95,10 +112,18 @@ nav[aria-label="breadcrumb"] li :where(a, [role="link"]):not(:hover) {
 ul.blog-sidebar {
   list-style-type: none;
   padding-left: 0;
+
+  @media (min-width: 1024px) {
+    max-width: 10em;
+  }
 }
 
 ul.blog-sidebar li {
   list-style: none;
+
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
 }
 
 ul.blog-sidebar a {
@@ -111,6 +136,10 @@ ul.blog-sidebar :where(a, [role="link"]):not(:hover) {
 
 ul.blog-sidebar > li > ul {
   padding-left: 1em;
+}
+
+.no-wrap {
+  text-wrap: nowrap;
 }
 
 .no-underline :where(a, [role="link"]):not(:hover),
