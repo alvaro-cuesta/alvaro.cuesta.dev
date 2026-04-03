@@ -95,11 +95,14 @@ nav[aria-label="breadcrumb"] li :where(a, [role="link"]):not(:hover) {
 ul.blog-sidebar {
   list-style-type: none;
   padding-left: 0;
-  min-width: 10em;
 }
 
 ul.blog-sidebar li {
   list-style: none;
+}
+
+ul.blog-sidebar a {
+  text-wrap: nowrap;
 }
 
 ul.blog-sidebar :where(a, [role="link"]):not(:hover) {
