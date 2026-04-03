@@ -7,7 +7,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production tsx --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/build.ts",
     "build:serve": "serve ./dist",
-    "dev": "cross-env NODE_ENV=development tsx watch --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/dev.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch --include ./src/**/*.ts --include ./src/**/*.tsx --include ./blog/**/*.ts --include ./blog/**/*.tsx --include ./config.ts --include ../xenon-ssg/src --include ../xenon-ssg-express/src --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint:tsc": "tsc --noEmit"
@@ -55,7 +55,7 @@
     "mock-fs": "^5.5.0",
     "serve": "^14.2.4",
     "ts-jest": "^29.2.3",
-    "tsx": "^4.16.2",
+    "tsx": "^4.21.0",
     "vitest": "^3.2.4"
   }
 }
