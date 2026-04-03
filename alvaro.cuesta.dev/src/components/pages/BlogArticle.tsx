@@ -6,6 +6,7 @@ import React from "react";
 import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
+  getBlogItemDateYear,
 } from "../../blog/item-dates";
 import type { SiteRenderMeta } from "../../site";
 import { BlogDateTime } from "../atoms/BlogDateTime";
@@ -105,6 +106,10 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
       <BlogListsLayout
         breadcrumbs={[{ name: articleTitle, href: articlePath }]}
         blogItems={blogItems}
+        currentTags={tagSlugs}
+        currentYear={getBlogItemDateYear(publicationDate)}
+        isTagListCurrent={tagSlugs.length > 0}
+        isYearListCurrent
       >
         <header>
           <div>

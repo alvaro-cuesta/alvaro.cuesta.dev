@@ -31,6 +31,7 @@ export const BlogTagList: React.FC<BlogTagListProps> = ({ siteRenderMeta }) => {
       <BlogListsLayout
         breadcrumbs={[{ name: "Tags", href: routeBlogTagList.build({}) }]}
         blogItems={blogItems}
+        isTagListCurrent
       >
         <h2>Tags</h2>
 

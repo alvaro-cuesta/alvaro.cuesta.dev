@@ -6,15 +6,27 @@ import {
   routeBlogYear,
   routeBlogYearList,
 } from "../../routes";
+import { Wrapper } from "../atoms/Wrapper";
 
 type BlogSidebarProps = {
   blogItems: AnalyzedBlogItems;
+  currentTags?: readonly string[];
+  currentYear?: number | null;
+  isTagListCurrent?: boolean;
+  isYearListCurrent?: boolean;
 };
 
 const MAX_TAGS = 10;
 
-export const BlogSidebar: React.FC<BlogSidebarProps> = ({ blogItems }) => {
+export const BlogSidebar: React.FC<BlogSidebarProps> = ({
+  blogItems,
+  currentTags = [],
+  currentYear = null,
+  isTagListCurrent = false,
+  isYearListCurrent = false,
+}) => {
   const { tagsDescendingByArticleCount, yearsSortedDescending } = blogItems;
+  const currentTagsSet = new Set(currentTags);
 
   const hasTags = tagsDescendingByArticleCount.length > 0;
   const hasYears = yearsSortedDescending.length > 0;
@@ -28,15 +40,31 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ blogItems }) => {
     <ul className="blog-sidebar">
       {hasTags ? (
         <li>
-          <Link href={routeBlogTagList.build({})}>Tags</Link>
+          <Wrapper
+            wrapper={(children) =>
+              isTagListCurrent ? <strong>{children}</strong> : <>{children}</>
+            }
+          >
+            <Link href={routeBlogTagList.build({})}>Tags</Link>
+          </Wrapper>
 
           <ul>
             {tagsDescendingByArticleCount
               .slice(0, MAX_TAGS)
               .map(({ tag, items }) => (
                 <li key={tag}>
-                  <Link href={routeBlogTag.build({ tag })}>{tag}</Link>&nbsp;(
-                  {items.length})
+                  <Wrapper
+                    wrapper={(children) =>
+                      currentTagsSet.has(tag) ? (
+                        <strong>{children}</strong>
+                      ) : (
+                        <>{children}</>
+                      )
+                    }
+                  >
+                    <Link href={routeBlogTag.build({ tag })}>{tag}</Link>
+                  </Wrapper>
+                  &nbsp;({items.length})
                 </li>
               ))}
             {tagsDescendingByArticleCount.length > MAX_TAGS ? (
@@ -51,13 +79,29 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ blogItems }) => {
       ) : null}
       {hasYears ? (
         <li>
-          <Link href={routeBlogYearList.build({})}>Years</Link>
+          <Wrapper
+            wrapper={(children) =>
+              isYearListCurrent ? <strong>{children}</strong> : <>{children}</>
+            }
+          >
+            <Link href={routeBlogYearList.build({})}>Years</Link>
+          </Wrapper>
 
           <ul>
             {yearsSortedDescending.map(({ year, data }) => (
               <li key={year}>
-                <Link href={routeBlogYear.build({ year })}>{year}</Link>&nbsp;(
-                {data.totalCount})
+                <Wrapper
+                  wrapper={(children) =>
+                    currentYear === year ? (
+                      <strong>{children}</strong>
+                    ) : (
+                      <>{children}</>
+                    )
+                  }
+                >
+                  <Link href={routeBlogYear.build({ year })}>{year}</Link>
+                </Wrapper>
+                &nbsp;({data.totalCount})
               </li>
             ))}
           </ul>

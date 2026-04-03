@@ -7,12 +7,20 @@ import { routeBlogArticleList } from "../../routes";
 type BlogListsLayoutProps = {
   breadcrumbs: BreadcrumbItem[];
   blogItems: AnalyzedBlogItems;
+  currentTags?: readonly string[];
+  currentYear?: number | null;
+  isTagListCurrent?: boolean;
+  isYearListCurrent?: boolean;
   children?: ReactNode;
 };
 
 export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
   breadcrumbs,
   blogItems,
+  currentTags = [],
+  currentYear = null,
+  isTagListCurrent = false,
+  isYearListCurrent = false,
   children,
 }) => (
   <>
@@ -29,7 +37,13 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
         />
         <article>{children}</article>
       </div>
-      <BlogSidebar blogItems={blogItems} />
+      <BlogSidebar
+        blogItems={blogItems}
+        currentTags={currentTags}
+        currentYear={currentYear}
+        isTagListCurrent={isTagListCurrent}
+        isYearListCurrent={isYearListCurrent}
+      />
     </div>
   </>
 );

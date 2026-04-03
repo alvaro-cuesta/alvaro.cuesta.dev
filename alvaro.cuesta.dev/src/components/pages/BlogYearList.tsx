@@ -33,6 +33,7 @@ export const BlogYearList: React.FC<BlogYearListProps> = ({
       <BlogListsLayout
         breadcrumbs={[{ name: "Years", href: routeBlogYearList.build({}) }]}
         blogItems={blogItems}
+        isYearListCurrent
       >
         <h2>Years</h2>
 

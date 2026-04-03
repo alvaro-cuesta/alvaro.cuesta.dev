@@ -74,6 +74,8 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
           { name: year.toString(), href: routeBlogYear.build({ year }) },
         ]}
         blogItems={blogItems}
+        currentYear={year}
+        isYearListCurrent
       >
         <h2>Year {year}</h2>
 

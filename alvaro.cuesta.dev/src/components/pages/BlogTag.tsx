@@ -43,6 +43,8 @@ export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
           { name: tag, href: routeBlogTag.build({ tag }) },
         ]}
         blogItems={blogItems}
+        currentTags={[tag]}
+        isTagListCurrent
       >
         <h2>Tag "{tag}"</h2>
 
