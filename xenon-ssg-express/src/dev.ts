@@ -5,7 +5,7 @@ import { type XenonExpressSite, getSiteMeta } from ".";
 import { getTagsFromInjectableRaw } from "./plugins/plugins";
 import type { UnknownRecord } from "type-fest";
 
-export const DEFAULT_DEV_PORT = 1337;
+export const DEFAULT_DEV_PORT = 31337;
 
 /**
  * Create an Express app that serves a Xenon site in development mode.
