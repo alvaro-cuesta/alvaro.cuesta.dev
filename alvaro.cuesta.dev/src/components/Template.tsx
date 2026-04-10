@@ -226,7 +226,7 @@ export const Template: React.FC<TemplateProps> = ({
                 </h1>
               </li>
             </ul>
-            <ul>
+            <ul className="navlinks">
               <li>
                 <Link href={routeHome.build({}, { hash: "technologies" })}>
                   Tech
