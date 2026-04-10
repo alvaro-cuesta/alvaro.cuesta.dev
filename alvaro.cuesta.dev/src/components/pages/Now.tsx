@@ -3,7 +3,7 @@ import { Template } from "../Template";
 import type { SiteRenderMeta } from "../../site";
 import { makeTitle } from "../../utils/meta";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
-import NowContent from "./now.mdx";
+import NowContent from "./Now.mdx";
 import { getGitLastModifiedDate } from "../../blog/git";
 import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
 import { Temporal } from "temporal-polyfill";
@@ -17,7 +17,7 @@ const lastModifiedPromise = suspendablePromiseMaker(
   async () => {
     return getGitLastModifiedDate(
       url.fileURLToPath(import.meta.resolve("../../")),
-      url.fileURLToPath(import.meta.resolve("./now.mdx")),
+      url.fileURLToPath(import.meta.resolve("./Now.mdx")),
     );
   },
   {
