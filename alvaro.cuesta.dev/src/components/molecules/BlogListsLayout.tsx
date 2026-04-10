@@ -39,15 +39,15 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
         />
         <article>{children}</article>
         <footer>
-          <Icon collection="fas" name="rss" aria-hidden /> Feeds:{" "}
+          <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
           <Link href="/blog/feed.rss" Component={"a"}>
             RSS
-          </Link>
-          ,{" "}
+          </Link>{" "}
+          /{" "}
           <Link href="/blog/feed.xml" Component={"a"}>
             Atom
-          </Link>
-          ,{" "}
+          </Link>{" "}
+          /{" "}
           <Link href="/blog/feed.json" Component={"a"}>
             JSON
           </Link>
