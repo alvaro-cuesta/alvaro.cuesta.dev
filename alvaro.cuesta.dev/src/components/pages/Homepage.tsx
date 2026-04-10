@@ -131,10 +131,11 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
                 <Link href="https://www.rust-lang.org">Rust</Link> +{" "}
                 <Link href="https://tauri.studio">Tauri</Link>
               </li>
+              <li>
+                <Link href="https://opentofu.org/">OpenTofu</Link> and{" "}
+                <Link href="https://dnscontrol.io/">DNSControl</Link>
+              </li>
             </ul>
-            <p>
-              See more in my <Link href={routeNow.build({})}>Now page</Link>.
-            </p>
           </article>
           <article>
             <header id="knowledge">
@@ -146,7 +147,7 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
               <li>Electronics engineering</li>
             </ul>
             <p>
-              See more in my <Link href={routeNow.build({})}>Now page</Link>.
+              See more in my <Link href={routeNow.build({})}>Now page</Link>!
             </p>
           </article>
         </div>

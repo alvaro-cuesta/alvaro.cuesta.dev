@@ -5,8 +5,8 @@ import { parseBlogItemModuleFromImportModule } from "./item-module";
 import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
 import { analyzeBlogItems } from "./analyze";
 
-const siteRootPath = path.join(__dirname, "..", "..");
-const blogFolderPath = path.join(__dirname, "..", "..", "blog");
+const siteRootPath = path.join(import.meta.dirname, "..", "..");
+const blogFolderPath = path.join(import.meta.dirname, "..", "..", "blog");
 
 const loadBlogItems = async () => {
   const blogFolderUrl = new URL(`../../blog/`, import.meta.url);

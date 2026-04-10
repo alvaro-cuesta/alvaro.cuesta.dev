@@ -15,6 +15,7 @@ import { staticFilePlugin } from "xenon-ssg-express/src/plugins/static-file";
 import { staticFolderPlugin } from "xenon-ssg-express/src/plugins/static-folder";
 import { singleLightningCssPlugin } from "xenon-ssg-express/src/plugins/single-lightningcss";
 import path from "node:path";
+import url from "node:url";
 import { faviconPlugin } from "xenon-ssg-express/src/plugins/favicon";
 import { version } from "../package.json" with { type: "json" };
 import type { PluginInjectableLink } from "xenon-ssg-express/src/plugins/plugins";
@@ -102,7 +103,9 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
 };
 
 const PICO_FILE = "pico.blue.min.css";
-const PICO_FILE_PATH = require.resolve(`@picocss/pico/css/${PICO_FILE}`);
+const PICO_FILE_PATH = url.fileURLToPath(
+  import.meta.resolve(`@picocss/pico/css/${PICO_FILE}`),
+);
 export const picoCss = staticFilePlugin({
   inputFilepath: PICO_FILE_PATH,
   outputFilename: PICO_FILE,
@@ -112,8 +115,8 @@ export const picoCss = staticFilePlugin({
 });
 
 const FONTAWESOME_FILE = "all.min.css";
-const FONTAWESOME_FILE_PATH = require.resolve(
-  `fontawesome-free/css/${FONTAWESOME_FILE}`,
+const FONTAWESOME_FILE_PATH = url.fileURLToPath(
+  import.meta.resolve(`fontawesome-free/css/${FONTAWESOME_FILE}`),
 );
 export const fontAwesomeCss = staticFilePlugin({
   inputFilepath: FONTAWESOME_FILE_PATH,
@@ -124,7 +127,7 @@ export const fontAwesomeCss = staticFilePlugin({
 });
 
 const FONTAWESOME_WEBFONTS_PATH = path.join(
-  require.resolve("fontawesome-free"),
+  url.fileURLToPath(import.meta.resolve("fontawesome-free")),
   "..", // @hack for some reason main is `attribution.js`
   "webfonts",
 );
@@ -136,12 +139,12 @@ export const fontawesomeWebfontsFolder = staticFolderPlugin({
   mountPointFragments: FONTAWESOME_MOUNT_POINT_FRAGMENTS,
 });
 
-const STATIC_FOLDER = path.join(__dirname, "..", "static");
+const STATIC_FOLDER = path.join(import.meta.dirname, "..", "static");
 export const staticFolder = staticFolderPlugin({
   inputFolder: STATIC_FOLDER,
 });
 
-const INDEX_CSS_PATH = path.join(__dirname, "index.css");
+const INDEX_CSS_PATH = path.join(import.meta.dirname, "index.css");
 export const indexCss = singleLightningCssPlugin({
   inputFilepath: INDEX_CSS_PATH,
   outputFilename: "index.min.css",
@@ -150,8 +153,8 @@ export const indexCss = singleLightningCssPlugin({
 });
 
 const STARRY_NIGHT_FILE = "both";
-const STARRY_NIGHT_FILE_PATH = require.resolve(
-  `@wooorm/starry-night/style/${STARRY_NIGHT_FILE}`,
+const STARRY_NIGHT_FILE_PATH = url.fileURLToPath(
+  import.meta.resolve(`@wooorm/starry-night/style/${STARRY_NIGHT_FILE}`),
 );
 export const starryNightCss = singleLightningCssPlugin({
   inputFilepath: STARRY_NIGHT_FILE_PATH,
@@ -183,7 +186,7 @@ export async function makeSite(): Promise<
 
   const sitemap = sitemapPlugin({
     robotsTxtContent: await fs.readFile(
-      path.join(__dirname, "robots.txt"),
+      path.join(import.meta.dirname, "robots.txt"),
       "utf-8",
     ),
     outputFilename: "sitemap.xml",
@@ -191,7 +194,7 @@ export async function makeSite(): Promise<
   });
 
   const favicon = await faviconPlugin({
-    inputFilepath: path.join(__dirname, "favicon.svg"),
+    inputFilepath: path.join(import.meta.dirname, "favicon.svg"),
     faviconOptions: {
       appName: SITE_TITLE,
       appShortName: SITE_TITLE,

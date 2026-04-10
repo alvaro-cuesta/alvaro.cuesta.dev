@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import path from "node:path";
+import { Temporal } from "temporal-polyfill";
 
 const runGitCommand = async (
   args: string[],
@@ -20,7 +21,7 @@ const runGitCommand = async (
 export const getGitLastModifiedDate = async (
   repoRootPath: string,
   repoRelativeFilePath: string,
-): Promise<Date | null> => {
+): Promise<Temporal.Instant | null> => {
   const lastModifiedAtIso8601 = await runGitCommand(
     ["log", "-1", "--follow", "--format=%cI", "--", repoRelativeFilePath],
     repoRootPath,
@@ -35,7 +36,7 @@ export const getGitLastModifiedDate = async (
     return null;
   }
 
-  return date;
+  return Temporal.Instant.from(lastModifiedAtIso8601);
 };
 
 export const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
