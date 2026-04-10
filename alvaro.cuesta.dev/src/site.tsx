@@ -33,6 +33,7 @@ import {
   routeBlogYearList,
   route404,
   routeHome,
+  routeNow,
 } from "./routes";
 import { feedsPlugin } from "./plugins/feeds";
 import { getBlogFeedSourceItems } from "./blog/feed-source";
@@ -71,6 +72,7 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
 
   const isHome = routeHome.match(siteRenderMeta.pathname);
   const is404 = route404.match(siteRenderMeta.pathname);
+  const isNow = routeNow.match(siteRenderMeta.pathname);
   const isBlogArticle = routeBlogArticle.match(siteRenderMeta.pathname);
   const isBlogArticleList = routeBlogArticleList.match(siteRenderMeta.pathname);
   const isBlogGenericRoute =
@@ -86,13 +88,15 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
         ? { exclude: true }
         : isHome
           ? { priority: 1.0 }
-          : isBlogArticleList
+          : isNow
             ? { priority: 0.8 }
-            : isBlogGenericRoute
-              ? { priority: 0.6 }
-              : isBlogArticle
-                ? { priority: 0.9 }
-                : undefined,
+            : isBlogArticleList
+              ? { priority: 0.8 }
+              : isBlogGenericRoute
+                ? { priority: 0.6 }
+                : isBlogArticle
+                  ? { priority: 0.9 }
+                  : undefined,
     },
   };
 };
