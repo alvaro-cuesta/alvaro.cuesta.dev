@@ -3,6 +3,8 @@ import { BlogSidebar } from "./BlogSidebar";
 import type { AnalyzedBlogItems } from "../../blog/analyze";
 import { Breadcrumb, type BreadcrumbItem } from "../atoms/Breadcrumb";
 import { routeBlogArticleList } from "../../routes";
+import { Link } from "../atoms/Link";
+import { Icon } from "../atoms/Icon";
 
 type BlogListsLayoutProps = {
   breadcrumbs: BreadcrumbItem[];
@@ -25,7 +27,7 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
 }) => (
   <>
     <div className="flex-responsive">
-      <div className="bloglist-main">
+      <section className="bloglist-main">
         <Breadcrumb
           breadcrumbs={[
             {
@@ -36,7 +38,13 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
           ]}
         />
         <article>{children}</article>
-      </div>
+        <footer>
+          <Icon collection="fas" name="rss" aria-hidden /> Feeds:{" "}
+          <Link href="/blog/feed.rss">RSS</Link>,{" "}
+          <Link href="/blog/feed.xml">Atom</Link>,{" "}
+          <Link href="/blog/feed.json">JSON</Link>
+        </footer>
+      </section>
       <BlogSidebar
         blogItems={blogItems}
         currentTags={currentTags}
