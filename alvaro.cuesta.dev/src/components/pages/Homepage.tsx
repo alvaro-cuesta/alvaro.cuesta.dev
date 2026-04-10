@@ -4,6 +4,7 @@ import { Icon } from "../atoms/Icon";
 import { Template } from "../Template";
 import type { SiteRenderMeta } from "../../site";
 import { makeTitle } from "../../utils/meta";
+import { routeNow } from "../../routes";
 import {
   HOMEPAGE_BLURB_DESCRIPTION,
   HOMEPAGE_BLURB_SOCIAL_DESCRIPTION,
@@ -131,6 +132,9 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
                 <Link href="https://tauri.studio">Tauri</Link>
               </li>
             </ul>
+            <p>
+              See more in my <Link href={routeNow.build({})}>Now page</Link>.
+            </p>
           </article>
           <article>
             <header id="knowledge">
@@ -141,6 +145,9 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
               <li>Cryptography & blockchain tech</li>
               <li>Electronics engineering</li>
             </ul>
+            <p>
+              See more in my <Link href={routeNow.build({})}>Now page</Link>.
+            </p>
           </article>
         </div>
       </section>
