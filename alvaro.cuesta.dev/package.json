@@ -1,13 +1,14 @@
 {
   "name": "alvaro.cuesta.dev",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "Álvaro Cuesta's personal website.",
   "main": "index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production tsx --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/build.ts",
     "build:serve": "serve ./dist",
-    "dev": "cross-env NODE_ENV=development tsx watch --include ./src/**/*.ts --include ./src/**/*.tsx --include ./blog/**/*.ts --include ./blog/**/*.tsx --include ./config.ts --include ../xenon-ssg/src --include ../xenon-ssg-express/src --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/dev.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch --include ./src/**/*.ts --include ./src/**/*.tsx --include ./src/**/*.mdx --include ./config.ts --include ../xenon-ssg/src --include ../xenon-ssg-express/src --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint:tsc": "tsc --noEmit"

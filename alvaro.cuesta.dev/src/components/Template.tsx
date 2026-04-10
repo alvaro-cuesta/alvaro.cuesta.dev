@@ -4,7 +4,7 @@ import { Link } from "./atoms/Link";
 import { Icon } from "./atoms/Icon";
 import { useBlogItems } from "../blog/promise";
 import type { SiteRenderMeta } from "../site";
-import { routeBlogArticleList, routeHome } from "../routes";
+import { routeBlogArticleList, routeHome, routeNow } from "../routes";
 import {
   blogItemDateToUTCISO8601Z,
   type BlogItemDate,
@@ -249,6 +249,9 @@ export const Template: React.FC<TemplateProps> = ({
                   </Link>
                 </li>
               ) : null}
+              <li>
+                <Link href={routeNow.build({})}>Now</Link>
+              </li>
             </ul>
           </nav>
         </header>

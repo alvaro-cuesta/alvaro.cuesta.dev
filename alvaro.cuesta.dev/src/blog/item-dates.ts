@@ -229,7 +229,20 @@ export const dateToBlogItemDate = (date: Date): BlogItemDate => {
   ).toPlainDateTime();
 
   return {
-    type: "dateTimeWithSeconds",
+    type: "dateTimeNoSeconds",
+    dateTime,
+  };
+};
+
+export const instantToBlogItemDate = (
+  instant: Temporal.Instant,
+): BlogItemDate => {
+  const dateTime = instant
+    .toZonedDateTimeISO(DATETIME_INPUT_TZ)
+    .toPlainDateTime();
+
+  return {
+    type: "dateTimeNoSeconds",
     dateTime,
   };
 };

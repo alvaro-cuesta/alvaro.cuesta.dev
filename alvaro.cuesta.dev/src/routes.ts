@@ -4,6 +4,8 @@ export const routeHome = makeRoute<{}>("/");
 
 export const route404 = makeRoute<{}>("/404.html");
 
+export const routeNow = makeRoute<{}>("/now/");
+
 // BLOG ARTICLES
 export const routeBlogArticleList = makeRoute<
   { page?: string },

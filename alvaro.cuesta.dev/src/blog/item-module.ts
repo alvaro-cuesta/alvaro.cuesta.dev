@@ -3,6 +3,7 @@ import { parseBlogItemFilename } from "./item-filename";
 import {
   compareBlogItemDates,
   dateToBlogItemDate,
+  instantToBlogItemDate,
   isBlogItemDate,
   type BlogItemDate,
 } from "./item-dates";
@@ -12,8 +13,9 @@ import { VALID_SLUG_REGEX } from "../utils/slug";
 
 // TODO: Allow strings with the same parsing mechanism as filenames
 type BlogItemModuleDate =
-  // Will imply "dateTimeWithSeconds"
+  // Will imply "dateTimeNoSeconds"
   | Date
+  | Temporal.Instant
   // Will imply "yearMonth"
   | Temporal.PlainYearMonth
   // Will imply "date"
@@ -38,6 +40,10 @@ const blogItemModuleDateToBlogItemDate = (
 ): BlogItemDate => {
   if (x instanceof Date) {
     return dateToBlogItemDate(x);
+  }
+
+  if (x instanceof Temporal.Instant) {
+    return instantToBlogItemDate(x);
   }
 
   if (x instanceof Temporal.PlainYearMonth) {

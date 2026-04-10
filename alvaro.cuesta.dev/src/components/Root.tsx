@@ -8,6 +8,7 @@ import {
   routeBlogYear,
   routeBlogYearList,
   routeHome,
+  routeNow,
 } from "../routes";
 import { BlogArticle } from "./pages/BlogArticle";
 import { BlogArticleList } from "./pages/BlogArticleList";
@@ -17,6 +18,7 @@ import { BlogYear } from "./pages/BlogYear";
 import { BlogYearList } from "./pages/BlogYearList";
 import { Homepage } from "./pages/Homepage";
 import { NotFound } from "./pages/NotFound";
+import { Now } from "./pages/Now";
 
 type RootProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -31,6 +33,10 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
 
   if (route404.match(pathname)) {
     return <NotFound siteRenderMeta={siteRenderMeta} />;
+  }
+
+  if (routeNow.match(pathname)) {
+    return <Now siteRenderMeta={siteRenderMeta} />;
   }
 
   const routeBlogPageMatch = routeBlogArticleList.match(pathname);

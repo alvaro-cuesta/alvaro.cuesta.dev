@@ -1,6 +1,7 @@
 import type { MDXComponents } from "mdx/types";
 import { Link } from "../components/atoms/Link";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import { BlogDateTime } from "../components/atoms/BlogDateTime";
 
 type MdxAnchorProps = ComponentPropsWithoutRef<"a">;
 
@@ -18,6 +19,9 @@ export const makeMdxDefaultComponents = ({
       ...props,
       href: rewriteHref ? rewriteHref(props.href) : props.href,
     });
+  },
+  BlogDateTime(props: ComponentPropsWithoutRef<typeof BlogDateTime>) {
+    return <BlogDateTime {...props} />;
   },
 });
 

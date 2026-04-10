@@ -1,6 +1,7 @@
 {
   "name": "xenon-ssg-express",
   "private": true,
+  "type": "module",
   "version": "0.0.1",
   "description": "Express layer for Xenon SSG — a dead simple React Static-Site Generator.",
   "main": "index.js",
