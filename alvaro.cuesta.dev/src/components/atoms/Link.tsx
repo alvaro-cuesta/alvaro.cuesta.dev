@@ -6,12 +6,14 @@ import { Icon } from "./Icon";
 type LinkProps = ComponentPropsWithoutRef<"a"> & {
   isExternal?: boolean;
   hideExternalIcon?: boolean;
+  Component?: React.ElementType<ComponentPropsWithoutRef<"a">>;
 };
 
 export const Link: React.FC<LinkProps> = ({
   isExternal,
   hideExternalIcon,
   children,
+  Component = XenonLink,
   ...props
 }) => {
   const calculatedIsExternal =
@@ -19,7 +21,7 @@ export const Link: React.FC<LinkProps> = ({
     (props.href ? !canonicalizeHref(props.href).isInternal : false);
 
   return (
-    <XenonLink
+    <Component
       {...props}
       target={(props.target ?? calculatedIsExternal) ? "_blank" : undefined}
       rel={calculatedIsExternal ? "noopener noreferrer" : undefined}
@@ -32,6 +34,6 @@ export const Link: React.FC<LinkProps> = ({
           aria-label=" (opens in new tab)"
         />
       ) : null}
-    </XenonLink>
+    </Component>
   );
 };
