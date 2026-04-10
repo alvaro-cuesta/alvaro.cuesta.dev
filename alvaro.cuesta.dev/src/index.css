@@ -121,9 +121,19 @@ article > header {
 }
 
 .bloglist-main > footer {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
   flex-grow: 1;
   align-self: end;
+
   padding: 0 1em;
+
+  > .feeds {
+    margin-left: auto;
+  }
 }
 
 nav[aria-label="breadcrumb"] li {

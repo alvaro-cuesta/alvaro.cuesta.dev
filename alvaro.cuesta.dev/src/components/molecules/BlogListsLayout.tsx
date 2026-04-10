@@ -28,29 +28,33 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
   <>
     <div className="flex-responsive">
       <section className="bloglist-main">
-        <Breadcrumb
-          breadcrumbs={[
-            {
-              name: "Blog",
-              href: routeBlogArticleList.build({ page: null }),
-            },
-            ...breadcrumbs,
-          ]}
-        />
         <article>{children}</article>
         <footer>
-          <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
-          <Link href="/blog/feed.rss" Component={"a"}>
-            RSS
-          </Link>{" "}
-          /{" "}
-          <Link href="/blog/atom.xml" Component={"a"}>
-            Atom
-          </Link>{" "}
-          /{" "}
-          <Link href="/blog/feed.json" Component={"a"}>
-            JSON
-          </Link>
+          <span>
+            <Breadcrumb
+              breadcrumbs={[
+                {
+                  name: "Blog",
+                  href: routeBlogArticleList.build({ page: null }),
+                },
+                ...breadcrumbs,
+              ]}
+            />
+          </span>
+          <span className="feeds">
+            <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
+            <Link href="/blog/feed.rss" Component={"a"}>
+              RSS
+            </Link>{" "}
+            /{" "}
+            <Link href="/blog/atom.xml" Component={"a"}>
+              Atom
+            </Link>{" "}
+            /{" "}
+            <Link href="/blog/feed.json" Component={"a"}>
+              JSON
+            </Link>
+          </span>
         </footer>
       </section>
       <BlogSidebar
