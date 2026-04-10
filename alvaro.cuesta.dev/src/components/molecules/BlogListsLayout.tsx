@@ -44,7 +44,7 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
             RSS
           </Link>{" "}
           /{" "}
-          <Link href="/blog/feed.xml" Component={"a"}>
+          <Link href="/blog/atom.xml" Component={"a"}>
             Atom
           </Link>{" "}
           /{" "}
