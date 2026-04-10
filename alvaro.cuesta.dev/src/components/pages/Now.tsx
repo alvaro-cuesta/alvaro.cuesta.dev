@@ -1,15 +1,22 @@
 import { Template } from "../Template";
 import type { SiteRenderMeta } from "../../site";
 import { makeTitle } from "../../utils/meta";
-import { useNowPage } from "../../now/promise";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
+import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
+
+const nowPageUrl = new URL(`../../../now/now.mdx`, import.meta.url);
+
+const { use: useNowContent } = suspendablePromiseMaker(
+  async () => (await import(`${nowPageUrl}?${Date.now()}`)).default,
+  { lazy: true },
+);
 
 type NowProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
 export const Now: React.FC<NowProps> = ({ siteRenderMeta }) => {
-  const { Component } = useNowPage();
+  const NowContent = useNowContent();
 
   const title = makeTitle(["Now"]);
 
@@ -28,7 +35,7 @@ export const Now: React.FC<NowProps> = ({ siteRenderMeta }) => {
     >
       <h2>Now</h2>
       <section>
-        <Component components={MDX_DEFAULT_COMPONENTS} />
+        <NowContent components={MDX_DEFAULT_COMPONENTS} />
       </section>
     </Template>
   );
