@@ -58,7 +58,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
                   >
                     {tag}
                   </Link>
-                  &nbsp;<span className="no-wrap">({items.length})</span>
+                  <span className="no-wrap">&nbsp;({items.length})</span>
                 </li>
               ))}
             {tagsDescendingByArticleCount.length > MAX_TAGS ? (
@@ -89,7 +89,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
                 >
                   {year}
                 </Link>
-                &nbsp;<span className="no-wrap">({data.totalCount})</span>
+                <span className="no-wrap">&nbsp;({data.totalCount})</span>
               </li>
             ))}
           </ul>

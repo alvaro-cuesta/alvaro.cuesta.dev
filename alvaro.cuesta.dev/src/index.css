@@ -191,14 +191,23 @@ ul.microblog-sidebar {
 
   li {
     list-style: none;
+  }
 
-    text-overflow: ellipsis;
-    display: block;
-    overflow: hidden;
+  li li {
+    display: flex;
+    align-items: baseline;
+    max-width: 100%;
+  }
+
+  li li > a {
+    flex: 0 1 auto;
+    min-width: 0;
   }
 
   a {
-    text-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   :where(a, [role="link"]):not(:hover) {
