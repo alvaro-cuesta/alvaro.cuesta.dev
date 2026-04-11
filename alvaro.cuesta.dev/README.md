@@ -28,7 +28,6 @@
   ```
 - Migrate somwhere else: GitHub Pages do not allow custom cache times (hardcoded to 600s!), and we could even be serving `immutable` for assets
 - Latest blog posts in frontpage
-- Microblog
 - Proper router
 - Sitemap improvements
   - Add last modified that I am already injecting in `<meta>` tags

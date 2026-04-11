@@ -3,7 +3,7 @@ import {
   blogItemDateToShortString,
   dropTimeFromBlogItemDate,
   type BlogItemDate,
-} from "../../blog/item-dates";
+} from "../../utils/item-dates";
 
 type BlogDateTimeProps = {
   dateTime: BlogItemDate;

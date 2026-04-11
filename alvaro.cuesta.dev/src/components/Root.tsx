@@ -8,6 +8,12 @@ import {
   routeBlogYear,
   routeBlogYearList,
   routeHome,
+  routeMicroblogPost,
+  routeMicroblogList,
+  routeMicroblogTag,
+  routeMicroblogTagList,
+  routeMicroblogYear,
+  routeMicroblogYearList,
   routeNow,
 } from "../routes";
 import { BlogArticle } from "./pages/BlogArticle";
@@ -17,6 +23,12 @@ import { BlogTagList } from "./pages/BlogTagsList";
 import { BlogYear } from "./pages/BlogYear";
 import { BlogYearList } from "./pages/BlogYearList";
 import { Homepage } from "./pages/Homepage";
+import { MicroblogPostPage } from "./pages/MicroblogPost";
+import { MicroblogList } from "./pages/MicroblogList";
+import { MicroblogTag } from "./pages/MicroblogTag";
+import { MicroblogTagList } from "./pages/MicroblogTagList";
+import { MicroblogYear } from "./pages/MicroblogYear";
+import { MicroblogYearList } from "./pages/MicroblogYearList";
 import { NotFound } from "./pages/NotFound";
 import { Now } from "./pages/Now";
 
@@ -37,6 +49,54 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
 
   if (routeNow.match(pathname)) {
     return <Now siteRenderMeta={siteRenderMeta} />;
+  }
+
+  const routeMicroblogListMatch = routeMicroblogList.match(pathname);
+  if (routeMicroblogListMatch) {
+    return (
+      <MicroblogList
+        siteRenderMeta={siteRenderMeta}
+        page={routeMicroblogListMatch.page}
+      />
+    );
+  }
+
+  if (routeMicroblogTagList.match(pathname)) {
+    return <MicroblogTagList siteRenderMeta={siteRenderMeta} />;
+  }
+
+  const routeMicroblogTagMatch = routeMicroblogTag.match(pathname);
+  if (routeMicroblogTagMatch) {
+    return (
+      <MicroblogTag
+        siteRenderMeta={siteRenderMeta}
+        tag={routeMicroblogTagMatch.tag}
+      />
+    );
+  }
+
+  if (routeMicroblogYearList.match(pathname)) {
+    return <MicroblogYearList siteRenderMeta={siteRenderMeta} />;
+  }
+
+  const routeMicroblogYearMatch = routeMicroblogYear.match(pathname);
+  if (routeMicroblogYearMatch) {
+    return (
+      <MicroblogYear
+        siteRenderMeta={siteRenderMeta}
+        year={routeMicroblogYearMatch.year}
+      />
+    );
+  }
+
+  const routeMicroblogPostMatch = routeMicroblogPost.match(pathname);
+  if (routeMicroblogPostMatch) {
+    return (
+      <MicroblogPostPage
+        siteRenderMeta={siteRenderMeta}
+        id={routeMicroblogPostMatch.id}
+      />
+    );
   }
 
   const routeBlogPageMatch = routeBlogArticleList.match(pathname);

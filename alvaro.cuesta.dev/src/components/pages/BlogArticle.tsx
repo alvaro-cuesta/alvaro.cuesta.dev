@@ -7,7 +7,7 @@ import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
   getBlogItemDateYear,
-} from "../../blog/item-dates";
+} from "../../utils/item-dates";
 import type { SiteRenderMeta } from "../../site";
 import { BlogDateTime } from "../atoms/BlogDateTime";
 import { Icon } from "../atoms/Icon";

@@ -3,7 +3,7 @@ import {
   getBlogItemDateMonth,
   getBlogItemDateYear,
   type BlogItemMonth,
-} from "./item-dates";
+} from "../utils/item-dates";
 import type { BlogItem } from "./item";
 
 type YearData = {

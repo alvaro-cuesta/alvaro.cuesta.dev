@@ -82,12 +82,18 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
 
         <div className="flex-space-between">
           {prevPageLink ? (
-            <Link href={prevPageLink}>Previous page</Link>
+            <Link href={prevPageLink} className="pagination-link">
+              <span className="no-underline">🡄&nbsp;</span>Previous page
+            </Link>
           ) : (
             // We need a placeholder to keep the layout
             <div />
           )}
-          {nextPageLink ? <Link href={nextPageLink}>Next page</Link> : null}
+          {nextPageLink ? (
+            <Link href={nextPageLink} className="pagination-link">
+              Next page<span className="no-underline">&nbsp;🡆</span>
+            </Link>
+          ) : null}
         </div>
       </BlogListsLayout>
     </Template>

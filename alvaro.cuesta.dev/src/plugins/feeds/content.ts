@@ -1,4 +1,4 @@
-import { htmlToPlainText } from "../../blog/html";
+import { htmlToPlainText } from "../../utils/html";
 import { compareInstants } from "./dates";
 import { getFeedFormatRoute, toAbsoluteUrl } from "./routes";
 import type {

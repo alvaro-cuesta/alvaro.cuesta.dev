@@ -4,10 +4,10 @@ import type { SiteRenderMeta } from "../../site";
 import { makeTitle } from "../../utils/meta";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 import NowContent from "./Now.mdx";
-import { getGitLastModifiedDate } from "../../blog/git";
+import { getGitLastModifiedDate } from "../../utils/git";
 import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
 import { Temporal } from "temporal-polyfill";
-import { instantToBlogItemDate } from "../../blog/item-dates";
+import { instantToBlogItemDate } from "../../utils/item-dates";
 
 type NowProps = {
   siteRenderMeta: SiteRenderMeta;

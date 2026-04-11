@@ -37,9 +37,41 @@ export const routeBlogTag = makeRoute<{ tag: string }>(
 // BLOG YEARS
 export const routeBlogYearList = makeRoute<{}>("/blog/years/");
 
+// MICROBLOG
+export const routeMicroblogList = makeRoute<
+  { page?: string },
+  { page: number | null }
+>(
+  "/timeline{/page/:page}/",
+  (params) => ({
+    page: params.page !== undefined ? parseInt(params.page, 10) : null,
+  }),
+  (params) => ({
+    ...(params.page !== null ? { page: params.page.toString() } : {}),
+  }),
+);
+
 export const routeBlogYear = makeRoute<{ year: string }, { year: number }>(
   // TODO:: path-to-regexp no longer supports complex patterns like `(\\d{4})` so we need to find a way to make this work
   "/blog/years/:year/",
+  (params) => ({ year: parseInt(params.year, 10) }),
+  (params) => ({ year: params.year.toString() }),
+);
+
+export const routeMicroblogPost = makeRoute<{ id: string }>(`/timeline/:id/`);
+
+// MICROBLOG TAGS
+export const routeMicroblogTagList = makeRoute<{}>("/timeline/tags/");
+
+export const routeMicroblogTag = makeRoute<{ tag: string }>(
+  `/timeline/tags/:tag/`,
+);
+
+// MICROBLOG YEARS
+export const routeMicroblogYearList = makeRoute<{}>("/timeline/years/");
+
+export const routeMicroblogYear = makeRoute<{ year: string }, { year: number }>(
+  "/timeline/years/:year/",
   (params) => ({ year: parseInt(params.year, 10) }),
   (params) => ({ year: params.year.toString() }),
 );

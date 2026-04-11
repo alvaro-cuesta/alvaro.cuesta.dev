@@ -2,6 +2,9 @@ import { type ComponentPropsWithoutRef } from "react";
 import { Link as XenonLink } from "xenon-ssg/src/generate/Link";
 import { canonicalizeHref } from "xenon-ssg/src/url";
 import { Icon } from "./Icon";
+import { useBlogItems } from "../../blog/promise";
+import { useMicroblogItems } from "../../microblog/promise";
+import { rewriteCustomProtocolHref } from "../../utils/href";
 
 type LinkProps = ComponentPropsWithoutRef<"a"> & {
   isExternal?: boolean;
@@ -16,13 +19,22 @@ export const Link: React.FC<LinkProps> = ({
   Component = XenonLink,
   ...props
 }) => {
+  const blogItems = useBlogItems();
+  const microblogItems = useMicroblogItems();
+
+  const rewrittenHref = rewriteCustomProtocolHref(props.href, {
+    blogItems,
+    microblogItems,
+  });
+
   const calculatedIsExternal =
     isExternal ??
-    (props.href ? !canonicalizeHref(props.href).isInternal : false);
+    (rewrittenHref ? !canonicalizeHref(rewrittenHref).isInternal : false);
 
   return (
     <Component
       {...props}
+      href={rewrittenHref}
       target={(props.target ?? calculatedIsExternal) ? "_blank" : undefined}
       rel={calculatedIsExternal ? "noopener noreferrer" : undefined}
     >

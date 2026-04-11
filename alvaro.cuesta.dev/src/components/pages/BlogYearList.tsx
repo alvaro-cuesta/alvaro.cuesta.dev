@@ -35,7 +35,7 @@ export const BlogYearList: React.FC<BlogYearListProps> = ({
         blogItems={blogItems}
         isYearListCurrent
       >
-        <h2>Years</h2>
+        <h2>Blog years</h2>
 
         <ul>
           {blogItems.yearsSortedDescending.map(({ year, data }) => (

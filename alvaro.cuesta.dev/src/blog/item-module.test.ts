@@ -2,7 +2,7 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import type { MDXContent } from "mdx/types";
 import { Temporal } from "temporal-polyfill";
-import { dateToBlogItemDate } from "./item-dates";
+import { dateToBlogItemDate } from "../utils/item-dates";
 import { parseBlogItemModuleFromImportModule } from "./item-module";
 
 const createMdxComponent = (): MDXContent => {

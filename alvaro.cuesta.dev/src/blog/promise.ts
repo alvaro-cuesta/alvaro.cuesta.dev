@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getGitLastModifiedDate, getGitWatchPaths } from "./git";
+import { getGitLastModifiedDate, getGitWatchPaths } from "../utils/git";
 import { parseBlogItemModuleFromImportModule } from "./item-module";
 import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
 import { analyzeBlogItems } from "./analyze";

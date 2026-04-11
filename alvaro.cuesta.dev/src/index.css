@@ -101,6 +101,15 @@ article > header {
   gap: var(--pico-grid-column-gap);
 }
 
+.pagination-link > .no-underline {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.muted {
+  color: var(--pico-muted-color);
+}
+
 .flex-responsive {
   display: flex;
   gap: var(--pico-grid-column-gap);
@@ -129,7 +138,7 @@ article > header {
   flex-grow: 1;
   align-self: end;
 
-  padding: 0 1em;
+  padding: 0 0.15em;
 
   > .feeds {
     margin-left: auto;
@@ -146,33 +155,42 @@ nav[aria-label="breadcrumb"] li :where(a, [role="link"]):not(:hover) {
   text-underline-offset: 0.125em;
 }
 
-ul.blog-sidebar {
+ul.blog-sidebar,
+ul.microblog-sidebar {
   list-style-type: none;
   padding-left: 0;
 
-  @media (min-width: 1024px) {
-    max-width: 10em;
+  li {
+    list-style: none;
+
+    text-overflow: ellipsis;
+    display: block;
+    overflow: hidden;
+  }
+
+  a {
+    text-wrap: nowrap;
+  }
+
+  :where(a, [role="link"]):not(:hover) {
+    text-decoration: none;
+  }
+
+  > li > ul {
+    padding-left: 1em;
   }
 }
 
-ul.blog-sidebar li {
-  list-style: none;
-
-  text-overflow: ellipsis;
-  display: block;
-  overflow: hidden;
+ul.blog-sidebar {
+  @media (min-width: 1024px) {
+    width: 10em;
+  }
 }
 
-ul.blog-sidebar a {
-  text-wrap: nowrap;
-}
-
-ul.blog-sidebar :where(a, [role="link"]):not(:hover) {
-  text-decoration: none;
-}
-
-ul.blog-sidebar > li > ul {
-  padding-left: 1em;
+ul.microblog-sidebar {
+  @media (min-width: 1024px) {
+    width: 15em;
+  }
 }
 
 .no-wrap {
@@ -376,4 +394,16 @@ pre > code {
   width: 1.5em;
   height: 1.5em;
   object-fit: contain;
+}
+
+.microblog-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.microblog-post-item,
+.microblog-pagination {
+  width: 100%;
+  max-width: 70ch;
+  align-self: center;
 }

@@ -1,5 +1,5 @@
 import { Temporal } from "temporal-polyfill";
-import type { BlogItemDate, BlogItemMonth } from "./item-dates";
+import type { BlogItemDate, BlogItemMonth } from "../utils/item-dates";
 
 const FILENAME_REGEX = new RegExp(
   [

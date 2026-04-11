@@ -4,11 +4,17 @@ import { Link } from "./atoms/Link";
 import { Icon } from "./atoms/Icon";
 import { useBlogItems } from "../blog/promise";
 import type { SiteRenderMeta } from "../site";
-import { routeBlogArticleList, routeHome, routeNow } from "../routes";
+import {
+  routeBlogArticleList,
+  routeHome,
+  routeMicroblogList,
+  routeNow,
+} from "../routes";
+import { useMicroblogItems } from "../microblog/promise";
 import {
   blogItemDateToUTCISO8601Z,
   type BlogItemDate,
-} from "../blog/item-dates";
+} from "../utils/item-dates";
 
 type TemplateProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -25,7 +31,7 @@ type TemplateMetaTags = {
   socialTitle: string;
   socialDescription: string;
   publishedTime?: BlogItemDate;
-  modifiedTime?: BlogItemDate;
+  modifiedTime?: BlogItemDate | undefined;
   openGraph: TemplateMetaTagsOpenGraph;
   imageAbsoluteUrl?: string;
   additional?: ReactNode;
@@ -59,6 +65,7 @@ export const Template: React.FC<TemplateProps> = ({
   children,
 }) => {
   const blogItems = useBlogItems();
+  const microblogItems = useMicroblogItems();
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;
 
@@ -246,6 +253,13 @@ export const Template: React.FC<TemplateProps> = ({
                 <li>
                   <Link href={routeBlogArticleList.build({ page: null })}>
                     Blog
+                  </Link>
+                </li>
+              ) : null}
+              {microblogItems.all.length > 0 ? (
+                <li>
+                  <Link href={routeMicroblogList.build({ page: null })}>
+                    Timeline
                   </Link>
                 </li>
               ) : null}

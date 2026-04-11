@@ -33,7 +33,7 @@ export const BlogTagList: React.FC<BlogTagListProps> = ({ siteRenderMeta }) => {
         blogItems={blogItems}
         isTagListCurrent
       >
-        <h2>Tags</h2>
+        <h2>Blog tags</h2>
 
         <ul>
           {blogItems.tagsAscendingAlphabetically.map(({ tag, items }) => (

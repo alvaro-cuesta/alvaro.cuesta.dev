@@ -6,6 +6,7 @@ import type {
 import fs from "node:fs/promises";
 import {
   BLOG_BLURB_DESCRIPTION,
+  MICROBLOG_BLURB_DESCRIPTION,
   MY_NAME,
   RENDER_TO_STREAM_OPTIONS,
   SITE_SHORT_DESCRIPTION,
@@ -34,10 +35,17 @@ import {
   routeBlogYearList,
   route404,
   routeHome,
+  routeMicroblogPost,
+  routeMicroblogList,
+  routeMicroblogTag,
+  routeMicroblogTagList,
+  routeMicroblogYear,
+  routeMicroblogYearList,
   routeNow,
 } from "./routes";
 import { feedsPlugin } from "./plugins/feeds";
 import { getBlogFeedSourceItems } from "./blog/feed-source";
+import { getMicroblogFeedSourceItems } from "./microblog/feed-source";
 import { makeTitle } from "./utils/meta";
 
 export type SiteRenderMeta = XenonExpressRenderMeta & {
@@ -74,13 +82,44 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
   const isHome = routeHome.match(siteRenderMeta.pathname);
   const is404 = route404.match(siteRenderMeta.pathname);
   const isNow = routeNow.match(siteRenderMeta.pathname);
+
+  const isHighSignalPage = isNow;
+
+  // Blog
+  const blogArticleListMatch = routeBlogArticleList.match(
+    siteRenderMeta.pathname,
+  );
+
   const isBlogArticle = routeBlogArticle.match(siteRenderMeta.pathname);
-  const isBlogArticleList = routeBlogArticleList.match(siteRenderMeta.pathname);
+  const isBlogArticleFrontpage =
+    blogArticleListMatch !== null &&
+    (blogArticleListMatch.page === null || blogArticleListMatch.page === 1);
   const isBlogGenericRoute =
     routeBlogTagList.match(siteRenderMeta.pathname) ||
     routeBlogTag.match(siteRenderMeta.pathname) ||
     routeBlogYearList.match(siteRenderMeta.pathname) ||
     routeBlogYear.match(siteRenderMeta.pathname);
+  const isBlogPagination =
+    blogArticleListMatch !== null &&
+    blogArticleListMatch.page &&
+    blogArticleListMatch.page > 1;
+
+  // Microblog
+  const microblogListMatch = routeMicroblogList.match(siteRenderMeta.pathname);
+
+  const isMicroblogPost = routeMicroblogPost.match(siteRenderMeta.pathname);
+  const isMicroblogFrontpage =
+    microblogListMatch !== null &&
+    (microblogListMatch.page === null || microblogListMatch.page === 1);
+  const isMicroblogGenericRoute =
+    routeMicroblogTagList.match(siteRenderMeta.pathname) ||
+    routeMicroblogTag.match(siteRenderMeta.pathname) ||
+    routeMicroblogYearList.match(siteRenderMeta.pathname) ||
+    routeMicroblogYear.match(siteRenderMeta.pathname);
+  const isMicroblogPagination =
+    microblogListMatch !== null &&
+    microblogListMatch.page &&
+    microblogListMatch.page > 1;
 
   return {
     reactNode: <Root siteRenderMeta={siteRenderMeta} />,
@@ -89,15 +128,19 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
         ? { exclude: true }
         : isHome
           ? { priority: 1.0 }
-          : isNow
-            ? { priority: 0.8 }
-            : isBlogArticleList
-              ? { priority: 0.8 }
-              : isBlogGenericRoute
-                ? { priority: 0.6 }
-                : isBlogArticle
-                  ? { priority: 0.9 }
-                  : undefined,
+          : isHighSignalPage
+            ? { priority: 0.9 }
+            : isBlogArticle
+              ? { priority: 0.85 }
+              : isMicroblogPost
+                ? { priority: 0.8 }
+                : isBlogArticleFrontpage || isMicroblogFrontpage
+                  ? { priority: 0.7 }
+                  : isBlogGenericRoute || isMicroblogGenericRoute
+                    ? { priority: 0.3 }
+                    : isBlogPagination || isMicroblogPagination
+                      ? { priority: 0.2 }
+                      : undefined,
     },
   };
 };
@@ -166,12 +209,30 @@ export const starryNightCss = singleLightningCssPlugin({
 export async function makeSite(): Promise<
   XenonExpressSite<SitemapPluginMetadata>
 > {
-  const feeds = feedsPlugin({
+  const blogFeeds = feedsPlugin({
     getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
     homePagePathname: routeBlogArticleList.build({ page: null }),
     mountPointFragments: ["blog"],
     title: makeTitle(["Blog"], { disableReverse: true }),
     description: BLOG_BLURB_DESCRIPTION,
+    authors: ({ baseUrl }) => [
+      {
+        name: MY_NAME,
+        url: baseUrl,
+      },
+    ],
+    content: {
+      html: "full",
+      text: "none",
+    },
+  });
+
+  const microblogFeeds = feedsPlugin({
+    getItems: ({ baseUrl }) => getMicroblogFeedSourceItems(baseUrl),
+    homePagePathname: routeMicroblogList.build({ page: null }),
+    mountPointFragments: ["timeline"],
+    title: makeTitle(["Timeline"], { disableReverse: true }),
+    description: MICROBLOG_BLURB_DESCRIPTION,
     authors: ({ baseUrl }) => [
       {
         name: MY_NAME,
@@ -190,7 +251,10 @@ export async function makeSite(): Promise<
       "utf-8",
     ),
     outputFilename: "sitemap.xml",
-    additionalPathnames: () => feeds.getFeedSitemapPathnames(),
+    additionalPathnames: async () => [
+      ...(await blogFeeds.getFeedSitemapPathnames()),
+      ...(await microblogFeeds.getFeedSitemapPathnames()),
+    ],
   });
 
   const favicon = await faviconPlugin({
@@ -219,7 +283,8 @@ export async function makeSite(): Promise<
       fontawesomeWebfontsFolder,
       indexCss,
       starryNightCss,
-      feeds,
+      blogFeeds,
+      microblogFeeds,
       sitemap,
     ],
   };

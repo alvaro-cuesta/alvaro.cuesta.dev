@@ -1,36 +1,21 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { rewriteBlogMdxHref } from "./href";
-import { blogItemDateToTemporalInstant } from "./item-dates";
+import { blogItemDateToTemporalInstant } from "../utils/item-dates";
 import { getBlogItems } from "./promise";
 import { makeMdxDefaultComponents } from "../mdx/mdx";
 import { routeBlogArticle } from "../routes";
-import { canonicalizeHref } from "xenon-ssg/src/url";
 import type { FeedSourceItem } from "../plugins/feeds/types";
 import type { BlogItem } from "./item";
 
-function renderBlogItemHtml(
-  baseUrl: string,
-  item: BlogItem,
-  blogItems: Iterable<BlogItem>,
-): string {
+function renderBlogItemHtml(baseUrl: string, item: BlogItem): string {
   const articlePathname = routeBlogArticle.build({ slug: item.module.slug });
-  const articleUrl = new URL(articlePathname, baseUrl).toString();
+  const articleUrl = new URL(articlePathname, baseUrl);
 
   return renderToStaticMarkup(
     React.createElement(item.module.Component, {
       components: {
         ...makeMdxDefaultComponents({
-          rewriteHref: (href) =>
-            href
-              ? canonicalizeHref(
-                  rewriteBlogMdxHref(href, {
-                    currentFilename: item.filename,
-                    blogItems,
-                  }) ?? href,
-                  new URL(articleUrl),
-                ).pathUrl.toString()
-              : href,
+          canonicalizeBaseUrl: articleUrl,
           renderAnchor: (props) => <a {...props} />,
         }),
         TableOfContents: () => null,
@@ -39,16 +24,12 @@ function renderBlogItemHtml(
   );
 }
 
-function toFeedSourceItem(
-  baseUrl: string,
-  item: BlogItem,
-  blogItems: Iterable<BlogItem>,
-): FeedSourceItem {
+function toFeedSourceItem(baseUrl: string, item: BlogItem): FeedSourceItem {
   return {
     pathname: routeBlogArticle.build({ slug: item.module.slug }),
     title: item.module.title,
     ...(item.module.summary ? { summary: item.module.summary } : {}),
-    render: () => renderBlogItemHtml(baseUrl, item, blogItems),
+    render: () => renderBlogItemHtml(baseUrl, item),
     datePublished: blogItemDateToTemporalInstant(item.module.publicationDate),
     ...(item.module.lastModificationDate
       ? {
@@ -69,7 +50,7 @@ export async function getBlogFeedSourceItems(
   const blogItems = await getBlogItems();
 
   return blogItems.allSortedByDescendingDate.map((item) =>
-    toFeedSourceItem(baseUrl, item, blogItems.all),
+    toFeedSourceItem(baseUrl, item),
   );
 }
 

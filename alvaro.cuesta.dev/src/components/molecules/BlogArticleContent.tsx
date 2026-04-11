@@ -1,6 +1,4 @@
 import type { BlogItem } from "../../blog/item";
-import { rewriteBlogMdxHref } from "../../blog/href";
-import { useBlogItems } from "../../blog/promise";
 import { makeMdxDefaultComponents } from "../../mdx/mdx";
 import { TableOfContents, type TableOfContentsProps } from "./TableOfContents";
 
@@ -18,9 +16,7 @@ export const BlogArticleContent: React.FC<BlogArticleContentProps> = ({
   article,
   disableDefaultComponents = false,
 }) => {
-  const blogItems = useBlogItems();
   const {
-    filename,
     module: { Component, tableOfContents },
   } = article;
 
@@ -30,13 +26,7 @@ export const BlogArticleContent: React.FC<BlogArticleContentProps> = ({
         {...(!disableDefaultComponents
           ? {
               components: {
-                ...makeMdxDefaultComponents({
-                  rewriteHref: (href) =>
-                    rewriteBlogMdxHref(href, {
-                      currentFilename: filename,
-                      blogItems: blogItems.all,
-                    }),
-                }),
+                ...makeMdxDefaultComponents(),
                 TableOfContents: (
                   props: Omit<TableOfContentsProps, "tableOfContents">,
                 ) => (

@@ -38,3 +38,20 @@ export const BLOG_BLURB_DESCRIPTION =
 
 export const makeBlogBlurbSocialDescription = (browsing?: string | undefined) =>
   `You're browsing ${browsing ? `${browsing} of ` : ""}Álvaro Cuesta's blog — keep exploring articles on technology, music, and creativity.`;
+
+export const MICROBLOG_BLURB_DESCRIPTION =
+  "Álvaro Cuesta's timeline — short-form thoughts on technology, music, creativity, and more.";
+
+export const makeMicroblogBlurbSocialDescription = (
+  browsing?: string | undefined,
+) =>
+  `You're browsing ${browsing ? `${browsing} of ` : ""}Álvaro Cuesta's timeline — short-form thoughts on technology, music, creativity, and more.`;
+
+/**
+ * Maps non-canonical hashtag names to their canonical form.
+ * E.g. `{ llm: "llms" }` means `#llm` will link to the `#llms` tag page.
+ * The display text stays as the author wrote it.
+ */
+export const CANONICAL_HASHTAGS: Record<string, string> = {
+  llms: "llm",
+};

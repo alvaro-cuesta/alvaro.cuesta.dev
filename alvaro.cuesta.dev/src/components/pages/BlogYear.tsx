@@ -2,7 +2,7 @@ import { useBlogItems } from "../../blog/promise";
 import { Template } from "../Template";
 import { BlogListsLayout } from "../molecules/BlogListsLayout";
 import { BlogArticleListItem } from "../molecules/BlogArticleListItem";
-import { type BlogItemMonth } from "../../blog/item-dates";
+import { type BlogItemMonth } from "../../utils/item-dates";
 import type { SiteRenderMeta } from "../../site";
 import { routeBlogYear, routeBlogYearList } from "../../routes";
 import {
@@ -77,7 +77,7 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
         currentYear={year}
         isYearListCurrent
       >
-        <h2>Year {year}</h2>
+        <h2>Blog year {year}</h2>
 
         <ul>
           {monthsSortedByDescending.map(({ month, items }) => {

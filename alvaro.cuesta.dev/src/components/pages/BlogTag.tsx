@@ -46,7 +46,7 @@ export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
         currentTags={[tag]}
         isTagListCurrent
       >
-        <h2>Tag "{tag}"</h2>
+        <h2>Blog tag "{tag}"</h2>
 
         <ul>
           {itemsInTag.map((item) => (

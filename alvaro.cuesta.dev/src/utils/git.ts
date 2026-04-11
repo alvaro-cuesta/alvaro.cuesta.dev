@@ -22,6 +22,15 @@ export const getGitLastModifiedDate = async (
   repoRootPath: string,
   repoRelativeFilePath: string,
 ): Promise<Temporal.Instant | null> => {
+  const commitCount = await runGitCommand(
+    ["rev-list", "--count", "HEAD", "--", repoRelativeFilePath],
+    repoRootPath,
+  );
+
+  if (commitCount === null || parseInt(commitCount, 10) <= 1) {
+    return null;
+  }
+
   const lastModifiedAtIso8601 = await runGitCommand(
     ["log", "-1", "--follow", "--format=%cI", "--", repoRelativeFilePath],
     repoRootPath,
