@@ -50,6 +50,17 @@ html {
 .small-sup {
   font-size: 50%;
   vertical-align: super;
+  color: color-mix(in srgb, currentColor 50%, var(--pico-background-color));
+}
+
+.link-domain {
+  font-size: 75%;
+  color: color-mix(in srgb, currentColor 70%, var(--pico-background-color));
+  user-select: none;
+
+  .small-sup {
+    color: inherit;
+  }
 }
 
 header:target {

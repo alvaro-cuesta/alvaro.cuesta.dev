@@ -25,13 +25,15 @@ type MakeMdxDefaultComponentsOptions = {
    * `renderAnchor`).
    */
   canonicalizeBaseUrl?: URL;
+  showDomain?: boolean;
   renderAnchor?: (props: MdxAnchorProps) => ReactElement;
   renderHashtag?: (props: HashtagProps) => ReactElement;
 };
 
 export const makeMdxDefaultComponents = ({
   canonicalizeBaseUrl,
-  renderAnchor = (props) => <Link {...props} />,
+  showDomain,
+  renderAnchor = (props) => <Link showDomain={showDomain} {...props} />,
   renderHashtag = ({ tag, children }) => {
     const tagName =
       tag ?? (typeof children === "string" ? children : undefined);

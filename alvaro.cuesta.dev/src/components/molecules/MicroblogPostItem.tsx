@@ -2,8 +2,12 @@ import type { MicroblogItem } from "../../microblog/item";
 import { microblogPostId } from "../../microblog/analyze";
 import { BlogDateTime } from "../atoms/BlogDateTime";
 import { Link } from "../atoms/Link";
-import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
+import { makeMdxDefaultComponents } from "../../mdx/mdx";
 import { routeMicroblogPost } from "../../routes";
+
+const MICROBLOG_MDX_COMPONENTS = makeMdxDefaultComponents({
+  showDomain: true,
+});
 
 type MicroblogPostItemProps = {
   item: MicroblogItem;
@@ -21,7 +25,7 @@ export const MicroblogPostItem: React.FC<MicroblogPostItemProps> = ({
 
   return (
     <article className="microblog-post-item">
-      <Component components={MDX_DEFAULT_COMPONENTS} />
+      <Component components={MICROBLOG_MDX_COMPONENTS} />
       <footer className="flex-space-between">
         <small>
           <Link href={permalink}>
