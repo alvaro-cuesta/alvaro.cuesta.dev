@@ -1,5 +1,4 @@
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { blogItemDateToTemporalInstant } from "../utils/item-dates";
 import { getMicroblogItems } from "./promise";
 import { microblogPostId } from "./analyze";
@@ -8,14 +7,18 @@ import { routeMicroblogPost } from "../routes";
 import type { FeedSourceItem } from "../plugins/feeds/types";
 import type { MicroblogItem } from "./item";
 import { htmlToPlainText } from "../utils/html";
+import { renderToString } from "xenon-ssg/src/render";
 
-function renderMicroblogItemHtml(baseUrl: string, item: MicroblogItem): string {
+function renderMicroblogItemHtml(
+  baseUrl: string,
+  item: MicroblogItem,
+): Promise<string> {
   const postPathname = routeMicroblogPost.build({
     id: microblogPostId(item.filename),
   });
   const postUrl = new URL(postPathname, baseUrl);
 
-  return renderToStaticMarkup(
+  return renderToString(
     React.createElement(item.module.Component, {
       components: {
         ...makeMdxDefaultComponents({
@@ -42,11 +45,11 @@ function makeExcerptTitle(html: string): string {
   return `${text.slice(0, EXCERPT_LENGTH)}…`;
 }
 
-function toFeedSourceItem(
+async function toFeedSourceItem(
   baseUrl: string,
   item: MicroblogItem,
-): FeedSourceItem {
-  const html = renderMicroblogItemHtml(baseUrl, item);
+): Promise<FeedSourceItem> {
+  const html = await renderMicroblogItemHtml(baseUrl, item);
   const title = makeExcerptTitle(html);
 
   return {
@@ -72,8 +75,10 @@ export async function getMicroblogFeedSourceItems(
 ): Promise<FeedSourceItem[]> {
   const microblogItems = await getMicroblogItems();
 
-  return microblogItems.allSortedByDescendingDate.map((item) =>
-    toFeedSourceItem(baseUrl, item),
+  return Promise.all(
+    microblogItems.allSortedByDescendingDate.map((item) =>
+      toFeedSourceItem(baseUrl, item),
+    ),
   );
 }
 

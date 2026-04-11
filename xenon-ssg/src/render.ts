@@ -74,6 +74,25 @@ export const renderToStream = (
 };
 
 /**
+ * Render a React node to a string.
+ *
+ * Unlike `renderToStaticMarkup`, this supports React Suspense.
+ */
+export const renderToString = async (
+  reactNode: ReactNode,
+  options?: RenderToStreamOptions,
+): Promise<string> => {
+  const stream = renderToStream(reactNode, options);
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.from(chunk));
+  }
+
+  return Buffer.concat(chunks).toString("utf-8");
+};
+
+/**
  * Render a React node to a file.
  */
 const renderToFile = async (

@@ -1,17 +1,20 @@
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { blogItemDateToTemporalInstant } from "../utils/item-dates";
 import { getBlogItems } from "./promise";
 import { makeMdxDefaultComponents } from "../mdx/mdx";
 import { routeBlogArticle } from "../routes";
 import type { FeedSourceItem } from "../plugins/feeds/types";
 import type { BlogItem } from "./item";
+import { renderToString } from "xenon-ssg/src/render";
 
-function renderBlogItemHtml(baseUrl: string, item: BlogItem): string {
+function renderBlogItemHtml(
+  baseUrl: string,
+  item: BlogItem,
+): Promise<string> {
   const articlePathname = routeBlogArticle.build({ slug: item.module.slug });
   const articleUrl = new URL(articlePathname, baseUrl);
 
-  return renderToStaticMarkup(
+  return renderToString(
     React.createElement(item.module.Component, {
       components: {
         ...makeMdxDefaultComponents({
