@@ -71,7 +71,7 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
         ]}
         microblogItems={microblogItems}
       >
-        <h2>Timeline post {blogItemDateToShortString(publicationDate)}</h2>
+        <h2>Timeline post <small>{blogItemDateToShortString(publicationDate)}</small></h2>
 
         <MicroblogPostItem item={item} />
 
