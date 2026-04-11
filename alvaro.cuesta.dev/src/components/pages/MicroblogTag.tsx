@@ -9,29 +9,57 @@ import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
 } from "../../../config";
+import { Link } from "../atoms/Link";
+import { paginateItems } from "../../utils/pagination";
 
 type MicroblogTagProps = {
   siteRenderMeta: SiteRenderMeta;
   tag: string;
+  page: number | null;
 };
 
 export const MicroblogTag: React.FC<MicroblogTagProps> = ({
   siteRenderMeta,
   tag,
+  page: rawPage,
 }) => {
   const microblogItems = useMicroblogItems();
 
-  const itemsInTag = microblogItems.byTag.get(tag);
+  const allItemsInTag = microblogItems.byTag.get(tag);
 
-  if (itemsInTag === undefined) {
+  if (allItemsInTag === undefined) {
     throw new Error(`Tag ${tag} not found`);
   }
+
+  const page = rawPage ?? 1;
+  const { itemsInPage, totalPages } = paginateItems(allItemsInTag, page);
+
+  if (itemsInPage.length === 0) {
+    throw new Error(`Page ${page} not found for tag ${tag}`);
+  }
+
+  const prevPageLink =
+    page > 1
+      ? routeMicroblogTag.build({ tag, page: page - 1 === 1 ? null : page - 1 })
+      : null;
+  const nextPageLink =
+    page < totalPages ? routeMicroblogTag.build({ tag, page: page + 1 }) : null;
+
+  const canonicalPathname = routeMicroblogTag.build({
+    tag,
+    page: page === 1 ? null : page,
+  });
 
   return (
     <Template
       siteRenderMeta={siteRenderMeta}
+      canonicalPathname={canonicalPathname}
       metaTags={{
-        title: makeTitle(["Timeline", `Tag "${tag}"`]),
+        title: makeTitle([
+          "Timeline",
+          `Tag "${tag}"`,
+          page > 1 && `Page ${page}`,
+        ]),
         description: MICROBLOG_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
         socialDescription: makeMicroblogBlurbSocialDescription(`tag ${tag}`),
@@ -41,17 +69,47 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
       <MicroblogListsLayout
         breadcrumbs={[
           { name: "Tags", href: routeMicroblogTagList.build({}) },
-          { name: tag, href: routeMicroblogTag.build({ tag }) },
+          { name: tag, href: routeMicroblogTag.build({ tag, page: null }) },
+          ...(page > 1 && totalPages > 1
+            ? [
+                {
+                  name: `Page ${page} of ${totalPages}`,
+                  href: canonicalPathname,
+                },
+              ]
+            : []),
         ]}
         microblogItems={microblogItems}
         currentTags={[tag]}
         isTagListCurrent
       >
-        <h2>Timeline tag "{tag}"</h2>
+        <h2>
+          Timeline tag "{tag}"
+          {page > 1 ? ` (page ${page} of ${totalPages})` : ""}
+        </h2>
 
-        {itemsInTag.map((item) => (
-          <MicroblogPostItem key={item.filename} item={item} />
-        ))}
+        <div className="microblog-list">
+          {itemsInPage.map((item) => (
+            <MicroblogPostItem key={item.filename} item={item} />
+          ))}
+
+          <section className="microblog-pagination">
+            <div className="flex-space-between">
+              {prevPageLink ? (
+                <Link href={prevPageLink} className="pagination-link">
+                  <span className="no-underline">🡄&nbsp;</span>Previous page
+                </Link>
+              ) : (
+                <div />
+              )}
+              {nextPageLink ? (
+                <Link href={nextPageLink} className="pagination-link">
+                  Next page<span className="no-underline">&nbsp;🡆</span>
+                </Link>
+              ) : null}
+            </div>
+          </section>
+        </div>
       </MicroblogListsLayout>
     </Template>
   );

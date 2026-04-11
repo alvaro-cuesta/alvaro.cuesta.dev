@@ -42,7 +42,7 @@ export const MicroblogYearList: React.FC<MicroblogYearListProps> = ({
         <ul>
           {microblogItems.yearsSortedDescending.map(({ year, data }) => (
             <li key={year}>
-              <Link href={routeMicroblogYear.build({ year })}>{year}</Link> (
+              <Link href={routeMicroblogYear.build({ year, page: null })}>{year}</Link> (
               {data.totalCount})
             </li>
           ))}

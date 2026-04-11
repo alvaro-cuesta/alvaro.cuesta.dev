@@ -133,7 +133,7 @@ export const rewriteCustomProtocolHref = (
         );
       }
 
-      return `${routeMicroblogTag.build({ tag: value })}${suffix}`;
+      return `${routeMicroblogTag.build({ tag: value, page: null })}${suffix}`;
     }
 
     case "microblog-year": {
@@ -146,7 +146,7 @@ export const rewriteCustomProtocolHref = (
         );
       }
 
-      return `${routeMicroblogYear.build({ year })}${suffix}`;
+      return `${routeMicroblogYear.build({ year, page: null })}${suffix}`;
     }
 
     default:

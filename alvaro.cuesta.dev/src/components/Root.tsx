@@ -71,6 +71,7 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
       <MicroblogTag
         siteRenderMeta={siteRenderMeta}
         tag={routeMicroblogTagMatch.tag}
+        page={routeMicroblogTagMatch.page}
       />
     );
   }
@@ -85,6 +86,7 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
       <MicroblogYear
         siteRenderMeta={siteRenderMeta}
         year={routeMicroblogYearMatch.year}
+        page={routeMicroblogYearMatch.page}
       />
     );
   }

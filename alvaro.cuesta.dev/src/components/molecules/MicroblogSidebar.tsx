@@ -62,7 +62,7 @@ export const MicroblogSidebar: React.FC<MicroblogSidebarProps> = ({
                       )
                     }
                   >
-                    <Link href={routeMicroblogTag.build({ tag })}>{tag}</Link>
+                    <Link href={routeMicroblogTag.build({ tag, page: null })}>{tag}</Link>
                   </Wrapper>
                   &nbsp;<span className="no-wrap">({items.length})</span>
                 </li>
@@ -99,7 +99,7 @@ export const MicroblogSidebar: React.FC<MicroblogSidebarProps> = ({
                     )
                   }
                 >
-                  <Link href={routeMicroblogYear.build({ year })}>{year}</Link>
+                  <Link href={routeMicroblogYear.build({ year, page: null })}>{year}</Link>
                 </Wrapper>
                 &nbsp;<span className="no-wrap">({data.totalCount})</span>
               </li>

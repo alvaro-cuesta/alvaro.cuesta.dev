@@ -111,15 +111,23 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
   const isMicroblogFrontpage =
     microblogListMatch !== null &&
     (microblogListMatch.page === null || microblogListMatch.page === 1);
+  const microblogTagMatch = routeMicroblogTag.match(siteRenderMeta.pathname);
+  const microblogYearMatch = routeMicroblogYear.match(siteRenderMeta.pathname);
   const isMicroblogGenericRoute =
     routeMicroblogTagList.match(siteRenderMeta.pathname) ||
-    routeMicroblogTag.match(siteRenderMeta.pathname) ||
+    (microblogTagMatch &&
+      (!microblogTagMatch.page || microblogTagMatch.page <= 1)) ||
     routeMicroblogYearList.match(siteRenderMeta.pathname) ||
-    routeMicroblogYear.match(siteRenderMeta.pathname);
+    (microblogYearMatch &&
+      (!microblogYearMatch.page || microblogYearMatch.page <= 1));
   const isMicroblogPagination =
-    microblogListMatch !== null &&
-    microblogListMatch.page &&
-    microblogListMatch.page > 1;
+    (microblogListMatch !== null &&
+      microblogListMatch.page &&
+      microblogListMatch.page > 1) ||
+    (microblogTagMatch && microblogTagMatch.page && microblogTagMatch.page > 1) ||
+    (microblogYearMatch &&
+      microblogYearMatch.page &&
+      microblogYearMatch.page > 1);
 
   return {
     reactNode: <Root siteRenderMeta={siteRenderMeta} />,

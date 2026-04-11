@@ -40,7 +40,7 @@ export const MicroblogTagList: React.FC<MicroblogTagListProps> = ({
         <ul>
           {microblogItems.tagsAscendingAlphabetically.map(({ tag, items }) => (
             <li key={tag}>
-              <Link href={routeMicroblogTag.build({ tag })}>{tag}</Link> (
+              <Link href={routeMicroblogTag.build({ tag, page: null })}>{tag}</Link> (
               {items.length})
             </li>
           ))}

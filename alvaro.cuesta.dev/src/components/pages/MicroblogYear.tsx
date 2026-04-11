@@ -2,7 +2,6 @@ import { useMicroblogItems } from "../../microblog/promise";
 import { Template } from "../Template";
 import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
 import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
-import { type BlogItemMonth } from "../../utils/item-dates";
 import type { SiteRenderMeta } from "../../site";
 import { routeMicroblogYear, routeMicroblogYearList } from "../../routes";
 import {
@@ -10,34 +9,19 @@ import {
   makeMicroblogBlurbSocialDescription,
 } from "../../../config";
 import { makeTitle } from "../../utils/meta";
+import { Link } from "../atoms/Link";
+import { paginateItems } from "../../utils/pagination";
 
 type MicroblogYearProps = {
   siteRenderMeta: SiteRenderMeta;
   year: number;
+  page: number | null;
 };
-
-const MONTH_NUMBER_TO_NAME: {
-  [Month in Exclude<BlogItemMonth, null>]: string;
-} = {
-  1: "January",
-  2: "February",
-  3: "March",
-  4: "April",
-  5: "May",
-  6: "June",
-  7: "July",
-  8: "August",
-  9: "September",
-  10: "October",
-  11: "November",
-  12: "December",
-};
-
-const NULL_MONTH_TO_NAME = "Other";
 
 export const MicroblogYear: React.FC<MicroblogYearProps> = ({
   siteRenderMeta,
   year,
+  page: rawPage,
 }) => {
   const microblogItems = useMicroblogItems();
 
@@ -46,23 +30,47 @@ export const MicroblogYear: React.FC<MicroblogYearProps> = ({
     throw new Error(`Year ${year} not found`);
   }
 
-  const monthsSortedByDescending = [...yearInfo.byMonth.entries()]
-    .map(([month, items]) => ({ month, items }))
-    .sort((a, b) =>
-      a.month === null && b.month === null
-        ? 0
-        : a.month === null
-          ? 1
-          : b.month === null
-            ? -1
-            : b.month - a.month,
-    );
+  // Flatten all items in this year sorted by descending date
+  const allItemsInYear = [...yearInfo.byMonth.entries()]
+    .sort(([a], [b]) =>
+      a === null && b === null ? 0 : a === null ? 1 : b === null ? -1 : b - a,
+    )
+    .flatMap(([, items]) => items);
+
+  const page = rawPage ?? 1;
+  const { itemsInPage, totalPages } = paginateItems(allItemsInYear, page);
+
+  if (itemsInPage.length === 0) {
+    throw new Error(`Page ${page} not found for year ${year}`);
+  }
+
+  const prevPageLink =
+    page > 1
+      ? routeMicroblogYear.build({
+          year,
+          page: page - 1 === 1 ? null : page - 1,
+        })
+      : null;
+  const nextPageLink =
+    page < totalPages
+      ? routeMicroblogYear.build({ year, page: page + 1 })
+      : null;
+
+  const canonicalPathname = routeMicroblogYear.build({
+    year,
+    page: page === 1 ? null : page,
+  });
 
   return (
     <Template
       siteRenderMeta={siteRenderMeta}
+      canonicalPathname={canonicalPathname}
       metaTags={{
-        title: makeTitle(["Timeline", `Year ${year}`]),
+        title: makeTitle([
+          "Timeline",
+          `Year ${year}`,
+          page > 1 && `Page ${page}`,
+        ]),
         description: MICROBLOG_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
         socialDescription: makeMicroblogBlurbSocialDescription(`year ${year}`),
@@ -72,27 +80,50 @@ export const MicroblogYear: React.FC<MicroblogYearProps> = ({
       <MicroblogListsLayout
         breadcrumbs={[
           { name: "Years", href: routeMicroblogYearList.build({}) },
-          { name: year.toString(), href: routeMicroblogYear.build({ year }) },
+          {
+            name: year.toString(),
+            href: routeMicroblogYear.build({ year, page: null }),
+          },
+          ...(page > 1 && totalPages > 1
+            ? [
+                {
+                  name: `Page ${page} of ${totalPages}`,
+                  href: canonicalPathname,
+                },
+              ]
+            : []),
         ]}
         microblogItems={microblogItems}
         currentYear={year}
         isYearListCurrent
       >
-        <h2>Timeline year {year}</h2>
+        <h2>
+          Timeline year {year}
+          {page > 1 ? ` (page ${page} of ${totalPages})` : ""}
+        </h2>
 
-        {monthsSortedByDescending.map(({ month, items }) => {
-          const monthName =
-            month !== null ? MONTH_NUMBER_TO_NAME[month] : NULL_MONTH_TO_NAME;
+        <div className="microblog-list">
+          {itemsInPage.map((item) => (
+            <MicroblogPostItem key={item.filename} item={item} />
+          ))}
 
-          return (
-            <section key={month}>
-              <h3>{monthName}</h3>
-              {items.map((item) => (
-                <MicroblogPostItem key={item.filename} item={item} />
-              ))}
-            </section>
-          );
-        })}
+          <section className="microblog-pagination">
+            <div className="flex-space-between">
+              {prevPageLink ? (
+                <Link href={prevPageLink} className="pagination-link">
+                  <span className="no-underline">🡄&nbsp;</span>Previous page
+                </Link>
+              ) : (
+                <div />
+              )}
+              {nextPageLink ? (
+                <Link href={nextPageLink} className="pagination-link">
+                  Next page<span className="no-underline">&nbsp;🡆</span>
+                </Link>
+              ) : null}
+            </div>
+          </section>
+        </div>
       </MicroblogListsLayout>
     </Template>
   );

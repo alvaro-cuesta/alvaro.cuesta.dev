@@ -63,15 +63,35 @@ export const routeMicroblogPost = makeRoute<{ id: string }>(`/timeline/:id/`);
 // MICROBLOG TAGS
 export const routeMicroblogTagList = makeRoute<{}>("/timeline/tags/");
 
-export const routeMicroblogTag = makeRoute<{ tag: string }>(
-  `/timeline/tags/:tag/`,
+export const routeMicroblogTag = makeRoute<
+  { tag: string; page?: string },
+  { tag: string; page: number | null }
+>(
+  `/timeline/tags/:tag{/:page}/`,
+  (params) => ({
+    tag: params.tag,
+    page: params.page !== undefined ? parseInt(params.page, 10) : null,
+  }),
+  (params) => ({
+    tag: params.tag,
+    ...(params.page !== null ? { page: params.page.toString() } : {}),
+  }),
 );
 
 // MICROBLOG YEARS
 export const routeMicroblogYearList = makeRoute<{}>("/timeline/years/");
 
-export const routeMicroblogYear = makeRoute<{ year: string }, { year: number }>(
-  "/timeline/years/:year/",
-  (params) => ({ year: parseInt(params.year, 10) }),
-  (params) => ({ year: params.year.toString() }),
+export const routeMicroblogYear = makeRoute<
+  { year: string; page?: string },
+  { year: number; page: number | null }
+>(
+  "/timeline/years/:year{/:page}/",
+  (params) => ({
+    year: parseInt(params.year, 10),
+    page: params.page !== undefined ? parseInt(params.page, 10) : null,
+  }),
+  (params) => ({
+    year: params.year.toString(),
+    ...(params.page !== null ? { page: params.page.toString() } : {}),
+  }),
 );
