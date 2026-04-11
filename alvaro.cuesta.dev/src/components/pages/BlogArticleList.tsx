@@ -84,7 +84,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
         <div className="flex-space-between">
           {prevPageLink ? (
             <Link href={prevPageLink} className="pagination-link">
-              <Icon name="arrow-left" aria-hidden="true" />&nbsp;Previous page
+              <span className="no-underline"><Icon name="arrow-left" aria-hidden="true" />&nbsp;</span>Previous page
             </Link>
           ) : (
             // We need a placeholder to keep the layout
@@ -92,7 +92,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
           )}
           {nextPageLink ? (
             <Link href={nextPageLink} className="pagination-link">
-              Next page&nbsp;<Icon name="arrow-right" aria-hidden="true" />
+              Next page<span className="no-underline">&nbsp;<Icon name="arrow-right" aria-hidden="true" /></span>
             </Link>
           ) : null}
         </div>

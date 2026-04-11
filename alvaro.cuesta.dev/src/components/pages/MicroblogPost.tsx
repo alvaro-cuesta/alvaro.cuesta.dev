@@ -79,14 +79,14 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
           <div className="flex-space-between">
             {newerPostHref ? (
               <Link href={newerPostHref} className="pagination-link">
-                <Icon name="arrow-left" aria-hidden="true" />&nbsp;Newer post
+                <span className="no-underline"><Icon name="arrow-left" aria-hidden="true" />&nbsp;</span>Newer post
               </Link>
             ) : (
               <div />
             )}
             {olderPostHref ? (
               <Link href={olderPostHref} className="pagination-link">
-                Older post&nbsp;<Icon name="arrow-right" aria-hidden="true" />
+                Older post<span className="no-underline">&nbsp;<Icon name="arrow-right" aria-hidden="true" /></span>
               </Link>
             ) : null}
           </div>
