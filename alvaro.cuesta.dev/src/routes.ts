@@ -60,7 +60,9 @@ export const routeBlogYear = makeRoute<{ year: string }, { year: number }>(
   (params) => ({ year: params.year.toString() }),
 );
 
-export const routeMicroblogPost = makeRoute<{ id: string }>(`/timeline/:id/`);
+export const routeMicroblogPost = makeRoute<{ slug: string }>(
+  `/timeline/:slug/`,
+);
 
 // MICROBLOG TAGS
 export const routeMicroblogTagList = makeRoute<{}>("/timeline/tags/");

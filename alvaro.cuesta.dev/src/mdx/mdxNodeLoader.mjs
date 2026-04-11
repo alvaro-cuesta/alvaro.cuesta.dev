@@ -7,6 +7,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import { all } from "@wooorm/starry-night";
 import recmaPluginInjectisMDXComponent from "recma-mdx-is-mdx-component";
+import recmaInjectTocProp from "./recmaInjectTocProp.mts";
 import rehypeShiftHeading from "rehype-shift-heading";
 import withToc from "@stefanprobst/rehype-extract-toc";
 import withTocExport from "@stefanprobst/rehype-extract-toc/mdx";
@@ -53,7 +54,7 @@ const hooks = createLoader({
     remarkParseCodeMeta,
     remarkCodeCaptionToFigure,
   ],
-  recmaPlugins: [recmaPluginInjectisMDXComponent],
+  recmaPlugins: [recmaPluginInjectisMDXComponent, recmaInjectTocProp],
   // I couldn't get this to work. I think it's because the MDX file are loading a different instance of the context, so
   // the provider is not the same as the one that is being used in the rest of the app...
   // Workaround is to just manually pass the `components` prop to each MDX render. Cumbersome, but reasonable.

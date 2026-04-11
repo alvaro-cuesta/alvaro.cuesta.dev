@@ -12,7 +12,11 @@ import type { SiteRenderMeta } from "../../site";
 import { BlogDateTime } from "../atoms/BlogDateTime";
 import { Icon } from "../atoms/Icon";
 import { BlogArticleContent } from "../molecules/BlogArticleContent";
-import { routeBlogArticle, routeBlogTag } from "../../routes";
+import {
+  routeBlogArticle,
+  routeBlogArticleList,
+  routeBlogTag,
+} from "../../routes";
 import { makeTitle } from "../../utils/meta";
 
 type BlogArticleProps = {
@@ -57,6 +61,7 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
     : null;
 
   const articlePath = routeBlogArticle.build({ slug });
+  const page = blogItems.pageBySlug.get(slug) ?? 1;
 
   const description = summary
     ? summary
@@ -104,7 +109,17 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
       }}
     >
       <BlogListsLayout
-        breadcrumbs={[{ name: articleTitle, href: articlePath }]}
+        breadcrumbs={[
+          ...(page > 1
+            ? [
+                {
+                  name: `Page ${page}`,
+                  href: routeBlogArticleList.build({ page }),
+                },
+              ]
+            : []),
+          { name: articleTitle, href: articlePath },
+        ]}
         blogItems={blogItems}
         currentTags={tagSlugs}
         currentYear={getBlogItemDateYear(publicationDate)}

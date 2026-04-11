@@ -1,5 +1,6 @@
-import type { AnalyzedBlogItems } from "../blog/analyze";
-import type { AnalyzedMicroblogItems } from "../microblog/analyze";
+import type { AnalyzedItems } from "./analyze";
+import type { BlogItemModuleParsed } from "../blog/item-module";
+import type { MicroblogItemModuleParsed } from "../microblog/item-module";
 import {
   routeBlogArticle,
   routeBlogTag,
@@ -10,8 +11,8 @@ import {
 } from "../routes";
 
 type RewriteContext = {
-  blogItems: AnalyzedBlogItems;
-  microblogItems: AnalyzedMicroblogItems;
+  blogItems: AnalyzedItems<BlogItemModuleParsed>;
+  microblogItems: AnalyzedItems<MicroblogItemModuleParsed>;
 };
 
 const SUPPORTED_PROTOCOLS = new Set([
@@ -110,14 +111,14 @@ export const rewriteCustomProtocolHref = (
     }
 
     case "microblog-post": {
-      if (!microblogItems.byId.has(value)) {
+      if (!microblogItems.bySlug.has(value)) {
         throw makeBrokenHrefError(
           href,
           `microblog post "${value}" does not exist`,
         );
       }
 
-      return `${routeMicroblogPost.build({ id: value })}${suffix}`;
+      return `${routeMicroblogPost.build({ slug: value })}${suffix}`;
     }
 
     case "microblog-tag": {

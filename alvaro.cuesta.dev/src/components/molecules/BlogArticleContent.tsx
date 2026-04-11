@@ -1,45 +1,21 @@
-import type { BlogItem } from "../../blog/item";
-import { makeMdxDefaultComponents } from "../../mdx/mdx";
-import { TableOfContents, type TableOfContentsProps } from "./TableOfContents";
+import type { Item } from "../../utils/analyze";
+import type { BlogItemModuleParsed } from "../../blog/item-module";
+import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 
 type BlogArticleContentProps = {
-  article: BlogItem;
-  /**
-   * Useful if you want to disable the default components that are site-specific, e.g. for rendering into an RSS feed.
-   */
-  disableDefaultComponents?: boolean;
+  article: Item<BlogItemModuleParsed>;
 };
-
-const DEFAULT_TOC_PERMALINK_ID = "toc";
 
 export const BlogArticleContent: React.FC<BlogArticleContentProps> = ({
   article,
-  disableDefaultComponents = false,
 }) => {
   const {
-    module: { Component, tableOfContents },
+    module: { Component },
   } = article;
 
   return (
     <section>
-      <Component
-        {...(!disableDefaultComponents
-          ? {
-              components: {
-                ...makeMdxDefaultComponents(),
-                TableOfContents: (
-                  props: Omit<TableOfContentsProps, "tableOfContents">,
-                ) => (
-                  <TableOfContents
-                    id={DEFAULT_TOC_PERMALINK_ID}
-                    tableOfContents={tableOfContents}
-                    {...props}
-                  />
-                ),
-              },
-            }
-          : {})}
-      />
+      <Component components={MDX_DEFAULT_COMPONENTS} />
     </section>
   );
 };

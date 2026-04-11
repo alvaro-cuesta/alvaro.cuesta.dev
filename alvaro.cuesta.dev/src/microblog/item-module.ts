@@ -1,164 +1,68 @@
 import type { MDXContent } from "mdx/types";
+import type { Toc } from "@stefanprobst/rehype-extract-toc";
 import { parseMicroblogItemFilename } from "./item-filename";
 import {
-  compareBlogItemDates,
-  dateToBlogItemDate,
-  instantToBlogItemDate,
-  isBlogItemDate,
   type BlogItemDate,
+  type ItemModuleDate,
+  itemModuleDateToBlogItemDate,
+  resolveLastModificationDate,
 } from "../utils/item-dates";
-import { Temporal } from "temporal-polyfill";
-
-type MicroblogItemModuleDate =
-  | Date
-  | Temporal.Instant
-  | Temporal.PlainYearMonth
-  | Temporal.PlainDate
-  | Temporal.PlainDateTime
-  | BlogItemDate;
-
-const isMicroblogItemModuleDate = (
-  x: unknown,
-): x is MicroblogItemModuleDate => {
-  return (
-    x instanceof Date ||
-    x instanceof Temporal.PlainYearMonth ||
-    x instanceof Temporal.PlainDate ||
-    x instanceof Temporal.PlainDateTime ||
-    isBlogItemDate(x)
-  );
-};
-
-const microblogItemModuleDateToBlogItemDate = (
-  x: MicroblogItemModuleDate,
-): BlogItemDate => {
-  if (x instanceof Date) {
-    return dateToBlogItemDate(x);
-  }
-
-  if (x instanceof Temporal.Instant) {
-    return instantToBlogItemDate(x);
-  }
-
-  if (x instanceof Temporal.PlainYearMonth) {
-    return {
-      type: "yearMonth",
-      yearMonth: x,
-    };
-  }
-
-  if (x instanceof Temporal.PlainDate) {
-    return {
-      type: "date",
-      date: x,
-    };
-  }
-
-  if (x instanceof Temporal.PlainDateTime) {
-    return {
-      type: "dateTimeWithSeconds",
-      dateTime: x,
-    };
-  }
-
-  return x;
-};
+import {
+  assertIsContentItemModule,
+  assertOptionalStringArray,
+} from "../utils/item-module-assertions";
 
 type MicroblogItemModule = NodeModule & {
   default: MDXContent;
-  creationDate?: MicroblogItemModuleDate | undefined;
-  publicationDate?: MicroblogItemModuleDate | undefined;
-  lastModificationDate?: MicroblogItemModuleDate | undefined;
+
+  // Known properties exportable from the MDX file
+  creationDate?: ItemModuleDate | undefined;
+  publicationDate?: ItemModuleDate | undefined;
+  lastModificationDate?: ItemModuleDate | undefined;
   draft?: boolean | undefined;
+
+  // Injected automatically by plugins
   hashtags?: string[] | undefined;
+  tableOfContents: Toc;
 };
 
 function assertIsMicroblogItemModule(
   module: NodeModule,
 ): asserts module is MicroblogItemModule {
-  if (!("default" in module)) {
-    throw new Error("Microblog module does not have a default export.");
-  }
+  const label = "microblog post";
 
-  if (typeof module.default !== "function") {
+  assertIsContentItemModule(module, label);
+  assertOptionalStringArray(module, "hashtags", label);
+}
+
+function microblogSlugFromCreationDate(creationDate: BlogItemDate): string {
+  if (creationDate.type !== "dateTimeNoSeconds") {
     throw new Error(
-      `Default export in microblog module is not a \`function\`, but a \`${typeof module.default}\`.`,
+      `Cannot infer microblog slug from creation date of type "${creationDate.type}".`,
     );
   }
 
-  if (
-    !("isMDXComponent" in module.default) ||
-    typeof module.default.isMDXComponent !== "boolean" ||
-    !module.default.isMDXComponent
-  ) {
-    throw new Error(
-      `Default export in microblog module is not an MDX component.`,
-    );
-  }
-
-  if (
-    "creationDate" in module &&
-    module.creationDate !== undefined &&
-    !isMicroblogItemModuleDate(module.creationDate)
-  ) {
-    throw new Error(
-      `\`creationDate\` in microblog post is not a valid date type.`,
-    );
-  }
-
-  if (
-    "publicationDate" in module &&
-    module.publicationDate !== undefined &&
-    !isMicroblogItemModuleDate(module.publicationDate)
-  ) {
-    throw new Error(
-      `\`publicationDate\` in microblog post is not a valid date type.`,
-    );
-  }
-
-  if (
-    "lastModificationDate" in module &&
-    module.lastModificationDate !== undefined &&
-    !isMicroblogItemModuleDate(module.lastModificationDate)
-  ) {
-    throw new Error(
-      `\`lastModificationDate\` in microblog post is not a valid date type.`,
-    );
-  }
-
-  if (
-    "draft" in module &&
-    module.draft !== undefined &&
-    typeof module.draft !== "boolean"
-  ) {
-    throw new Error(
-      `\`draft\` in microblog post is not a \`boolean\`, but a \`${typeof module.draft}\`.`,
-    );
-  }
-
-  if (
-    "hashtags" in module &&
-    module.hashtags !== undefined &&
-    (!Array.isArray(module.hashtags) ||
-      !module.hashtags.every((t: unknown) => typeof t === "string"))
-  ) {
-    throw new Error(
-      `\`hashtags\` in microblog post is not a \`string[]\`.`,
-    );
-  }
+  const dt = creationDate.dateTime;
+  return `${dt.year.toString().padStart(4, "0")}${dt.month
+    .toString()
+    .padStart(2, "0")}${dt.day.toString().padStart(2, "0")}${dt.hour
+    .toString()
+    .padStart(2, "0")}${dt.minute.toString().padStart(2, "0")}`;
 }
 
 export type MicroblogItemModuleParsed = {
   Component: MDXContent;
+  slug: string;
   creationDate: BlogItemDate;
   publicationDate: BlogItemDate;
   lastModificationDate: BlogItemDate | null;
   draft: boolean;
   tags: string[];
+  tableOfContents: Toc;
 };
 
 type MicroblogItemModuleInferredMetadata = {
-  lastModificationDate: MicroblogItemModuleDate | null;
+  lastModificationDate: ItemModuleDate | null;
 };
 
 export const parseMicroblogItemModuleFromImportModule = (
@@ -171,33 +75,27 @@ export const parseMicroblogItemModuleFromImportModule = (
   const parsedFilename = parseMicroblogItemFilename(filename);
 
   const creationDate = module.creationDate
-    ? microblogItemModuleDateToBlogItemDate(module.creationDate)
+    ? itemModuleDateToBlogItemDate(module.creationDate)
     : parsedFilename.creationDate;
 
   const publicationDate = module.publicationDate
-    ? microblogItemModuleDateToBlogItemDate(module.publicationDate)
+    ? itemModuleDateToBlogItemDate(module.publicationDate)
     : creationDate;
 
-  const inferredLastModificationDate =
-    inferredMetadata.lastModificationDate === null
-      ? null
-      : microblogItemModuleDateToBlogItemDate(
-          inferredMetadata.lastModificationDate,
-        );
-
-  const lastModificationDate = module.lastModificationDate
-    ? microblogItemModuleDateToBlogItemDate(module.lastModificationDate)
-    : inferredLastModificationDate !== null &&
-        compareBlogItemDates(inferredLastModificationDate, publicationDate) >= 0
-      ? inferredLastModificationDate
-      : null;
+  const lastModificationDate = resolveLastModificationDate(
+    module.lastModificationDate,
+    inferredMetadata.lastModificationDate,
+    publicationDate,
+  );
 
   return {
     Component: module.default,
+    slug: microblogSlugFromCreationDate(creationDate),
     creationDate,
     publicationDate,
     lastModificationDate,
     draft: module.draft ?? false,
     tags: module.hashtags ?? [],
+    tableOfContents: module.tableOfContents,
   };
 };

@@ -1,74 +1,18 @@
 import type { MDXContent } from "mdx/types";
 import { parseBlogItemFilename } from "./item-filename";
 import {
-  compareBlogItemDates,
-  dateToBlogItemDate,
-  instantToBlogItemDate,
-  isBlogItemDate,
   type BlogItemDate,
+  type ItemModuleDate,
+  itemModuleDateToBlogItemDate,
+  resolveLastModificationDate,
 } from "../utils/item-dates";
+import {
+  assertIsContentItemModule,
+  assertOptionalString,
+  assertOptionalStringArray,
+} from "../utils/item-module-assertions";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
-import { Temporal } from "temporal-polyfill";
 import { VALID_SLUG_REGEX } from "../utils/slug";
-
-// TODO: Allow strings with the same parsing mechanism as filenames
-type BlogItemModuleDate =
-  // Will imply "dateTimeNoSeconds"
-  | Date
-  | Temporal.Instant
-  // Will imply "yearMonth"
-  | Temporal.PlainYearMonth
-  // Will imply "date"
-  | Temporal.PlainDate
-  // Will imply "dateTimeWithSeconds"
-  | Temporal.PlainDateTime
-  // Our true value
-  | BlogItemDate;
-
-const isBlogItemModuleDate = (x: unknown): x is BlogItemModuleDate => {
-  return (
-    x instanceof Date ||
-    x instanceof Temporal.PlainYearMonth ||
-    x instanceof Temporal.PlainDate ||
-    x instanceof Temporal.PlainDateTime ||
-    isBlogItemDate(x)
-  );
-};
-
-const blogItemModuleDateToBlogItemDate = (
-  x: BlogItemModuleDate,
-): BlogItemDate => {
-  if (x instanceof Date) {
-    return dateToBlogItemDate(x);
-  }
-
-  if (x instanceof Temporal.Instant) {
-    return instantToBlogItemDate(x);
-  }
-
-  if (x instanceof Temporal.PlainYearMonth) {
-    return {
-      type: "yearMonth",
-      yearMonth: x,
-    };
-  }
-
-  if (x instanceof Temporal.PlainDate) {
-    return {
-      type: "date",
-      date: x,
-    };
-  }
-
-  if (x instanceof Temporal.PlainDateTime) {
-    return {
-      type: "dateTimeWithSeconds",
-      dateTime: x,
-    };
-  }
-
-  return x;
-};
 
 type BlogItemModule = NodeModule & {
   // The default export of the MDX file
@@ -77,9 +21,9 @@ type BlogItemModule = NodeModule & {
   // Known properties exportable from the MDX file
   title?: string | undefined;
   summary?: string | undefined;
-  creationDate?: BlogItemModuleDate | undefined;
-  publicationDate?: BlogItemModuleDate | undefined;
-  lastModificationDate?: BlogItemModuleDate | undefined;
+  creationDate?: ItemModuleDate | undefined;
+  publicationDate?: ItemModuleDate | undefined;
+  lastModificationDate?: ItemModuleDate | undefined;
   draft?: boolean | undefined;
   slug?: string | undefined;
   tags?: string[] | undefined;
@@ -91,124 +35,13 @@ type BlogItemModule = NodeModule & {
 function assertIsBlogItemModule(
   module: NodeModule,
 ): asserts module is BlogItemModule {
-  if (!("default" in module)) {
-    throw new Error("Blog module does not have a default export.");
-  }
+  const label = "blog post";
 
-  if (typeof module.default !== "function") {
-    throw new Error(
-      `Default export in blog module is not a \`function\`, but a \`${typeof module.default}\`.`,
-    );
-  }
-
-  if (
-    !("isMDXComponent" in module.default) ||
-    typeof module.default.isMDXComponent !== "boolean" ||
-    !module.default.isMDXComponent
-  ) {
-    throw new Error(`Default export in blog module is not an MDX component.`);
-  }
-
-  if (
-    "title" in module &&
-    module.title !== undefined &&
-    typeof module.title !== "string"
-  ) {
-    throw new Error(
-      `\`title\` in blog post is not a \`string\`, but a \`${typeof module.title}\`.`,
-    );
-  }
-
-  if (
-    "summary" in module &&
-    module.summary !== undefined &&
-    typeof module.summary !== "string"
-  ) {
-    throw new Error(
-      `\`summary\` in blog post is not a \`string\`, but a \`${typeof module.summary}\`.`,
-    );
-  }
-
-  if (
-    "creationDate" in module &&
-    module.creationDate !== undefined &&
-    !isBlogItemModuleDate(module.creationDate)
-  ) {
-    throw new Error(
-      `\`creationDate\` in blog post is not a \`BlogItemModuleDate\`, but a \`${typeof module.creationDate}\`.`,
-    );
-  }
-
-  if (
-    "publicationDate" in module &&
-    module.publicationDate !== undefined &&
-    !isBlogItemModuleDate(module.publicationDate)
-  ) {
-    throw new Error(
-      `\`publicationDate\` in blog post is not a \`BlogItemModuleDate\`, but a \`${typeof module.publicationDate}\`.`,
-    );
-  }
-
-  if (
-    "lastModificationDate" in module &&
-    module.lastModificationDate !== undefined &&
-    !isBlogItemModuleDate(module.lastModificationDate)
-  ) {
-    throw new Error(
-      `\`lastModificationDate\` in blog post is not a \`BlogItemModuleDate\`, but a \`${typeof module.lastModificationDate}\`.`,
-    );
-  }
-
-  if (
-    "draft" in module &&
-    module.draft !== undefined &&
-    typeof module.draft !== "boolean"
-  ) {
-    throw new Error(
-      `\`draft\` in blog post is not a \`boolean\`, but a \`${typeof module.draft}\`.`,
-    );
-  }
-
-  if (
-    "slug" in module &&
-    module.slug !== undefined &&
-    typeof module.slug !== "string"
-  ) {
-    throw new Error(
-      `\`slug\` in blog post is not a \`string\`, but a \`${typeof module.slug}\`.`,
-    );
-  }
-
-  if ("tags" in module && module.tags !== undefined) {
-    if (!Array.isArray(module.tags)) {
-      throw new Error(
-        `\`tags\` in blog post is not an \`array\`, but a \`${typeof module.tags}\`.`,
-      );
-    }
-
-    for (let i = 0; i < module.tags.length; i++) {
-      if (typeof module.tags[i] !== "string") {
-        throw new Error(
-          `\`tags[${i}]\` in blog post is not a \`string\`, but a \`${typeof module
-            .tags[i]}\`.`,
-        );
-      }
-
-      // TODO: Assert that tags are sluggable
-      // TODO: Asser that tags are unique
-    }
-  }
-
-  if (!("tableOfContents" in module)) {
-    throw new Error("Blog module does not have a `tableOfContents` export.");
-  }
-
-  if (!Array.isArray(module.tableOfContents)) {
-    throw new Error(
-      `\`tableOfContents\` in blog post is not an \`array\`, but a \`${typeof module.tableOfContents}\`.`,
-    );
-  }
-  // At this point we'll assume tableOfContents is a Toc
+  assertIsContentItemModule(module, label);
+  assertOptionalString(module, "title", label);
+  assertOptionalString(module, "summary", label);
+  assertOptionalString(module, "slug", label);
+  assertOptionalStringArray(module, "tags", label);
 }
 
 type BlogItemModuleParsedTag = {
@@ -231,7 +64,7 @@ export type BlogItemModuleParsed = {
 };
 
 type BlogItemModuleInferredMetadata = {
-  lastModificationDate: BlogItemModuleDate | null;
+  lastModificationDate: ItemModuleDate | null;
 };
 
 const unslugify = (slug: string): string => {
@@ -258,7 +91,7 @@ export const parseBlogItemModuleFromImportModule = (
   }
 
   const creationDate = module.creationDate
-    ? blogItemModuleDateToBlogItemDate(module.creationDate)
+    ? itemModuleDateToBlogItemDate(module.creationDate)
     : parsedFilename.possibleCreationDate;
   if (creationDate === null) {
     throw new Error(
@@ -267,20 +100,14 @@ export const parseBlogItemModuleFromImportModule = (
   }
 
   const publicationDate = module.publicationDate
-    ? blogItemModuleDateToBlogItemDate(module.publicationDate)
+    ? itemModuleDateToBlogItemDate(module.publicationDate)
     : creationDate;
 
-  const inferredLastModificationDate =
-    inferredMetadata.lastModificationDate === null
-      ? null
-      : blogItemModuleDateToBlogItemDate(inferredMetadata.lastModificationDate);
-
-  const lastModificationDate = module.lastModificationDate
-    ? blogItemModuleDateToBlogItemDate(module.lastModificationDate)
-    : inferredLastModificationDate !== null &&
-        compareBlogItemDates(inferredLastModificationDate, publicationDate) >= 0
-      ? inferredLastModificationDate
-      : null;
+  const lastModificationDate = resolveLastModificationDate(
+    module.lastModificationDate,
+    inferredMetadata.lastModificationDate,
+    publicationDate,
+  );
 
   return {
     Component: module.default,

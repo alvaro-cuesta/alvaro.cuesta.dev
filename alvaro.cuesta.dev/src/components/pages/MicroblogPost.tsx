@@ -2,7 +2,6 @@ import { Template } from "../Template";
 import { Icon } from "../atoms/Icon";
 import { Link } from "../atoms/Link";
 import { useMicroblogItems } from "../../microblog/promise";
-import { microblogPostId } from "../../microblog/analyze";
 import type { SiteRenderMeta } from "../../site";
 import { routeMicroblogPost, routeMicroblogList } from "../../routes";
 import { makeTitle } from "../../utils/meta";
@@ -13,35 +12,35 @@ import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
 
 type MicroblogPostPageProps = {
   siteRenderMeta: SiteRenderMeta;
-  id: string;
+  slug: string;
 };
 
 export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
   siteRenderMeta,
-  id,
+  slug,
 }) => {
   const microblogItems = useMicroblogItems();
 
-  const item = microblogItems.byId.get(id);
+  const item = microblogItems.bySlug.get(slug);
 
   if (item === undefined) {
-    throw new Error(`Microblog post "${id}" not found`);
+    throw new Error(`Microblog post "${slug}" not found`);
   }
 
   const { publicationDate, lastModificationDate } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);
 
-  const page = microblogItems.pageByPostId.get(id) ?? 1;
+  const page = microblogItems.pageBySlug.get(slug) ?? 1;
 
   const sortedIndex = microblogItems.allSortedByDescendingDate.indexOf(item);
   const newerPost = microblogItems.allSortedByDescendingDate[sortedIndex - 1];
   const olderPost = microblogItems.allSortedByDescendingDate[sortedIndex + 1];
 
   const newerPostHref = newerPost
-    ? routeMicroblogPost.build({ id: microblogPostId(newerPost.filename) })
+    ? routeMicroblogPost.build({ slug: newerPost.module.slug })
     : null;
   const olderPostHref = olderPost
-    ? routeMicroblogPost.build({ id: microblogPostId(olderPost.filename) })
+    ? routeMicroblogPost.build({ slug: olderPost.module.slug })
     : null;
 
   return (

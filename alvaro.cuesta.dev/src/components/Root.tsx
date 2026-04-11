@@ -96,7 +96,7 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
     return (
       <MicroblogPostPage
         siteRenderMeta={siteRenderMeta}
-        id={routeMicroblogPostMatch.id}
+        slug={routeMicroblogPostMatch.slug}
       />
     );
   }

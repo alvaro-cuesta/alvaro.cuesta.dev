@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
-import type { AnalyzedBlogItems } from "../blog/analyze";
-import type { AnalyzedMicroblogItems } from "../microblog/analyze";
+import type { AnalyzedItems } from "./analyze";
+import type { BlogItemModuleParsed } from "../blog/item-module";
+import type { MicroblogItemModuleParsed } from "../microblog/item-module";
 import { rewriteCustomProtocolHref } from "./href";
 
-const blogItems: AnalyzedBlogItems = {
+const blogItems: AnalyzedItems<BlogItemModuleParsed> = {
   all: [],
   allSortedByDescendingDate: [],
   allSortedByDescendingDateByPage: new Map(),
+  pageBySlug: new Map([["my-post", 1]]),
   bySlug: new Map([
     [
       "my-post",
@@ -34,39 +36,43 @@ const blogItems: AnalyzedBlogItems = {
   tagsDescendingByArticleCount: [],
 };
 
-const microblogItems: AnalyzedMicroblogItems = {
+const microblogItems: AnalyzedItems<MicroblogItemModuleParsed> = {
   all: [
     {
       filename: "2026-04-10_12-00.mdx",
       module: {
         Component: (() => null) as never,
+        slug: "202604101200",
         creationDate: { type: "year", year: 2026 },
         publicationDate: { type: "year", year: 2026 },
         lastModificationDate: null,
         draft: false,
         tags: ["webdev"],
+        tableOfContents: [],
       },
     },
   ],
   allSortedByDescendingDate: [],
   allSortedByDescendingDateByPage: new Map(),
-  byId: new Map([
+  bySlug: new Map([
     [
       "202604101200",
       {
         filename: "2026-04-10_12-00.mdx",
         module: {
           Component: (() => null) as never,
+          slug: "202604101200",
           creationDate: { type: "year" as const, year: 2026 },
           publicationDate: { type: "year" as const, year: 2026 },
           lastModificationDate: null,
           draft: false,
           tags: ["webdev"],
+          tableOfContents: [],
         },
       },
     ],
   ]),
-  pageByPostId: new Map([["202604101200", 1]]),
+  pageBySlug: new Map([["202604101200", 1]]),
   byYear: new Map([[2026, { totalCount: 1, byMonth: new Map() }]]),
   byTag: new Map([["webdev", []]]),
   yearsSortedDescending: [],

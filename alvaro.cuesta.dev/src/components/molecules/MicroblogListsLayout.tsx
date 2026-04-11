@@ -1,14 +1,20 @@
 import type { ReactNode } from "react";
-import { MicroblogSidebar } from "./MicroblogSidebar";
-import type { AnalyzedMicroblogItems } from "../../microblog/analyze";
-import { Breadcrumb, type BreadcrumbItem } from "../atoms/Breadcrumb";
-import { routeMicroblogList } from "../../routes";
-import { Link } from "../atoms/Link";
-import { Icon } from "../atoms/Icon";
+import { ContentSidebar } from "./ContentSidebar";
+import type { AnalyzedItems } from "../../utils/analyze";
+import type { MicroblogItemModuleParsed } from "../../microblog/item-module";
+import type { BreadcrumbItem } from "../atoms/Breadcrumb";
+import {
+  routeMicroblogList,
+  routeMicroblogTag,
+  routeMicroblogTagList,
+  routeMicroblogYear,
+  routeMicroblogYearList,
+} from "../../routes";
+import { ContentListsLayout } from "./ContentListsLayout";
 
 type MicroblogListsLayoutProps = {
   breadcrumbs?: BreadcrumbItem[];
-  microblogItems: AnalyzedMicroblogItems;
+  microblogItems: AnalyzedItems<MicroblogItemModuleParsed>;
   currentTags?: readonly string[];
   currentYear?: number | null;
   isTagListCurrent?: boolean;
@@ -17,51 +23,37 @@ type MicroblogListsLayoutProps = {
 };
 
 export const MicroblogListsLayout: React.FC<MicroblogListsLayoutProps> = ({
-  breadcrumbs = [],
+  breadcrumbs,
   microblogItems,
-  currentTags = [],
-  currentYear = null,
-  isTagListCurrent = false,
-  isYearListCurrent = false,
+  currentTags,
+  currentYear,
+  isTagListCurrent,
+  isYearListCurrent,
   children,
 }) => (
-  <div className="flex-responsive">
-    <section className="bloglist-main">
-      {children}
-      <footer>
-        <span>
-          <Breadcrumb
-            breadcrumbs={[
-              {
-                name: "Timeline",
-                href: routeMicroblogList.build({ page: null }),
-              },
-              ...breadcrumbs,
-            ]}
-          />
-        </span>
-        <span className="feeds">
-          <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
-          <Link href="/timeline/feed.rss" Component={"a"}>
-            RSS
-          </Link>{" "}
-          /{" "}
-          <Link href="/timeline/atom.xml" Component={"a"}>
-            Atom
-          </Link>{" "}
-          /{" "}
-          <Link href="/timeline/feed.json" Component={"a"}>
-            JSON
-          </Link>
-        </span>
-      </footer>
-    </section>
-    <MicroblogSidebar
-      microblogItems={microblogItems}
-      currentTags={currentTags}
-      currentYear={currentYear}
-      isTagListCurrent={isTagListCurrent}
-      isYearListCurrent={isYearListCurrent}
-    />
-  </div>
+  <ContentListsLayout
+    rootName="Timeline"
+    rootHref={routeMicroblogList.build({ page: null })}
+    feedBasePath="/timeline/"
+    breadcrumbs={breadcrumbs}
+    sidebar={
+      <ContentSidebar
+        className="microblog-sidebar"
+        tagsDescendingByArticleCount={
+          microblogItems.tagsDescendingByArticleCount
+        }
+        yearsSortedDescending={microblogItems.yearsSortedDescending}
+        currentTags={currentTags}
+        currentYear={currentYear}
+        isTagListCurrent={isTagListCurrent}
+        isYearListCurrent={isYearListCurrent}
+        buildTagListHref={() => routeMicroblogTagList.build({})}
+        buildTagHref={(tag) => routeMicroblogTag.build({ tag, page: null })}
+        buildYearListHref={() => routeMicroblogYearList.build({})}
+        buildYearHref={(year) => routeMicroblogYear.build({ year, page: null })}
+      />
+    }
+  >
+    {children}
+  </ContentListsLayout>
 );

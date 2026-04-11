@@ -1,14 +1,20 @@
 import type { ReactNode } from "react";
-import { BlogSidebar } from "./BlogSidebar";
-import type { AnalyzedBlogItems } from "../../blog/analyze";
-import { Breadcrumb, type BreadcrumbItem } from "../atoms/Breadcrumb";
-import { routeBlogArticleList } from "../../routes";
-import { Link } from "../atoms/Link";
-import { Icon } from "../atoms/Icon";
+import { ContentSidebar } from "./ContentSidebar";
+import type { AnalyzedItems } from "../../utils/analyze";
+import type { BlogItemModuleParsed } from "../../blog/item-module";
+import type { BreadcrumbItem } from "../atoms/Breadcrumb";
+import {
+  routeBlogArticleList,
+  routeBlogTag,
+  routeBlogTagList,
+  routeBlogYear,
+  routeBlogYearList,
+} from "../../routes";
+import { ContentListsLayout } from "./ContentListsLayout";
 
 type BlogListsLayoutProps = {
   breadcrumbs: BreadcrumbItem[];
-  blogItems: AnalyzedBlogItems;
+  blogItems: AnalyzedItems<BlogItemModuleParsed>;
   currentTags?: readonly string[];
   currentYear?: number | null;
   isTagListCurrent?: boolean;
@@ -19,51 +25,33 @@ type BlogListsLayoutProps = {
 export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
   breadcrumbs,
   blogItems,
-  currentTags = [],
-  currentYear = null,
-  isTagListCurrent = false,
-  isYearListCurrent = false,
+  currentTags,
+  currentYear,
+  isTagListCurrent,
+  isYearListCurrent,
   children,
 }) => (
-  <>
-    <div className="flex-responsive">
-      <section className="bloglist-main">
-        <article>{children}</article>
-        <footer>
-          <span>
-            <Breadcrumb
-              breadcrumbs={[
-                {
-                  name: "Blog",
-                  href: routeBlogArticleList.build({ page: null }),
-                },
-                ...breadcrumbs,
-              ]}
-            />
-          </span>
-          <span className="feeds">
-            <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
-            <Link href="/blog/feed.rss" Component={"a"}>
-              RSS
-            </Link>{" "}
-            /{" "}
-            <Link href="/blog/atom.xml" Component={"a"}>
-              Atom
-            </Link>{" "}
-            /{" "}
-            <Link href="/blog/feed.json" Component={"a"}>
-              JSON
-            </Link>
-          </span>
-        </footer>
-      </section>
-      <BlogSidebar
-        blogItems={blogItems}
+  <ContentListsLayout
+    rootName="Blog"
+    rootHref={routeBlogArticleList.build({ page: null })}
+    feedBasePath="/blog/"
+    breadcrumbs={breadcrumbs}
+    sidebar={
+      <ContentSidebar
+        className="blog-sidebar"
+        tagsDescendingByArticleCount={blogItems.tagsDescendingByArticleCount}
+        yearsSortedDescending={blogItems.yearsSortedDescending}
         currentTags={currentTags}
         currentYear={currentYear}
         isTagListCurrent={isTagListCurrent}
         isYearListCurrent={isYearListCurrent}
+        buildTagListHref={() => routeBlogTagList.build({})}
+        buildTagHref={(tag) => routeBlogTag.build({ tag })}
+        buildYearListHref={() => routeBlogYearList.build({})}
+        buildYearHref={(year) => routeBlogYear.build({ year })}
       />
-    </div>
-  </>
+    }
+  >
+    <article>{children}</article>
+  </ContentListsLayout>
 );

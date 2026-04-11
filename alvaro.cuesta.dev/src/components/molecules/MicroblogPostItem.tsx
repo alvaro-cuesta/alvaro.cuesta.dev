@@ -1,5 +1,5 @@
-import type { MicroblogItem } from "../../microblog/item";
-import { microblogPostId } from "../../microblog/analyze";
+import type { Item } from "../../utils/analyze";
+import type { MicroblogItemModuleParsed } from "../../microblog/item-module";
 import { BlogDateTime } from "../atoms/BlogDateTime";
 import { Link } from "../atoms/Link";
 import { makeMdxDefaultComponents } from "../../mdx/mdx";
@@ -10,18 +10,15 @@ const MICROBLOG_MDX_COMPONENTS = makeMdxDefaultComponents({
 });
 
 type MicroblogPostItemProps = {
-  item: MicroblogItem;
+  item: Item<MicroblogItemModuleParsed>;
 };
 
 export const MicroblogPostItem: React.FC<MicroblogPostItemProps> = ({
   item: {
-    filename,
-    module: { Component, publicationDate, lastModificationDate, draft },
+    module: { Component, slug, publicationDate, lastModificationDate, draft },
   },
 }) => {
-  const permalink = routeMicroblogPost.build({
-    id: microblogPostId(filename),
-  });
+  const permalink = routeMicroblogPost.build({ slug });
 
   return (
     <article className="microblog-post-item">

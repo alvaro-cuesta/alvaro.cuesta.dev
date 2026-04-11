@@ -1,31 +1,35 @@
 import cx from "classnames";
 import { Link } from "../atoms/Link";
-import type { AnalyzedBlogItems } from "../../blog/analyze";
-import {
-  routeBlogTag,
-  routeBlogTagList,
-  routeBlogYear,
-  routeBlogYearList,
-} from "../../routes";
 
-type BlogSidebarProps = {
-  blogItems: AnalyzedBlogItems;
-  currentTags?: readonly string[];
-  currentYear?: number | null;
-  isTagListCurrent?: boolean;
-  isYearListCurrent?: boolean;
+type ContentSidebarProps = {
+  className: string;
+  tagsDescendingByArticleCount: { tag: string; items: unknown[] }[];
+  yearsSortedDescending: { year: number; data: { totalCount: number } }[];
+  currentTags?: readonly string[] | undefined;
+  currentYear?: number | null | undefined;
+  isTagListCurrent?: boolean | undefined;
+  isYearListCurrent?: boolean | undefined;
+  buildTagListHref: () => string;
+  buildTagHref: (tag: string) => string;
+  buildYearListHref: () => string;
+  buildYearHref: (year: number) => string;
 };
 
 const MAX_TAGS = 10;
 
-export const BlogSidebar: React.FC<BlogSidebarProps> = ({
-  blogItems,
+export const ContentSidebar: React.FC<ContentSidebarProps> = ({
+  className,
+  tagsDescendingByArticleCount,
+  yearsSortedDescending,
   currentTags = [],
   currentYear = null,
   isTagListCurrent = false,
   isYearListCurrent = false,
+  buildTagListHref,
+  buildTagHref,
+  buildYearListHref,
+  buildYearHref,
 }) => {
-  const { tagsDescendingByArticleCount, yearsSortedDescending } = blogItems;
   const currentTagsSet = new Set(currentTags);
 
   const hasTags = tagsDescendingByArticleCount.length > 0;
@@ -37,12 +41,12 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
 
   // TODO: would like this to be wrapped in <aside> but it's ugly in Pico
   return (
-    <ul className="blog-sidebar">
+    <ul className={className}>
       {hasTags ? (
         <li>
           <Link
             className={cx(isTagListCurrent && "is-active")}
-            href={routeBlogTagList.build({})}
+            href={buildTagListHref()}
           >
             Tags
           </Link>
@@ -54,7 +58,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
                 <li key={tag}>
                   <Link
                     className={cx(currentTagsSet.has(tag) && "is-active")}
-                    href={routeBlogTag.build({ tag })}
+                    href={buildTagHref(tag)}
                   >
                     {tag}
                   </Link>
@@ -63,7 +67,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
               ))}
             {tagsDescendingByArticleCount.length > MAX_TAGS ? (
               <li>
-                <Link href={routeBlogTagList.build({})}>
+                <Link href={buildTagListHref()}>
                   <i>(More...)</i>
                 </Link>
               </li>
@@ -75,7 +79,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
         <li>
           <Link
             className={cx(isYearListCurrent && "is-active")}
-            href={routeBlogYearList.build({})}
+            href={buildYearListHref()}
           >
             Years
           </Link>
@@ -85,7 +89,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
               <li key={year}>
                 <Link
                   className={cx(currentYear === year && "is-active")}
-                  href={routeBlogYear.build({ year })}
+                  href={buildYearHref(year)}
                 >
                   {year}
                 </Link>

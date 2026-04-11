@@ -124,7 +124,9 @@ const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
     (microblogListMatch !== null &&
       microblogListMatch.page &&
       microblogListMatch.page > 1) ||
-    (microblogTagMatch && microblogTagMatch.page && microblogTagMatch.page > 1) ||
+    (microblogTagMatch &&
+      microblogTagMatch.page &&
+      microblogTagMatch.page > 1) ||
     (microblogYearMatch &&
       microblogYearMatch.page &&
       microblogYearMatch.page > 1);

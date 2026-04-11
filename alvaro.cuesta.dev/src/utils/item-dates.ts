@@ -350,3 +350,88 @@ export const blogItemDateToShortTimeString = (
     }
   }
 };
+
+/**
+ * Union of date types accepted as module exports in MDX files.
+ * Shared between blog and microblog item-module parsers.
+ */
+export type ItemModuleDate =
+  // Will imply "dateTimeNoSeconds"
+  | Date
+  | Temporal.Instant
+  // Will imply "yearMonth"
+  | Temporal.PlainYearMonth
+  // Will imply "date"
+  | Temporal.PlainDate
+  // Will imply "dateTimeWithSeconds"
+  | Temporal.PlainDateTime
+  // Our true value
+  | BlogItemDate;
+
+export const isItemModuleDate = (x: unknown): x is ItemModuleDate => {
+  return (
+    x instanceof Date ||
+    x instanceof Temporal.PlainYearMonth ||
+    x instanceof Temporal.PlainDate ||
+    x instanceof Temporal.PlainDateTime ||
+    isBlogItemDate(x)
+  );
+};
+
+export const itemModuleDateToBlogItemDate = (
+  x: ItemModuleDate,
+): BlogItemDate => {
+  if (x instanceof Date) {
+    return dateToBlogItemDate(x);
+  }
+
+  if (x instanceof Temporal.Instant) {
+    return instantToBlogItemDate(x);
+  }
+
+  if (x instanceof Temporal.PlainYearMonth) {
+    return {
+      type: "yearMonth",
+      yearMonth: x,
+    };
+  }
+
+  if (x instanceof Temporal.PlainDate) {
+    return {
+      type: "date",
+      date: x,
+    };
+  }
+
+  if (x instanceof Temporal.PlainDateTime) {
+    return {
+      type: "dateTimeWithSeconds",
+      dateTime: x,
+    };
+  }
+
+  return x;
+};
+
+/**
+ * Resolves the lastModificationDate from explicit module export, inferred (git) date,
+ * and publication date. Shared between blog and microblog.
+ */
+export const resolveLastModificationDate = (
+  explicit: ItemModuleDate | undefined,
+  inferred: ItemModuleDate | null,
+  publicationDate: BlogItemDate,
+): BlogItemDate | null => {
+  if (explicit) {
+    return itemModuleDateToBlogItemDate(explicit);
+  }
+
+  if (inferred === null) {
+    return null;
+  }
+
+  const inferredConverted = itemModuleDateToBlogItemDate(inferred);
+  return compareBlogItemDates(inferredConverted, publicationDate) >= 0
+    ? inferredConverted
+    : null;
+};

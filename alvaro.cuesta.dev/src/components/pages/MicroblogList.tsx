@@ -1,6 +1,5 @@
 import { Template } from "../Template";
-import { Icon } from "../atoms/Icon";
-import { Link } from "../atoms/Link";
+import { Pagination } from "../atoms/Pagination";
 import { useMicroblogItems } from "../../microblog/promise";
 import type { SiteRenderMeta } from "../../site";
 import { routeMicroblogList } from "../../routes";
@@ -89,21 +88,10 @@ export const MicroblogList: React.FC<MicroblogListProps> = ({
           ))}
 
           <section className="microblog-pagination">
-            <div className="flex-space-between">
-              {prevPageLink ? (
-                <Link href={prevPageLink} className="pagination-link">
-                  <span className="no-underline"><Icon name="arrow-left" aria-hidden="true" />&nbsp;</span>Previous page
-                </Link>
-              ) : (
-                // We need a placeholder to keep the layout
-                <div />
-              )}
-              {nextPageLink ? (
-                <Link href={nextPageLink} className="pagination-link">
-                  Next page<span className="no-underline">&nbsp;<Icon name="arrow-right" aria-hidden="true" /></span>
-                </Link>
-              ) : null}
-            </div>
+            <Pagination
+              prevPageLink={prevPageLink}
+              nextPageLink={nextPageLink}
+            />
           </section>
         </div>
       </MicroblogListsLayout>
