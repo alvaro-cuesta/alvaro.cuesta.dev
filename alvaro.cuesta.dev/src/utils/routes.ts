@@ -4,21 +4,34 @@ import { NeedsTrailingSlashError } from "xenon-ssg-express/src";
 type Route<Params> = {
   match: (path: string) => Params | null;
   build: (params: Params, options?: { hash?: string }) => string;
+  isActive: (pathname: string) => boolean;
+};
+
+type MakeRouteOptions = {
+  activePrefix?: string;
 };
 
 export function makeRoute<Params extends ParamData>(
   path: string,
+  options?: MakeRouteOptions,
 ): Route<Params>;
 export function makeRoute<Params extends ParamData, ParsedParams>(
   path: string,
   parse: (params: Params) => ParsedParams,
   serialize: (params: ParsedParams) => Params,
+  options?: MakeRouteOptions,
 ): Route<ParsedParams>;
 export function makeRoute<Params extends ParamData, ParsedParams>(
   path: string,
-  parse?: (params: Params) => ParsedParams,
+  parseOrOptions?: ((params: Params) => ParsedParams) | MakeRouteOptions,
   serialize?: (params: ParsedParams) => Params,
+  options?: MakeRouteOptions,
 ): Route<ParsedParams> {
+  const parse =
+    typeof parseOrOptions === "function" ? parseOrOptions : undefined;
+  const resolvedOptions =
+    typeof parseOrOptions === "object" ? parseOrOptions : options;
+
   const matchFn = match<Params>(path);
   const matchWithoutTrailingFn = path.endsWith("/")
     ? match<Params>(path.slice(0, -1))
@@ -26,7 +39,12 @@ export function makeRoute<Params extends ParamData, ParsedParams>(
 
   const buildFn = compile<Params>(path);
 
+  const activePrefix = resolvedOptions?.activePrefix;
+
   return {
+    isActive: (pathname: string) =>
+      activePrefix !== undefined && pathname.startsWith(activePrefix),
+
     match: (requestedPath: string) => {
       const matched = matchFn(requestedPath);
 

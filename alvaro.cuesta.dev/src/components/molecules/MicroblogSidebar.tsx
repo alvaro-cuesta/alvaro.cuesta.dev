@@ -1,3 +1,4 @@
+import cx from "classnames";
 import { Link } from "../atoms/Link";
 import type { AnalyzedMicroblogItems } from "../../microblog/analyze";
 import {
@@ -6,7 +7,6 @@ import {
   routeMicroblogYear,
   routeMicroblogYearList,
 } from "../../routes";
-import { Wrapper } from "../atoms/Wrapper";
 
 type MicroblogSidebarProps = {
   microblogItems: AnalyzedMicroblogItems;
@@ -40,30 +40,24 @@ export const MicroblogSidebar: React.FC<MicroblogSidebarProps> = ({
     <ul className="microblog-sidebar">
       {hasTags ? (
         <li>
-          <Wrapper
-            wrapper={(children) =>
-              isTagListCurrent ? <strong>{children}</strong> : <>{children}</>
-            }
+          <Link
+            className={cx(isTagListCurrent && "is-active")}
+            href={routeMicroblogTagList.build({})}
           >
-            <Link href={routeMicroblogTagList.build({})}>Tags</Link>
-          </Wrapper>
+            Tags
+          </Link>
 
           <ul>
             {tagsDescendingByArticleCount
               .slice(0, MAX_TAGS)
               .map(({ tag, items }) => (
                 <li key={tag}>
-                  <Wrapper
-                    wrapper={(children) =>
-                      currentTagsSet.has(tag) ? (
-                        <strong>{children}</strong>
-                      ) : (
-                        <>{children}</>
-                      )
-                    }
+                  <Link
+                    className={cx(currentTagsSet.has(tag) && "is-active")}
+                    href={routeMicroblogTag.build({ tag, page: null })}
                   >
-                    <Link href={routeMicroblogTag.build({ tag, page: null })}>{tag}</Link>
-                  </Wrapper>
+                    {tag}
+                  </Link>
                   &nbsp;<span className="no-wrap">({items.length})</span>
                 </li>
               ))}
@@ -79,28 +73,22 @@ export const MicroblogSidebar: React.FC<MicroblogSidebarProps> = ({
       ) : null}
       {hasYears ? (
         <li>
-          <Wrapper
-            wrapper={(children) =>
-              isYearListCurrent ? <strong>{children}</strong> : <>{children}</>
-            }
+          <Link
+            className={cx(isYearListCurrent && "is-active")}
+            href={routeMicroblogYearList.build({})}
           >
-            <Link href={routeMicroblogYearList.build({})}>Years</Link>
-          </Wrapper>
+            Years
+          </Link>
 
           <ul>
             {yearsSortedDescending.map(({ year, data }) => (
               <li key={year}>
-                <Wrapper
-                  wrapper={(children) =>
-                    currentYear === year ? (
-                      <strong>{children}</strong>
-                    ) : (
-                      <>{children}</>
-                    )
-                  }
+                <Link
+                  className={cx(currentYear === year && "is-active")}
+                  href={routeMicroblogYear.build({ year, page: null })}
                 >
-                  <Link href={routeMicroblogYear.build({ year, page: null })}>{year}</Link>
-                </Wrapper>
+                  {year}
+                </Link>
                 &nbsp;<span className="no-wrap">({data.totalCount})</span>
               </li>
             ))}

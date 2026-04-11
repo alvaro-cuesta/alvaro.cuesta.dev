@@ -222,6 +222,10 @@ ul.microblog-sidebar {
   }
 }
 
+.is-active {
+  font-weight: bold;
+}
+
 .no-wrap {
   text-wrap: nowrap;
 }

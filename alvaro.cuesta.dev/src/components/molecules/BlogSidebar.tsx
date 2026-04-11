@@ -1,3 +1,4 @@
+import cx from "classnames";
 import { Link } from "../atoms/Link";
 import type { AnalyzedBlogItems } from "../../blog/analyze";
 import {
@@ -6,7 +7,6 @@ import {
   routeBlogYear,
   routeBlogYearList,
 } from "../../routes";
-import { Wrapper } from "../atoms/Wrapper";
 
 type BlogSidebarProps = {
   blogItems: AnalyzedBlogItems;
@@ -40,30 +40,24 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
     <ul className="blog-sidebar">
       {hasTags ? (
         <li>
-          <Wrapper
-            wrapper={(children) =>
-              isTagListCurrent ? <strong>{children}</strong> : <>{children}</>
-            }
+          <Link
+            className={cx(isTagListCurrent && "is-active")}
+            href={routeBlogTagList.build({})}
           >
-            <Link href={routeBlogTagList.build({})}>Tags</Link>
-          </Wrapper>
+            Tags
+          </Link>
 
           <ul>
             {tagsDescendingByArticleCount
               .slice(0, MAX_TAGS)
               .map(({ tag, items }) => (
                 <li key={tag}>
-                  <Wrapper
-                    wrapper={(children) =>
-                      currentTagsSet.has(tag) ? (
-                        <strong>{children}</strong>
-                      ) : (
-                        <>{children}</>
-                      )
-                    }
+                  <Link
+                    className={cx(currentTagsSet.has(tag) && "is-active")}
+                    href={routeBlogTag.build({ tag })}
                   >
-                    <Link href={routeBlogTag.build({ tag })}>{tag}</Link>
-                  </Wrapper>
+                    {tag}
+                  </Link>
                   &nbsp;<span className="no-wrap">({items.length})</span>
                 </li>
               ))}
@@ -79,28 +73,22 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
       ) : null}
       {hasYears ? (
         <li>
-          <Wrapper
-            wrapper={(children) =>
-              isYearListCurrent ? <strong>{children}</strong> : <>{children}</>
-            }
+          <Link
+            className={cx(isYearListCurrent && "is-active")}
+            href={routeBlogYearList.build({})}
           >
-            <Link href={routeBlogYearList.build({})}>Years</Link>
-          </Wrapper>
+            Years
+          </Link>
 
           <ul>
             {yearsSortedDescending.map(({ year, data }) => (
               <li key={year}>
-                <Wrapper
-                  wrapper={(children) =>
-                    currentYear === year ? (
-                      <strong>{children}</strong>
-                    ) : (
-                      <>{children}</>
-                    )
-                  }
+                <Link
+                  className={cx(currentYear === year && "is-active")}
+                  href={routeBlogYear.build({ year })}
                 >
-                  <Link href={routeBlogYear.build({ year })}>{year}</Link>
-                </Wrapper>
+                  {year}
+                </Link>
                 &nbsp;<span className="no-wrap">({data.totalCount})</span>
               </li>
             ))}

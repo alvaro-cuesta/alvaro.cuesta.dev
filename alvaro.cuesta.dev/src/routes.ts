@@ -4,7 +4,7 @@ export const routeHome = makeRoute<{}>("/");
 
 export const route404 = makeRoute<{}>("/404.html");
 
-export const routeNow = makeRoute<{}>("/now/");
+export const routeNow = makeRoute<{}>("/now/", { activePrefix: "/now" });
 
 // BLOG ARTICLES
 export const routeBlogArticleList = makeRoute<
@@ -19,6 +19,7 @@ export const routeBlogArticleList = makeRoute<
   (params) => ({
     ...(params.page !== null ? { page: params.page.toString() } : {}),
   }),
+  { activePrefix: "/blog" },
 );
 
 export const routeBlogArticle = makeRoute<{ slug: string }>(
@@ -49,6 +50,7 @@ export const routeMicroblogList = makeRoute<
   (params) => ({
     ...(params.page !== null ? { page: params.page.toString() } : {}),
   }),
+  { activePrefix: "/timeline" },
 );
 
 export const routeBlogYear = makeRoute<{ year: string }, { year: number }>(

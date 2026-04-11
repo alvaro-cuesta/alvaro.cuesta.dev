@@ -251,20 +251,39 @@ export const Template: React.FC<TemplateProps> = ({
               </li>
               {blogItems.all.length > 0 ? (
                 <li>
-                  <Link href={routeBlogArticleList.build({ page: null })}>
+                  <Link
+                    className={cx(
+                      routeBlogArticleList.isActive(canonicalPathname) &&
+                        "is-active",
+                    )}
+                    href={routeBlogArticleList.build({ page: null })}
+                  >
                     Blog
                   </Link>
                 </li>
               ) : null}
               {microblogItems.all.length > 0 ? (
                 <li>
-                  <Link href={routeMicroblogList.build({ page: null })}>
+                  <Link
+                    className={cx(
+                      routeMicroblogList.isActive(canonicalPathname) &&
+                        "is-active",
+                    )}
+                    href={routeMicroblogList.build({ page: null })}
+                  >
                     Timeline
                   </Link>
                 </li>
               ) : null}
               <li>
-                <Link href={routeNow.build({})}>Now</Link>
+                <Link
+                  className={cx(
+                    routeNow.isActive(canonicalPathname) && "is-active",
+                  )}
+                  href={routeNow.build({})}
+                >
+                  Now
+                </Link>
               </li>
             </ul>
           </nav>
