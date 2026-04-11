@@ -53,6 +53,10 @@ html {
   color: color-mix(in srgb, currentColor 50%, var(--pico-background-color));
 }
 
+.link-domain .small-sup {
+  display: inline !important;
+}
+
 .link-domain {
   font-size: 75%;
   color: color-mix(in srgb, currentColor 70%, var(--pico-background-color));
