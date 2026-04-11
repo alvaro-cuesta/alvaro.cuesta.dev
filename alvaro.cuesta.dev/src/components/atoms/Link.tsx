@@ -32,7 +32,10 @@ export const Link: React.FC<LinkProps> = ({
 
   const calculatedIsExternal =
     isExternal ??
-    (rewrittenHref ? !canonicalizeHref(rewrittenHref).isInternal : false);
+    (rewrittenHref
+      ? !rewrittenHref.startsWith("mailto:") &&
+        !canonicalizeHref(rewrittenHref).isInternal
+      : false);
 
   const isPlainLink =
     typeof children === "string" &&

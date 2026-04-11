@@ -144,6 +144,20 @@ article > header {
   flex-direction: column;
 }
 
+body > footer {
+  .fa,
+  .fas,
+  .fab {
+    display: inline;
+  }
+}
+
+body > footer nav ul li + li::before {
+  content: "/";
+  position: relative;
+  left: calc(var(--pico-nav-element-spacing-horizontal) * -1.2);
+}
+
 .bloglist-main > footer {
   display: flex;
   width: 100%;

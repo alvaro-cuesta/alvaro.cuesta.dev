@@ -286,6 +286,11 @@ export const Template: React.FC<TemplateProps> = ({
                   <Icon collection="fab" name="github" aria-hidden /> GitHub
                 </Link>
               </li>
+              <li>
+                <Link href="mailto:alvaro@cuesta.dev">
+                  <Icon collection="fas" name="envelope" aria-hidden /> Email
+                </Link>
+              </li>
             </ul>
           </nav>
         </footer>
