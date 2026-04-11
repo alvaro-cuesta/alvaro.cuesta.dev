@@ -2,7 +2,11 @@ import { Template } from "../Template";
 import { Pagination } from "../atoms/Pagination";
 import { useMicroblogItems } from "../../microblog/promise";
 import type { SiteRenderMeta } from "../../site";
-import { routeMicroblogList } from "../../routes";
+import {
+  routeBlogArticleList,
+  routeMicroblogList,
+  routeNow,
+} from "../../routes";
 import { makeTitle } from "../../utils/meta";
 import {
   MICROBLOG_BLURB_DESCRIPTION,
@@ -10,6 +14,7 @@ import {
 } from "../../../config";
 import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
 import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
+import { Link } from "../atoms/Link";
 
 type MicroblogListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -77,10 +82,24 @@ export const MicroblogList: React.FC<MicroblogListProps> = ({
       >
         <h2>Timeline{page > 1 ? ` (page ${page} of ${totalPages})` : ""}</h2>
 
-        <p>
-          This is my microblog timeline. Short-form thoughts, quick updates, and
-          random musings will live here.
-        </p>
+        {page === 1 && (
+          <>
+            <p>
+              I post about a variety of topics, including software development,
+              technology, art, and more. Short-form thoughts, quick updates, and
+              random musings live here.
+            </p>
+            <p>
+              Check out my{" "}
+              <Link href={routeBlogArticleList.build({ page: null })}>
+                blog
+              </Link>{" "}
+              for more in-depth articles, essays and research notes. You can
+              also read my <Link href={routeNow.build({})}>Now page</Link> to
+              see what I'm up to!
+            </p>
+          </>
+        )}
 
         <div className="microblog-list">
           {itemsInPage.map((item) => (

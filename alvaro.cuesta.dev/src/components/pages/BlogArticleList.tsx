@@ -4,12 +4,17 @@ import { BlogListsLayout } from "../molecules/BlogListsLayout";
 import { useBlogItems } from "../../blog/promise";
 import { BlogArticleListItem } from "../molecules/BlogArticleListItem";
 import type { SiteRenderMeta } from "../../site";
-import { routeBlogArticleList } from "../../routes";
+import {
+  routeBlogArticleList,
+  routeMicroblogList,
+  routeNow,
+} from "../../routes";
 import { makeTitle } from "../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
 } from "../../../config";
+import { Link } from "../atoms/Link";
 
 type BlogArticleListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -74,13 +79,36 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
       >
         <h2>Blog{page > 1 ? ` (page ${page} of ${totalPages})` : ""}</h2>
 
-        <ul>
-          {itemsInPage.map((item) => (
-            <BlogArticleListItem key={item.filename} item={item} />
-          ))}
-        </ul>
+        {page === 1 && (
+          <>
+            <p>
+              I post about a variety of topics, including software development,
+              technology, art, and more. Long-form articles, essays, research
+              notes, and other more in-depth content will live here.
+            </p>
+            <p>
+              Check out my{" "}
+              <Link href={routeMicroblogList.build({ page: null })}>
+                timeline
+              </Link>{" "}
+              for more frequent updates, quick thoughts, and random musings. You
+              can also read my <Link href={routeNow.build({})}>Now page</Link>{" "}
+              to see what I'm up to!
+            </p>
+          </>
+        )}
 
-        <Pagination prevPageLink={prevPageLink} nextPageLink={nextPageLink} />
+        <article>
+          <ul>
+            {itemsInPage.map((item) => (
+              <BlogArticleListItem key={item.filename} item={item} />
+            ))}
+          </ul>
+        </article>
+
+        <section>
+          <Pagination prevPageLink={prevPageLink} nextPageLink={nextPageLink} />
+        </section>
       </BlogListsLayout>
     </Template>
   );

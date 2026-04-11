@@ -79,23 +79,27 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
       >
         <h2>Blog year {year}</h2>
 
-        <ul>
-          {monthsSortedByDescending.map(({ month, items }) => {
-            const monthName =
-              month !== null ? MONTH_NUMBER_TO_NAME[month] : NULL_MONTH_TO_NAME;
+        <article>
+          <ul>
+            {monthsSortedByDescending.map(({ month, items }) => {
+              const monthName =
+                month !== null
+                  ? MONTH_NUMBER_TO_NAME[month]
+                  : NULL_MONTH_TO_NAME;
 
-            return (
-              <li key={month}>
-                <h3>{monthName}</h3>
-                <ul>
-                  {items.map((item) => (
-                    <BlogArticleListItem key={item.filename} item={item} />
-                  ))}
-                </ul>
-              </li>
-            );
-          })}
-        </ul>
+              return (
+                <li key={month}>
+                  <h3>{monthName}</h3>
+                  <ul>
+                    {items.map((item) => (
+                      <BlogArticleListItem key={item.filename} item={item} />
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </article>
       </BlogListsLayout>
     </Template>
   );

@@ -37,14 +37,16 @@ export const BlogYearList: React.FC<BlogYearListProps> = ({
       >
         <h2>Blog years</h2>
 
-        <ul>
-          {blogItems.yearsSortedDescending.map(({ year, data }) => (
-            <li key={year}>
-              <Link href={routeBlogYear.build({ year })}>{year}</Link> (
-              {data.totalCount})
-            </li>
-          ))}
-        </ul>
+        <article>
+          <ul>
+            {blogItems.yearsSortedDescending.map(({ year, data }) => (
+              <li key={year}>
+                <Link href={routeBlogYear.build({ year })}>{year}</Link> (
+                {data.totalCount})
+              </li>
+            ))}
+          </ul>
+        </article>
       </BlogListsLayout>
     </Template>
   );

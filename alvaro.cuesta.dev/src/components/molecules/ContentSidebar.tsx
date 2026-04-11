@@ -68,7 +68,7 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
             {tagsDescendingByArticleCount.length > MAX_TAGS ? (
               <li>
                 <Link href={buildTagListHref()}>
-                  <i>(More...)</i>
+                  <i>(More tags...)</i>
                 </Link>
               </li>
             ) : null}

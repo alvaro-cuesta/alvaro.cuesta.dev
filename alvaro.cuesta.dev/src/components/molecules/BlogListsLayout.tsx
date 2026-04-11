@@ -52,6 +52,6 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
       />
     }
   >
-    <article>{children}</article>
+    {children}
   </ContentListsLayout>
 );

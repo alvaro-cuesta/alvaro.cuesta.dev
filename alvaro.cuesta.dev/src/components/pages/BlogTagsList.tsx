@@ -35,14 +35,16 @@ export const BlogTagList: React.FC<BlogTagListProps> = ({ siteRenderMeta }) => {
       >
         <h2>Blog tags</h2>
 
-        <ul>
-          {blogItems.tagsAscendingAlphabetically.map(({ tag, items }) => (
-            <li key={tag}>
-              <Link href={routeBlogTag.build({ tag })}>{tag}</Link> (
-              {items.length})
-            </li>
-          ))}
-        </ul>
+        <article>
+          <ul>
+            {blogItems.tagsAscendingAlphabetically.map(({ tag, items }) => (
+              <li key={tag}>
+                <Link href={routeBlogTag.build({ tag })}>{tag}</Link> (
+                {items.length})
+              </li>
+            ))}
+          </ul>
+        </article>
       </BlogListsLayout>
     </Template>
   );

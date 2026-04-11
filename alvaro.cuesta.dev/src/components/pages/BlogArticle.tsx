@@ -126,43 +126,46 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
         isTagListCurrent={tagSlugs.length > 0}
         isYearListCurrent
       >
-        <header>
-          <div>
-            <h2 className="no-underline">
-              <Link href={articlePath}>{articleTitle}</Link>
-              {draft ? " (draft)" : ""}
-            </h2>
-          </div>
-
-          <div className="icon-field">
-            <Icon fixedWidth name="calendar" title="Publication date" />{" "}
-            <BlogDateTime dateTime={publicationDate} />
-          </div>
-
-          {tagSlugs.length > 0 && (
-            <div className="icon-field">
-              <Icon fixedWidth name="tags" title="Tags" />{" "}
-              <span>
-                {tagSlugs.map((tag, index) => (
-                  <React.Fragment key={tag}>
-                    {index > 0 && ", "}
-                    <Link href={routeBlogTag.build({ tag })}>{tag}</Link>
-                  </React.Fragment>
-                ))}
-              </span>
+        <article>
+          <header>
+            <div>
+              <h2 className="no-underline">
+                <Link href={articlePath}>{articleTitle}</Link>
+                {draft ? " (draft)" : ""}
+              </h2>
             </div>
-          )}
-        </header>
 
-        <BlogArticleContent article={article} />
+            <div className="icon-field">
+              <Icon fixedWidth name="calendar" title="Publication date" />{" "}
+              <BlogDateTime dateTime={publicationDate} />
+            </div>
 
-        {lastModificationDate ? (
-          <footer>
-            <i>
-              (Last updated on <BlogDateTime dateTime={lastModificationDate} />)
-            </i>
-          </footer>
-        ) : null}
+            {tagSlugs.length > 0 && (
+              <div className="icon-field">
+                <Icon fixedWidth name="tags" title="Tags" />{" "}
+                <span>
+                  {tagSlugs.map((tag, index) => (
+                    <React.Fragment key={tag}>
+                      {index > 0 && ", "}
+                      <Link href={routeBlogTag.build({ tag })}>{tag}</Link>
+                    </React.Fragment>
+                  ))}
+                </span>
+              </div>
+            )}
+          </header>
+
+          <BlogArticleContent article={article} />
+
+          {lastModificationDate ? (
+            <footer>
+              <i>
+                (Last updated on{" "}
+                <BlogDateTime dateTime={lastModificationDate} />)
+              </i>
+            </footer>
+          ) : null}
+        </article>
       </BlogListsLayout>
     </Template>
   );

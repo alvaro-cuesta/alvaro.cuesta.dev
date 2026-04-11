@@ -48,11 +48,13 @@ export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
       >
         <h2>Blog tag "{tag}"</h2>
 
-        <ul>
-          {itemsInTag.map((item) => (
-            <BlogArticleListItem key={item.filename} item={item} />
-          ))}
-        </ul>
+        <article>
+          <ul>
+            {itemsInTag.map((item) => (
+              <BlogArticleListItem key={item.filename} item={item} />
+            ))}
+          </ul>
+        </article>
       </BlogListsLayout>
     </Template>
   );
