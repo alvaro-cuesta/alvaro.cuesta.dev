@@ -116,11 +116,6 @@ article > header {
   gap: var(--pico-grid-column-gap);
 }
 
-.pagination-link > .no-underline {
-  display: inline-block;
-  text-decoration: none;
-}
-
 .muted {
   color: var(--pico-muted-color);
 }

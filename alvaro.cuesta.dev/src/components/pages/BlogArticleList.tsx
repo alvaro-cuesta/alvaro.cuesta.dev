@@ -1,4 +1,5 @@
 import { Template } from "../Template";
+import { Icon } from "../atoms/Icon";
 import { Link } from "../atoms/Link";
 import { BlogListsLayout } from "../molecules/BlogListsLayout";
 import { useBlogItems } from "../../blog/promise";
@@ -83,7 +84,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
         <div className="flex-space-between">
           {prevPageLink ? (
             <Link href={prevPageLink} className="pagination-link">
-              <span className="no-underline">🡄&nbsp;</span>Previous page
+              <Icon name="arrow-left" aria-hidden="true" />&nbsp;Previous page
             </Link>
           ) : (
             // We need a placeholder to keep the layout
@@ -91,7 +92,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
           )}
           {nextPageLink ? (
             <Link href={nextPageLink} className="pagination-link">
-              Next page<span className="no-underline">&nbsp;🡆</span>
+              Next page&nbsp;<Icon name="arrow-right" aria-hidden="true" />
             </Link>
           ) : null}
         </div>

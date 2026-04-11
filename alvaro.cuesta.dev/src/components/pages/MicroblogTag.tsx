@@ -9,6 +9,7 @@ import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
 } from "../../../config";
+import { Icon } from "../atoms/Icon";
 import { Link } from "../atoms/Link";
 import { paginateItems } from "../../utils/pagination";
 
@@ -97,14 +98,14 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
             <div className="flex-space-between">
               {prevPageLink ? (
                 <Link href={prevPageLink} className="pagination-link">
-                  <span className="no-underline">🡄&nbsp;</span>Previous page
+                  <Icon name="arrow-left" aria-hidden="true" />&nbsp;Previous page
                 </Link>
               ) : (
                 <div />
               )}
               {nextPageLink ? (
                 <Link href={nextPageLink} className="pagination-link">
-                  Next page<span className="no-underline">&nbsp;🡆</span>
+                  Next page&nbsp;<Icon name="arrow-right" aria-hidden="true" />
                 </Link>
               ) : null}
             </div>

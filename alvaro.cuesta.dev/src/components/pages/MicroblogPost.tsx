@@ -1,4 +1,5 @@
 import { Template } from "../Template";
+import { Icon } from "../atoms/Icon";
 import { Link } from "../atoms/Link";
 import { useMicroblogItems } from "../../microblog/promise";
 import { microblogPostId } from "../../microblog/analyze";
@@ -78,14 +79,14 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
           <div className="flex-space-between">
             {newerPostHref ? (
               <Link href={newerPostHref} className="pagination-link">
-                <span className="no-underline">🡄&nbsp;</span>Newer post
+                <Icon name="arrow-left" aria-hidden="true" />&nbsp;Newer post
               </Link>
             ) : (
               <div />
             )}
             {olderPostHref ? (
               <Link href={olderPostHref} className="pagination-link">
-                Older post<span className="no-underline">&nbsp;🡆</span>
+                Older post&nbsp;<Icon name="arrow-right" aria-hidden="true" />
               </Link>
             ) : null}
           </div>
