@@ -52,7 +52,7 @@ const microblogItems: AnalyzedMicroblogItems = {
   allSortedByDescendingDateByPage: new Map(),
   byId: new Map([
     [
-      "2026-04-10_12-00",
+      "202604101200",
       {
         filename: "2026-04-10_12-00.mdx",
         module: {
@@ -66,7 +66,7 @@ const microblogItems: AnalyzedMicroblogItems = {
       },
     ],
   ]),
-  pageByPostId: new Map([["2026-04-10_12-00", 1]]),
+  pageByPostId: new Map([["202604101200", 1]]),
   byYear: new Map([[2026, { totalCount: 1, byMonth: new Map() }]]),
   byTag: new Map([["webdev", []]]),
   yearsSortedDescending: [],
@@ -182,17 +182,17 @@ describe("rewriteCustomProtocolHref", () => {
   describe("microblog-post:///", () => {
     it("rewrites to the microblog post page", () => {
       expect(
-        rewriteCustomProtocolHref("microblog-post:///2026-04-10_12-00", ctx),
-      ).toBe("/timeline/2026-04-10_12-00/");
+        rewriteCustomProtocolHref("microblog-post:///202604101200", ctx),
+      ).toBe("/timeline/202604101200/");
     });
 
     it("preserves hash and query string", () => {
       expect(
         rewriteCustomProtocolHref(
-          "microblog-post:///2026-04-10_12-00?q=1#section",
+          "microblog-post:///202604101200?q=1#section",
           ctx,
         ),
-      ).toBe("/timeline/2026-04-10_12-00/?q=1#section");
+      ).toBe("/timeline/202604101200/?q=1#section");
     });
 
     it("throws on missing post", () => {

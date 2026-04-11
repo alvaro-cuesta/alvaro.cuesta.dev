@@ -12,7 +12,7 @@ type YearData = {
 };
 
 export const microblogPostId = (filename: string): string =>
-  filename.replace(/\.mdx?$/, "");
+  filename.replace(/\.mdx?$/, "").replace(/[-_]/g, "");
 
 export type AnalyzedMicroblogItems = {
   all: MicroblogItem[];

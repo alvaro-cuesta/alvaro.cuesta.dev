@@ -110,12 +110,7 @@ export const rewriteCustomProtocolHref = (
     }
 
     case "microblog-post": {
-      const filename = `${value}.mdx`;
-      const exists = microblogItems.all.some(
-        (item) => item.filename === filename,
-      );
-
-      if (!exists) {
+      if (!microblogItems.byId.has(value)) {
         throw makeBrokenHrefError(
           href,
           `microblog post "${value}" does not exist`,
