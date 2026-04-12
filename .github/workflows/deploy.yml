@@ -65,8 +65,14 @@ jobs:
         working-directory: ${{ env.BUILD_PATH }}
 
   test:
-    name: Test
+    name: Test ${{ matrix.package }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - alvaro.cuesta.dev
+          - xenon-ssg
     steps:
       - *checkout
       - *setup
@@ -74,7 +80,7 @@ jobs:
 
       - name: Run tests
         run: npm test
-        working-directory: ${{ env.BUILD_PATH }}
+        working-directory: ${{ matrix.package }}
 
   build:
     name: Build

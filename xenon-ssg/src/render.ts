@@ -10,7 +10,7 @@ const REACT_COMMENT_RE = /<!--[\s/$?]*-->/g;
 // Max length of a React comment (<!--/$-->) so we can handle chunk boundaries
 const MAX_COMMENT_LENGTH = "<!--/$-->".length;
 
-class StripReactComments extends Transform {
+export class StripReactComments extends Transform {
   private tail = "";
 
   constructor() {
