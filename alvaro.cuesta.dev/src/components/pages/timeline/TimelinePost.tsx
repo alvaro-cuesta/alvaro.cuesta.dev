@@ -20,10 +20,10 @@ type TimelinePostPageProps = {
   slug: string;
 };
 
-export const TimelinePostPage: React.FC<TimelinePostPageProps> = ({
+export function TimelinePostPage({
   siteRenderMeta,
   slug,
-}) => {
+}: TimelinePostPageProps) {
   const timelineItems = useTimelineItems();
 
   const item = timelineItems.bySlug.get(slug);
@@ -97,4 +97,4 @@ export const TimelinePostPage: React.FC<TimelinePostPageProps> = ({
       </TimelineLayout>
     </Template>
   );
-};
+}

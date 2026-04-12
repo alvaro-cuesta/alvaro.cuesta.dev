@@ -22,10 +22,10 @@ type TimelineListProps = {
   page: number | null;
 };
 
-export const TimelineList: React.FC<TimelineListProps> = ({
+export function TimelineList({
   siteRenderMeta,
   page: rawPage,
-}) => {
+}: TimelineListProps) {
   const timelineItems = useTimelineItems();
 
   const page = rawPage ?? 1;
@@ -116,4 +116,4 @@ export const TimelineList: React.FC<TimelineListProps> = ({
       </TimelineLayout>
     </Template>
   );
-};
+}

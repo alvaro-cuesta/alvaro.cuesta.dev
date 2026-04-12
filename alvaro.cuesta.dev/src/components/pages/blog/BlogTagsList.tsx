@@ -14,7 +14,7 @@ type BlogTagListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const BlogTagList: React.FC<BlogTagListProps> = ({ siteRenderMeta }) => {
+export function BlogTagList({ siteRenderMeta }: BlogTagListProps) {
   const blogItems = useBlogItems();
 
   return (
@@ -48,4 +48,4 @@ export const BlogTagList: React.FC<BlogTagListProps> = ({ siteRenderMeta }) => {
       </BlogLayout>
     </Template>
   );
-};
+}

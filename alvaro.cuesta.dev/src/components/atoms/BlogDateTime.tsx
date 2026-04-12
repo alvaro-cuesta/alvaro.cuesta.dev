@@ -10,10 +10,10 @@ type BlogDateTimeProps = {
   dropTime?: boolean;
 };
 
-export const BlogDateTime: React.FC<BlogDateTimeProps> = ({
+export function BlogDateTime({
   dateTime: dateTimeRaw,
   dropTime = false,
-}) => {
+}: BlogDateTimeProps) {
   const dateTime = dropTime
     ? dropTimeFromBlogItemDate(dateTimeRaw)
     : dateTimeRaw;
@@ -23,4 +23,4 @@ export const BlogDateTime: React.FC<BlogDateTimeProps> = ({
       {blogItemDateToShortString(dateTime)}
     </time>
   );
-};
+}

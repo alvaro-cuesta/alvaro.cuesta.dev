@@ -19,7 +19,7 @@ type MdxPageProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const makeMdxPage = (contentFileUrl: string): React.FC<MdxPageProps> => {
+export function makeMdxPage(contentFileUrl: string) {
   const promise = suspendablePromiseMaker(
     async () => {
       const [module, lastModified] = await Promise.all([
@@ -37,7 +37,7 @@ export const makeMdxPage = (contentFileUrl: string): React.FC<MdxPageProps> => {
     },
   );
 
-  return ({ siteRenderMeta }) => {
+  return function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const {
       module: { default: Content, title, description },
       lastModified,
@@ -77,4 +77,4 @@ export const makeMdxPage = (contentFileUrl: string): React.FC<MdxPageProps> => {
       </Template>
     );
   };
-};
+}

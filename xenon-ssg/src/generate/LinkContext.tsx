@@ -20,10 +20,11 @@ export type LinkProviderProps = {
  *
  * @private Not meant to be used by end users. Will be automatically added by the renderer.
  */
-export const LinkProvider: React.FC<LinkProviderProps> = ({
-  addLink,
-  children,
-}) => <LinkContext.Provider value={addLink}>{children}</LinkContext.Provider>;
+export function LinkProvider({ addLink, children }: LinkProviderProps) {
+  return (
+    <LinkContext.Provider value={addLink}>{children}</LinkContext.Provider>
+  );
+}
 
 /**
  * Hook to add a link to the list of links that the renderer will follow.

@@ -1,6 +1,13 @@
 import cx from "classnames";
 
-type IconSize = 0.33 | 2 | 3 | 4 | 5;
+type IconSize =
+  | 0.33
+  // 1x is the default size, and doesn't actually have a class
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5;
 
 type IconPull = "left" | "right";
 
@@ -42,7 +49,7 @@ type IconProps = {
     }
 );
 
-export const Icon: React.FC<IconProps> = ({
+export function Icon({
   collection = "fa",
   name,
   className,
@@ -55,34 +62,42 @@ export const Icon: React.FC<IconProps> = ({
   rotation,
   flip,
   ...restProps
-}) => (
-  <span
-    className={cx(className, collection, `fa-${name}`, fixedWidth && "fa-fw", {
-      // `size` prop
-      "fa-lg": size === 0.33,
-      // "fa-1x": size === 1, // This class doesn't actually exist
-      "fa-2x": size === 2,
-      "fa-3x": size === 3,
-      "fa-4x": size === 4,
-      "fa-5x": size === 5,
-      //
-      "fa-fw": fixedWidth,
-      "fa-li": listItem,
-      "fa-border": bordered,
-      // `pull` prop
-      "fa-pull-left": pull === "left",
-      "fa-pull-right": pull === "right",
-      // `animation` prop
-      "fa-spin": animation === "spin",
-      "fa-pulse": animation === "pulse",
-      // `rotation` prop
-      "fa-rotate-90": rotation === 90,
-      "fa-rotate-180": rotation === 180,
-      "fa-rotate-270": rotation === 270,
-      // `flip` prop
-      "fa-flip-horizontal": flip === "horizontal",
-      "fa-flip-vertical": flip === "vertical",
-    })}
-    {...restProps}
-  />
-);
+}: IconProps) {
+  return (
+    <span
+      className={cx(
+        className,
+        collection,
+        `fa-${name}`,
+        fixedWidth && "fa-fw",
+        {
+          // `size` prop
+          "fa-lg": size === 0.33,
+          // "fa-1x": size === 1, // This class doesn't actually exist
+          "fa-2x": size === 2,
+          "fa-3x": size === 3,
+          "fa-4x": size === 4,
+          "fa-5x": size === 5,
+          //
+          "fa-fw": fixedWidth,
+          "fa-li": listItem,
+          "fa-border": bordered,
+          // `pull` prop
+          "fa-pull-left": pull === "left",
+          "fa-pull-right": pull === "right",
+          // `animation` prop
+          "fa-spin": animation === "spin",
+          "fa-pulse": animation === "pulse",
+          // `rotation` prop
+          "fa-rotate-90": rotation === 90,
+          "fa-rotate-180": rotation === 180,
+          "fa-rotate-270": rotation === 270,
+          // `flip` prop
+          "fa-flip-horizontal": flip === "horizontal",
+          "fa-flip-vertical": flip === "vertical",
+        },
+      )}
+      {...restProps}
+    />
+  );
+}

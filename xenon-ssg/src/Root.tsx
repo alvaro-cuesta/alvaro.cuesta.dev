@@ -6,10 +6,12 @@ type RootProps = {
   addLink: LinkProviderProps["addLink"];
 };
 
-export const Root: React.FC<RootProps> = ({ children, addLink }) => (
-  // A top-level suspense will help in case the user tries to use suspense features while not
-  // providing their own suspense boundary
-  <Suspense>
-    <LinkProvider addLink={addLink}>{children}</LinkProvider>
-  </Suspense>
-);
+export function Root({ children, addLink }: RootProps) {
+  return (
+    // A top-level suspense will help in case the user tries to use suspense features while not
+    // providing their own suspense boundary
+    <Suspense>
+      <LinkProvider addLink={addLink}>{children}</LinkProvider>
+    </Suspense>
+  );
+}

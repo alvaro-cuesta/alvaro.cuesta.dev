@@ -20,13 +20,13 @@ type ProjectProps = {
   children?: ReactNode;
 };
 
-const Project: React.FC<ProjectProps> = ({
+function Project({
   name,
   codeLink,
   logoUrl,
   liveLink,
   children,
-}) => {
+}: ProjectProps) {
   const nameElement = <strong>{name}</strong>;
 
   return (
@@ -51,13 +51,13 @@ const Project: React.FC<ProjectProps> = ({
       (<Link href={codeLink}>code</Link>){children ? <> — {children}</> : null}
     </li>
   );
-};
+}
 
 export type HomepageProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
+export function Homepage({ siteRenderMeta }: HomepageProps) {
   const year = new Date().getFullYear();
 
   const title = makeTitle(["Full-stack software engineer"], {
@@ -234,4 +234,4 @@ export const Homepage: React.FC<HomepageProps> = ({ siteRenderMeta }) => {
       </section>
     </Template>
   );
-};
+}

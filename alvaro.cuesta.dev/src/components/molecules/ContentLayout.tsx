@@ -1,9 +1,7 @@
 import { type ReactNode } from "react";
 import { Breadcrumb, type BreadcrumbItem } from "../atoms/Breadcrumb";
 
-export type ContentListsLayoutSection = "blog" | "timeline";
-
-export type ContentListsLayoutProps = {
+export type ContentLayoutProps = {
   rootName: string;
   rootHref: string;
   breadcrumbs?: BreadcrumbItem[] | undefined;
@@ -11,13 +9,13 @@ export type ContentListsLayoutProps = {
   children?: ReactNode;
 };
 
-export const ContentListsLayout: React.FC<ContentListsLayoutProps> = ({
+export function ContentLayout({
   rootName,
   rootHref,
   breadcrumbs = [],
   sidebar,
   children,
-}) => {
+}: ContentLayoutProps) {
   return (
     <div className="flex-responsive">
       <section className="bloglist-main">
@@ -39,4 +37,4 @@ export const ContentListsLayout: React.FC<ContentListsLayoutProps> = ({
       {sidebar}
     </div>
   );
-};
+}

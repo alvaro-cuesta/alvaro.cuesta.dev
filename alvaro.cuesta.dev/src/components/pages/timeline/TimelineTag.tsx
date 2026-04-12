@@ -18,11 +18,11 @@ type TimelineTagProps = {
   page: number | null;
 };
 
-export const TimelineTag: React.FC<TimelineTagProps> = ({
+export function TimelineTag({
   siteRenderMeta,
   tag,
   page: rawPage,
-}) => {
+}: TimelineTagProps) {
   const timelineItems = useTimelineItems();
 
   const allItemsInTag = timelineItems.byTag.get(tag);
@@ -103,4 +103,4 @@ export const TimelineTag: React.FC<TimelineTagProps> = ({
       </TimelineLayout>
     </Template>
   );
-};
+}

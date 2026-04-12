@@ -13,11 +13,11 @@ type TimelinePostItemProps = {
   item: Item<TimelineItemModuleParsed>;
 };
 
-export const TimelinePostItem: React.FC<TimelinePostItemProps> = ({
+export function TimelinePostItem({
   item: {
     module: { Component, slug, publicationDate, lastModificationDate, draft },
   },
-}) => {
+}: TimelinePostItemProps) {
   const permalink = routeTimelinePost.build({ slug });
 
   return (
@@ -40,4 +40,4 @@ export const TimelinePostItem: React.FC<TimelinePostItemProps> = ({
       </footer>
     </article>
   );
-};
+}

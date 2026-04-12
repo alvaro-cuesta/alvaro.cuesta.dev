@@ -14,9 +14,7 @@ type TimelineYearListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const TimelineYearList: React.FC<TimelineYearListProps> = ({
-  siteRenderMeta,
-}) => {
+export function TimelineYearList({ siteRenderMeta }: TimelineYearListProps) {
   const timelineItems = useTimelineItems();
 
   return (
@@ -31,9 +29,7 @@ export const TimelineYearList: React.FC<TimelineYearListProps> = ({
       }}
     >
       <TimelineLayout
-        breadcrumbs={[
-          { name: "Years", href: routeTimelineYearList.build({}) },
-        ]}
+        breadcrumbs={[{ name: "Years", href: routeTimelineYearList.build({}) }]}
         timelineItems={timelineItems}
         isYearListCurrent
       >
@@ -52,4 +48,4 @@ export const TimelineYearList: React.FC<TimelineYearListProps> = ({
       </TimelineLayout>
     </Template>
   );
-};
+}

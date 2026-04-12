@@ -35,7 +35,7 @@ const MONTH_NUMBER_TO_NAME: {
 
 const NULL_MONTH_TO_NAME = "Other";
 
-export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
+export function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
   const blogItems = useBlogItems();
 
   const yearInfo = blogItems.byYear.get(year);
@@ -103,4 +103,4 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
       </BlogLayout>
     </Template>
   );
-};
+}

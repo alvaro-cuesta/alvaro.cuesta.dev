@@ -14,9 +14,7 @@ type BlogYearListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const BlogYearList: React.FC<BlogYearListProps> = ({
-  siteRenderMeta,
-}) => {
+export function BlogYearList({ siteRenderMeta }: BlogYearListProps) {
   const blogItems = useBlogItems();
 
   return (
@@ -50,4 +48,4 @@ export const BlogYearList: React.FC<BlogYearListProps> = ({
       </BlogLayout>
     </Template>
   );
-};
+}

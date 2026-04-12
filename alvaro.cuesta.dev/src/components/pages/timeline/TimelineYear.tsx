@@ -18,11 +18,11 @@ type TimelineYearProps = {
   page: number | null;
 };
 
-export const TimelineYear: React.FC<TimelineYearProps> = ({
+export function TimelineYear({
   siteRenderMeta,
   year,
   page: rawPage,
-}) => {
+}: TimelineYearProps) {
   const timelineItems = useTimelineItems();
 
   const yearInfo = timelineItems.byYear.get(year);
@@ -117,4 +117,4 @@ export const TimelineYear: React.FC<TimelineYearProps> = ({
       </TimelineLayout>
     </Template>
   );
-};
+}

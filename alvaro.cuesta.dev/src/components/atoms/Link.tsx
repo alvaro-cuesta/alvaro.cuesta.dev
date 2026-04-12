@@ -14,14 +14,14 @@ type LinkProps = ComponentPropsWithoutRef<"a"> & {
   Component?: React.ElementType<ComponentPropsWithoutRef<"a">>;
 };
 
-export const Link: React.FC<LinkProps> = ({
+export function Link({
   isExternal,
   hideExternalIcon,
   showDomain,
   children,
   Component = XenonLink,
   ...props
-}) => {
+}: LinkProps) {
   const blogItems = useBlogItems();
   const timelineItems = useTimelineItems();
 
@@ -78,4 +78,4 @@ export const Link: React.FC<LinkProps> = ({
       ) : null}
     </Component>
   );
-};
+}

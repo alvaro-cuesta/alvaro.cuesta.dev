@@ -18,7 +18,7 @@ type ContentSidebarProps = {
 
 const MAX_TAGS = 10;
 
-export const ContentSidebar: React.FC<ContentSidebarProps> = ({
+export function ContentSidebar({
   className,
   tagsDescendingByArticleCount,
   yearsSortedDescending,
@@ -30,7 +30,7 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
   buildTagHref,
   buildYearListHref,
   buildYearHref,
-}) => {
+}: ContentSidebarProps) {
   const currentTagsSet = new Set(
     currentTags.map((tag) => CANONICAL_TAGS[tag] ?? tag),
   );
@@ -108,4 +108,4 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
       ) : null}
     </ul>
   );
-};
+}

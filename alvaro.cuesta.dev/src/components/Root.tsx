@@ -40,7 +40,7 @@ type RootProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
+export function Root({ siteRenderMeta }: RootProps) {
   const pathname = siteRenderMeta.pathname;
 
   if (routeHome.match(pathname)) {
@@ -155,4 +155,4 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
   }
 
   throw new Error(`Path not found: ${pathname}`);
-};
+}

@@ -24,10 +24,7 @@ type BlogArticleProps = {
   slug: string;
 };
 
-export const BlogArticle: React.FC<BlogArticleProps> = ({
-  siteRenderMeta,
-  slug,
-}) => {
+export function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
   const blogItems = useBlogItems();
 
   const article = blogItems.bySlug.get(slug);
@@ -171,4 +168,4 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
       </BlogLayout>
     </Template>
   );
-};
+}

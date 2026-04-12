@@ -10,7 +10,7 @@ import {
   routeBlogYear,
   routeBlogYearList,
 } from "../../../../routes";
-import { ContentListsLayout } from "../../../molecules/ContentListsLayout";
+import { ContentLayout } from "../../../molecules/ContentLayout";
 
 type BlogLayoutProps = {
   breadcrumbs: BreadcrumbItem[];
@@ -22,7 +22,7 @@ type BlogLayoutProps = {
   children?: ReactNode;
 };
 
-export const BlogLayout: React.FC<BlogLayoutProps> = ({
+export function BlogLayout({
   breadcrumbs,
   blogItems,
   currentTags,
@@ -30,27 +30,29 @@ export const BlogLayout: React.FC<BlogLayoutProps> = ({
   isTagListCurrent,
   isYearListCurrent,
   children,
-}) => (
-  <ContentListsLayout
-    rootName="Blog"
-    rootHref={routeBlogArticleList.build({ page: null })}
-    breadcrumbs={breadcrumbs}
-    sidebar={
-      <ContentSidebar
-        className="blog-sidebar"
-        tagsDescendingByArticleCount={blogItems.tagsDescendingByArticleCount}
-        yearsSortedDescending={blogItems.yearsSortedDescending}
-        currentTags={currentTags}
-        currentYear={currentYear}
-        isTagListCurrent={isTagListCurrent}
-        isYearListCurrent={isYearListCurrent}
-        buildTagListHref={() => routeBlogTagList.build({})}
-        buildTagHref={(tag) => routeBlogTag.build({ tag })}
-        buildYearListHref={() => routeBlogYearList.build({})}
-        buildYearHref={(year) => routeBlogYear.build({ year })}
-      />
-    }
-  >
-    {children}
-  </ContentListsLayout>
-);
+}: BlogLayoutProps) {
+  return (
+    <ContentLayout
+      rootName="Blog"
+      rootHref={routeBlogArticleList.build({ page: null })}
+      breadcrumbs={breadcrumbs}
+      sidebar={
+        <ContentSidebar
+          className="blog-sidebar"
+          tagsDescendingByArticleCount={blogItems.tagsDescendingByArticleCount}
+          yearsSortedDescending={blogItems.yearsSortedDescending}
+          currentTags={currentTags}
+          currentYear={currentYear}
+          isTagListCurrent={isTagListCurrent}
+          isYearListCurrent={isYearListCurrent}
+          buildTagListHref={() => routeBlogTagList.build({})}
+          buildTagHref={(tag) => routeBlogTag.build({ tag })}
+          buildYearListHref={() => routeBlogYearList.build({})}
+          buildYearHref={(year) => routeBlogYear.build({ year })}
+        />
+      }
+    >
+      {children}
+    </ContentLayout>
+  );
+}

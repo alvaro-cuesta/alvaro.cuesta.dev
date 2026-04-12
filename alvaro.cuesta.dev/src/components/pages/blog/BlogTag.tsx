@@ -15,7 +15,7 @@ type BlogTagProps = {
   tag: string;
 };
 
-export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
+export function BlogTag({ siteRenderMeta, tag }: BlogTagProps) {
   const blogItems = useBlogItems();
 
   const itemsInTag = blogItems.byTag.get(tag);
@@ -58,4 +58,4 @@ export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
       </BlogLayout>
     </Template>
   );
-};
+}

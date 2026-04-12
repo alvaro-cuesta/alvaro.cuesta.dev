@@ -57,14 +57,14 @@ type TemplateMetaTagsOpenGraph =
       gender?: "male" | "female";
     };
 
-export const Template: React.FC<TemplateProps> = ({
+export function Template({
   siteRenderMeta,
   canonicalPathname = siteRenderMeta.pathname,
   canonicalUrl = `${siteRenderMeta.baseUrl}${canonicalPathname}`,
   metaTags,
   mainClassName,
   children,
-}) => {
+}: TemplateProps) {
   const blogItems = useBlogItems();
   const timelineItems = useTimelineItems();
 
@@ -340,4 +340,4 @@ export const Template: React.FC<TemplateProps> = ({
       </body>
     </html>
   );
-};
+}

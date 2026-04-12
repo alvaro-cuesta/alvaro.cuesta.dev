@@ -22,10 +22,10 @@ type BlogArticleListProps = {
   page: number | null;
 };
 
-export const BlogArticleList: React.FC<BlogArticleListProps> = ({
+export function BlogArticleList({
   siteRenderMeta,
   page: rawPage,
-}) => {
+}: BlogArticleListProps) {
   const blogItems = useBlogItems();
 
   const page = rawPage ?? 1;
@@ -112,4 +112,4 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
       </BlogLayout>
     </Template>
   );
-};
+}

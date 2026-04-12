@@ -10,7 +10,7 @@ type NotFoundProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const NotFound: React.FC<NotFoundProps> = ({ siteRenderMeta }) => {
+export function NotFound({ siteRenderMeta }: NotFoundProps) {
   const title = makeTitle(["404 – Page not found"]);
 
   return (
@@ -30,4 +30,4 @@ export const NotFound: React.FC<NotFoundProps> = ({ siteRenderMeta }) => {
       </main>
     </Template>
   );
-};
+}

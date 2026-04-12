@@ -14,9 +14,7 @@ type TimelineTagListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export const TimelineTagList: React.FC<TimelineTagListProps> = ({
-  siteRenderMeta,
-}) => {
+export function TimelineTagList({ siteRenderMeta }: TimelineTagListProps) {
   const timelineItems = useTimelineItems();
 
   return (
@@ -50,4 +48,4 @@ export const TimelineTagList: React.FC<TimelineTagListProps> = ({
       </TimelineLayout>
     </Template>
   );
-};
+}
