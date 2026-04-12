@@ -455,16 +455,15 @@ pre > code {
 }
 
 body > footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-
+  display: flex;
+  flex-direction: column;
   row-gap: calc(var(--pico-grid-row-gap) / 2);
 
-  :nth-child(2n - 1) {
-    justify-self: start;
-  }
-  :nth-child(2n) {
-    justify-self: end;
+  > div {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--pico-grid-column-gap);
+    justify-content: space-between;
   }
 }
 

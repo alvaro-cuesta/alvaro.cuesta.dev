@@ -302,35 +302,39 @@ export const Template: React.FC<TemplateProps> = ({
         <main className={cx("container", mainClassName)}>{children}</main>
         <footer className={cx("container", "no-underline")}>
           <div>
-            © {year} <Link href={routeHome.build({})}>Álvaro Cuesta</Link>
+            <div>
+              © {year} <Link href={routeHome.build({})}>Álvaro Cuesta</Link>
+            </div>
+            <div>
+              <Link
+                href="https://github.com/alvaro-cuesta/"
+                aria-label="Álvaro Cuesta's GitHub (opens in new tab)"
+                hideExternalIcon
+              >
+                <span className="no-underline-icon">
+                  <Icon collection="fab" name="github" aria-hidden />
+                  &nbsp;
+                </span>
+                GitHub
+              </Link>{" "}
+              /{" "}
+              <Link href="mailto:alvaro@cuesta.dev">
+                <span className="no-underline-icon">
+                  <Icon collection="fas" name="envelope" aria-hidden />
+                  &nbsp;
+                </span>
+                Email
+              </Link>
+            </div>
           </div>
           <div>
-            <Link
-              href="https://github.com/alvaro-cuesta/"
-              aria-label="Álvaro Cuesta's GitHub (opens in new tab)"
-              hideExternalIcon
-            >
-              <span className="no-underline-icon">
-                <Icon collection="fab" name="github" aria-hidden />
-                &nbsp;
-              </span>
-              GitHub
-            </Link>{" "}
-            /{" "}
-            <Link href="mailto:alvaro@cuesta.dev">
-              <span className="no-underline-icon">
-                <Icon collection="fas" name="envelope" aria-hidden />
-                &nbsp;
-              </span>
-              Email
-            </Link>
-          </div>
-          <div aria-hidden="true" />
-          <div>
-            <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
-            <Link href={siteRenderMeta.feedUrls.blog}>Blog</Link> /{" "}
-            <Link href={siteRenderMeta.feedUrls.timeline}>Timeline</Link> /{" "}
-            <Link href={siteRenderMeta.feedUrls.all}>All</Link>
+            <div aria-hidden="true" />
+            <div>
+              <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
+              <Link href={siteRenderMeta.feedUrls.blog}>Blog</Link> /{" "}
+              <Link href={siteRenderMeta.feedUrls.timeline}>Timeline</Link> /{" "}
+              <Link href={siteRenderMeta.feedUrls.all}>All</Link>
+            </div>
           </div>
         </footer>
       </body>
