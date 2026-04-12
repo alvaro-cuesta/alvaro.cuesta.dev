@@ -353,7 +353,7 @@ export const blogItemDateToShortTimeString = (
 
 /**
  * Union of date types accepted as module exports in MDX files.
- * Shared between blog and microblog item-module parsers.
+ * Shared between blog and timeline item-module parsers.
  */
 export type ItemModuleDate =
   // Will imply "dateTimeNoSeconds"
@@ -415,7 +415,7 @@ export const itemModuleDateToBlogItemDate = (
 
 /**
  * Resolves the lastModificationDate from explicit module export, inferred (git) date,
- * and publication date. Shared between blog and microblog.
+ * and publication date. Shared between blog and timeline.
  */
 export const resolveLastModificationDate = (
   explicit: ItemModuleDate | undefined,

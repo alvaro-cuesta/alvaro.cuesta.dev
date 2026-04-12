@@ -1,28 +1,28 @@
 import type { Item } from "../../../../utils/analyze";
-import type { MicroblogItemModuleParsed } from "../../../../microblog/item-module";
+import type { TimelineItemModuleParsed } from "../../../../timeline/item-module";
 import { BlogDateTime } from "../../../atoms/BlogDateTime";
 import { Link } from "../../../atoms/Link";
 import { makeMdxDefaultComponents } from "../../../../mdx/mdx";
-import { routeMicroblogPost } from "../../../../routes";
+import { routeTimelinePost } from "../../../../routes";
 
-const MICROBLOG_MDX_COMPONENTS = makeMdxDefaultComponents({
+const TIMELINE_MDX_COMPONENTS = makeMdxDefaultComponents({
   showDomain: true,
 });
 
-type MicroblogPostItemProps = {
-  item: Item<MicroblogItemModuleParsed>;
+type TimelinePostItemProps = {
+  item: Item<TimelineItemModuleParsed>;
 };
 
-export const MicroblogPostItem: React.FC<MicroblogPostItemProps> = ({
+export const TimelinePostItem: React.FC<TimelinePostItemProps> = ({
   item: {
     module: { Component, slug, publicationDate, lastModificationDate, draft },
   },
 }) => {
-  const permalink = routeMicroblogPost.build({ slug });
+  const permalink = routeTimelinePost.build({ slug });
 
   return (
-    <article className="microblog-post-item">
-      <Component components={MICROBLOG_MDX_COMPONENTS} />
+    <article className="timeline-post-item">
+      <Component components={TIMELINE_MDX_COMPONENTS} />
       <footer className="flex-space-between">
         <small>
           <Link href={permalink}>

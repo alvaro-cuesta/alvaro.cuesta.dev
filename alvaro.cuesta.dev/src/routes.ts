@@ -47,8 +47,8 @@ export const routeBlogTag = makeRoute<{ tag: string }>(
 // BLOG YEARS
 export const routeBlogYearList = makeRoute<{}>("/blog/years/");
 
-// MICROBLOG
-export const routeMicroblogList = makeRoute<
+// TIMELINE
+export const routeTimelineList = makeRoute<
   { page?: string },
   { page: number | null }
 >(
@@ -69,14 +69,14 @@ export const routeBlogYear = makeRoute<{ year: string }, { year: number }>(
   (params) => ({ year: params.year.toString() }),
 );
 
-export const routeMicroblogPost = makeRoute<{ slug: string }>(
+export const routeTimelinePost = makeRoute<{ slug: string }>(
   `/timeline/:slug/`,
 );
 
-// MICROBLOG TAGS
-export const routeMicroblogTagList = makeRoute<{}>("/timeline/tags/");
+// TIMELINE TAGS
+export const routeTimelineTagList = makeRoute<{}>("/timeline/tags/");
 
-export const routeMicroblogTag = makeRoute<
+export const routeTimelineTag = makeRoute<
   { tag: string; page?: string },
   { tag: string; page: number | null }
 >(
@@ -91,10 +91,10 @@ export const routeMicroblogTag = makeRoute<
   }),
 );
 
-// MICROBLOG YEARS
-export const routeMicroblogYearList = makeRoute<{}>("/timeline/years/");
+// TIMELINE YEARS
+export const routeTimelineYearList = makeRoute<{}>("/timeline/years/");
 
-export const routeMicroblogYear = makeRoute<
+export const routeTimelineYear = makeRoute<
   { year: string; page?: string },
   { year: number; page: number | null }
 >(

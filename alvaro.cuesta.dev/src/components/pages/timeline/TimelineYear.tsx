@@ -1,31 +1,31 @@
-import { useMicroblogItems } from "../../../microblog/promise";
+import { useTimelineItems } from "../../../timeline/promise";
 import { Template } from "../../Template";
-import { MicroblogLayout } from "./components/MicroblogLayout";
-import { MicroblogPostItem } from "./components/MicroblogPostItem";
+import { TimelineLayout } from "./components/TimelineLayout";
+import { TimelinePostItem } from "./components/TimelinePostItem";
 import type { SiteRenderMeta } from "../../../site";
-import { routeMicroblogYear, routeMicroblogYearList } from "../../../routes";
+import { routeTimelineYear, routeTimelineYearList } from "../../../routes";
 import {
-  MICROBLOG_BLURB_DESCRIPTION,
-  makeMicroblogBlurbSocialDescription,
+  TIMELINE_BLURB_DESCRIPTION,
+  makeTimelineBlurbSocialDescription,
 } from "../../../../config";
 import { makeTitle } from "../../../utils/meta";
 import { Pagination } from "../../atoms/Pagination";
 import { paginateItems } from "../../../utils/pagination";
 
-type MicroblogYearProps = {
+type TimelineYearProps = {
   siteRenderMeta: SiteRenderMeta;
   year: number;
   page: number | null;
 };
 
-export const MicroblogYear: React.FC<MicroblogYearProps> = ({
+export const TimelineYear: React.FC<TimelineYearProps> = ({
   siteRenderMeta,
   year,
   page: rawPage,
 }) => {
-  const microblogItems = useMicroblogItems();
+  const timelineItems = useTimelineItems();
 
-  const yearInfo = microblogItems.byYear.get(year);
+  const yearInfo = timelineItems.byYear.get(year);
   if (yearInfo === undefined) {
     throw new Error(`Year ${year} not found`);
   }
@@ -46,17 +46,17 @@ export const MicroblogYear: React.FC<MicroblogYearProps> = ({
 
   const prevPageLink =
     page > 1
-      ? routeMicroblogYear.build({
+      ? routeTimelineYear.build({
           year,
           page: page - 1 === 1 ? null : page - 1,
         })
       : null;
   const nextPageLink =
     page < totalPages
-      ? routeMicroblogYear.build({ year, page: page + 1 })
+      ? routeTimelineYear.build({ year, page: page + 1 })
       : null;
 
-  const canonicalPathname = routeMicroblogYear.build({
+  const canonicalPathname = routeTimelineYear.build({
     year,
     page: page === 1 ? null : page,
   });
@@ -71,18 +71,18 @@ export const MicroblogYear: React.FC<MicroblogYearProps> = ({
           `Year ${year}`,
           page > 1 && `Page ${page}`,
         ]),
-        description: MICROBLOG_BLURB_DESCRIPTION,
+        description: TIMELINE_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
-        socialDescription: makeMicroblogBlurbSocialDescription(`year ${year}`),
+        socialDescription: makeTimelineBlurbSocialDescription(`year ${year}`),
         openGraph: { type: "website" },
       }}
     >
-      <MicroblogLayout
+      <TimelineLayout
         breadcrumbs={[
-          { name: "Years", href: routeMicroblogYearList.build({}) },
+          { name: "Years", href: routeTimelineYearList.build({}) },
           {
             name: year.toString(),
-            href: routeMicroblogYear.build({ year, page: null }),
+            href: routeTimelineYear.build({ year, page: null }),
           },
           ...(page > 1 && totalPages > 1
             ? [
@@ -93,7 +93,7 @@ export const MicroblogYear: React.FC<MicroblogYearProps> = ({
               ]
             : []),
         ]}
-        microblogItems={microblogItems}
+        timelineItems={timelineItems}
         currentYear={year}
         isYearListCurrent
       >
@@ -102,19 +102,19 @@ export const MicroblogYear: React.FC<MicroblogYearProps> = ({
           {page > 1 ? ` (page ${page} of ${totalPages})` : ""}
         </h2>
 
-        <div className="microblog-list">
+        <div className="timeline-list">
           {itemsInPage.map((item) => (
-            <MicroblogPostItem key={item.filename} item={item} />
+            <TimelinePostItem key={item.filename} item={item} />
           ))}
 
-          <section className="microblog-pagination">
+          <section className="timeline-pagination">
             <Pagination
               prevPageLink={prevPageLink}
               nextPageLink={nextPageLink}
             />
           </section>
         </div>
-      </MicroblogLayout>
+      </TimelineLayout>
     </Template>
   );
 };

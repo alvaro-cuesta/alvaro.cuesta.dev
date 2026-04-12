@@ -1,20 +1,20 @@
 import path from "node:path";
-import { parseMicroblogItemModuleFromImportModule } from "./item-module";
-import type { MicroblogItemModuleParsed } from "./item-module";
+import { parseTimelineItemModuleFromImportModule } from "./item-module";
+import type { TimelineItemModuleParsed } from "./item-module";
 import { createContentLoader } from "../utils/content-loader";
 import { getBlogItems, useBlogItems } from "../blog/promise";
-import { blogItemToImplicitMicroblogItem } from "./implicit-posts";
+import { blogItemToImplicitTimelineItem } from "./implicit-posts";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze";
 import type { BlogItemModuleParsed } from "../blog/item-module";
 
 const {
-  getItems: getRawMicroblogItems,
-  useItems: useRawMicroblogItems,
+  getItems: getRawTimelineItems,
+  useItems: useRawTimelineItems,
 } = createContentLoader({
   siteRootPath: path.join(import.meta.dirname, "..", ".."),
-  contentFolderPath: path.join(import.meta.dirname, "..", "..", "microblog"),
-  contentFolderUrl: new URL("../../microblog/", import.meta.url),
-  parseModule: parseMicroblogItemModuleFromImportModule,
+  contentFolderPath: path.join(import.meta.dirname, "..", "..", "timeline"),
+  contentFolderUrl: new URL("../../timeline/", import.meta.url),
+  parseModule: parseTimelineItemModuleFromImportModule,
   analyzeOptions: {
     getSlug: (item) => item.module.slug,
     getPublicationDate: (item) => item.module.publicationDate,
@@ -23,16 +23,16 @@ const {
 });
 
 const ANALYZE_OPTIONS = {
-  getSlug: (item: { module: MicroblogItemModuleParsed }) => item.module.slug,
-  getPublicationDate: (item: { module: MicroblogItemModuleParsed }) =>
+  getSlug: (item: { module: TimelineItemModuleParsed }) => item.module.slug,
+  getPublicationDate: (item: { module: TimelineItemModuleParsed }) =>
     item.module.publicationDate,
-  getTags: (item: { module: MicroblogItemModuleParsed }) => item.module.tags,
+  getTags: (item: { module: TimelineItemModuleParsed }) => item.module.tags,
 };
 
 function deduplicateSlugs(
-  implicitItems: Item<MicroblogItemModuleParsed>[],
+  implicitItems: Item<TimelineItemModuleParsed>[],
   usedSlugs: Set<string>,
-): Item<MicroblogItemModuleParsed>[] {
+): Item<TimelineItemModuleParsed>[] {
   return implicitItems.map((item) => {
     let slug = item.module.slug;
 
@@ -56,13 +56,13 @@ function deduplicateSlugs(
 }
 
 function mergeWithImplicitPosts(
-  raw: AnalyzedItems<MicroblogItemModuleParsed>,
+  raw: AnalyzedItems<TimelineItemModuleParsed>,
   blog: AnalyzedItems<BlogItemModuleParsed>,
-): AnalyzedItems<MicroblogItemModuleParsed> {
+): AnalyzedItems<TimelineItemModuleParsed> {
   const usedSlugs = new Set(raw.all.map((item) => item.module.slug));
 
   const implicitItems = blog.allSortedByDescendingDate.map(
-    blogItemToImplicitMicroblogItem,
+    blogItemToImplicitTimelineItem,
   );
 
   const deduplicatedImplicitItems = deduplicateSlugs(implicitItems, usedSlugs);
@@ -74,14 +74,14 @@ function mergeWithImplicitPosts(
 }
 
 // Cache merged results by reference identity of inputs
-let cachedRaw: AnalyzedItems<MicroblogItemModuleParsed> | null = null;
+let cachedRaw: AnalyzedItems<TimelineItemModuleParsed> | null = null;
 let cachedBlog: AnalyzedItems<BlogItemModuleParsed> | null = null;
-let cachedMerged: AnalyzedItems<MicroblogItemModuleParsed> | null = null;
+let cachedMerged: AnalyzedItems<TimelineItemModuleParsed> | null = null;
 
 function mergeWithCache(
-  raw: AnalyzedItems<MicroblogItemModuleParsed>,
+  raw: AnalyzedItems<TimelineItemModuleParsed>,
   blog: AnalyzedItems<BlogItemModuleParsed>,
-): AnalyzedItems<MicroblogItemModuleParsed> {
+): AnalyzedItems<TimelineItemModuleParsed> {
   if (raw === cachedRaw && blog === cachedBlog && cachedMerged) {
     return cachedMerged;
   }
@@ -91,20 +91,20 @@ function mergeWithCache(
   return cachedMerged;
 }
 
-async function getMicroblogItems(): Promise<
-  AnalyzedItems<MicroblogItemModuleParsed>
+async function getTimelineItems(): Promise<
+  AnalyzedItems<TimelineItemModuleParsed>
 > {
   const [raw, blog] = await Promise.all([
-    getRawMicroblogItems(),
+    getRawTimelineItems(),
     getBlogItems(),
   ]);
   return mergeWithCache(raw, blog);
 }
 
-function useMicroblogItems(): AnalyzedItems<MicroblogItemModuleParsed> {
-  const raw = useRawMicroblogItems();
+function useTimelineItems(): AnalyzedItems<TimelineItemModuleParsed> {
+  const raw = useRawTimelineItems();
   const blog = useBlogItems();
   return mergeWithCache(raw, blog);
 }
 
-export { getMicroblogItems, useMicroblogItems };
+export { getTimelineItems, useTimelineItems };

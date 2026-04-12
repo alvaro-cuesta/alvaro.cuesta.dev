@@ -7,11 +7,11 @@ import type { SiteRenderMeta } from "../site";
 import {
   routeBlogArticleList,
   routeHome,
-  routeMicroblogList,
+  routeTimelineList,
   routeNow,
   routeBookmarks,
 } from "../routes";
-import { useMicroblogItems } from "../microblog/promise";
+import { useTimelineItems } from "../timeline/promise";
 import {
   blogItemDateToUTCISO8601Z,
   type BlogItemDate,
@@ -66,7 +66,7 @@ export const Template: React.FC<TemplateProps> = ({
   children,
 }) => {
   const blogItems = useBlogItems();
-  const microblogItems = useMicroblogItems();
+  const timelineItems = useTimelineItems();
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;
 
@@ -263,14 +263,14 @@ export const Template: React.FC<TemplateProps> = ({
                   </Link>
                 </li>
               ) : null}
-              {microblogItems.all.length > 0 ? (
+              {timelineItems.all.length > 0 ? (
                 <li>
                   <Link
                     className={cx(
-                      routeMicroblogList.isActive(canonicalPathname) &&
+                      routeTimelineList.isActive(canonicalPathname) &&
                         "is-active",
                     )}
-                    href={routeMicroblogList.build({ page: null })}
+                    href={routeTimelineList.build({ page: null })}
                   >
                     Timeline
                   </Link>

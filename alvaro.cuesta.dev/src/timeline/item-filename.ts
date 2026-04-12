@@ -4,7 +4,7 @@ import type { BlogItemDate } from "../utils/item-dates";
 const FILENAME_REGEX =
   /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})_(?<hour>\d{2})-(?<minute>\d{2})\.mdx?$/;
 
-export const parseMicroblogItemFilename = (
+export const parseTimelineItemFilename = (
   filename: string,
 ): {
   creationDate: BlogItemDate;
@@ -13,7 +13,7 @@ export const parseMicroblogItemFilename = (
 
   if (!match) {
     throw new Error(
-      `The microblog filename "${filename}" does not match the expected format "yyyy-mm-dd_hh-mm.mdx".`,
+      `The timeline filename "${filename}" does not match the expected format "yyyy-mm-dd_hh-mm.mdx".`,
     );
   }
 

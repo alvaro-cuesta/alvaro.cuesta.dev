@@ -1,31 +1,31 @@
-import { MicroblogLayout } from "./components/MicroblogLayout";
-import { MicroblogPostItem } from "./components/MicroblogPostItem";
+import { TimelineLayout } from "./components/TimelineLayout";
+import { TimelinePostItem } from "./components/TimelinePostItem";
 import { Template } from "../../Template";
-import { useMicroblogItems } from "../../../microblog/promise";
+import { useTimelineItems } from "../../../timeline/promise";
 import type { SiteRenderMeta } from "../../../site";
-import { routeMicroblogTag, routeMicroblogTagList } from "../../../routes";
+import { routeTimelineTag, routeTimelineTagList } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
-  MICROBLOG_BLURB_DESCRIPTION,
-  makeMicroblogBlurbSocialDescription,
+  TIMELINE_BLURB_DESCRIPTION,
+  makeTimelineBlurbSocialDescription,
 } from "../../../../config";
 import { Pagination } from "../../atoms/Pagination";
 import { paginateItems } from "../../../utils/pagination";
 
-type MicroblogTagProps = {
+type TimelineTagProps = {
   siteRenderMeta: SiteRenderMeta;
   tag: string;
   page: number | null;
 };
 
-export const MicroblogTag: React.FC<MicroblogTagProps> = ({
+export const TimelineTag: React.FC<TimelineTagProps> = ({
   siteRenderMeta,
   tag,
   page: rawPage,
 }) => {
-  const microblogItems = useMicroblogItems();
+  const timelineItems = useTimelineItems();
 
-  const allItemsInTag = microblogItems.byTag.get(tag);
+  const allItemsInTag = timelineItems.byTag.get(tag);
 
   if (allItemsInTag === undefined) {
     throw new Error(`Tag ${tag} not found`);
@@ -40,12 +40,12 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
 
   const prevPageLink =
     page > 1
-      ? routeMicroblogTag.build({ tag, page: page - 1 === 1 ? null : page - 1 })
+      ? routeTimelineTag.build({ tag, page: page - 1 === 1 ? null : page - 1 })
       : null;
   const nextPageLink =
-    page < totalPages ? routeMicroblogTag.build({ tag, page: page + 1 }) : null;
+    page < totalPages ? routeTimelineTag.build({ tag, page: page + 1 }) : null;
 
-  const canonicalPathname = routeMicroblogTag.build({
+  const canonicalPathname = routeTimelineTag.build({
     tag,
     page: page === 1 ? null : page,
   });
@@ -60,16 +60,16 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
           `Tag "${tag}"`,
           page > 1 && `Page ${page}`,
         ]),
-        description: MICROBLOG_BLURB_DESCRIPTION,
+        description: TIMELINE_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
-        socialDescription: makeMicroblogBlurbSocialDescription(`tag ${tag}`),
+        socialDescription: makeTimelineBlurbSocialDescription(`tag ${tag}`),
         openGraph: { type: "website" },
       }}
     >
-      <MicroblogLayout
+      <TimelineLayout
         breadcrumbs={[
-          { name: "Tags", href: routeMicroblogTagList.build({}) },
-          { name: tag, href: routeMicroblogTag.build({ tag, page: null }) },
+          { name: "Tags", href: routeTimelineTagList.build({}) },
+          { name: tag, href: routeTimelineTag.build({ tag, page: null }) },
           ...(page > 1 && totalPages > 1
             ? [
                 {
@@ -79,7 +79,7 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
               ]
             : []),
         ]}
-        microblogItems={microblogItems}
+        timelineItems={timelineItems}
         currentTags={[tag]}
         isTagListCurrent
       >
@@ -88,19 +88,19 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
           {page > 1 ? ` (page ${page} of ${totalPages})` : ""}
         </h2>
 
-        <div className="microblog-list">
+        <div className="timeline-list">
           {itemsInPage.map((item) => (
-            <MicroblogPostItem key={item.filename} item={item} />
+            <TimelinePostItem key={item.filename} item={item} />
           ))}
 
-          <section className="microblog-pagination">
+          <section className="timeline-pagination">
             <Pagination
               prevPageLink={prevPageLink}
               nextPageLink={nextPageLink}
             />
           </section>
         </div>
-      </MicroblogLayout>
+      </TimelineLayout>
     </Template>
   );
 };

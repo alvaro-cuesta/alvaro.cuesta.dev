@@ -6,7 +6,7 @@ import type {
 import fs from "node:fs/promises";
 import {
   BLOG_BLURB_DESCRIPTION,
-  MICROBLOG_BLURB_DESCRIPTION,
+  TIMELINE_BLURB_DESCRIPTION,
   MY_NAME,
   RENDER_TO_STREAM_OPTIONS,
   SITE_SHORT_DESCRIPTION,
@@ -35,18 +35,18 @@ import {
   routeBlogYearList,
   route404,
   routeHome,
-  routeMicroblogPost,
-  routeMicroblogList,
-  routeMicroblogTag,
-  routeMicroblogTagList,
-  routeMicroblogYear,
-  routeMicroblogYearList,
+  routeTimelinePost,
+  routeTimelineList,
+  routeTimelineTag,
+  routeTimelineTagList,
+  routeTimelineYear,
+  routeTimelineYearList,
   routeNow,
 } from "./routes";
 import { feedsPlugin } from "./plugins/feeds";
 import { compareInstants } from "./plugins/feeds/dates";
 import { getBlogFeedSourceItems } from "./blog/feed-source";
-import { getMicroblogFeedSourceItems } from "./microblog/feed-source";
+import { getTimelineFeedSourceItems } from "./timeline/feed-source";
 import { makeTitle } from "./utils/meta";
 
 export type SiteFeedUrls = {
@@ -119,36 +119,36 @@ const render =
       blogArticleListMatch.page &&
       blogArticleListMatch.page > 1;
 
-    // Microblog
-    const microblogListMatch = routeMicroblogList.match(
+    // Timeline
+    const timelineListMatch = routeTimelineList.match(
       siteRenderMeta.pathname,
     );
 
-    const isMicroblogPost = routeMicroblogPost.match(siteRenderMeta.pathname);
-    const isMicroblogFrontpage =
-      microblogListMatch !== null &&
-      (microblogListMatch.page === null || microblogListMatch.page === 1);
-    const microblogTagMatch = routeMicroblogTag.match(siteRenderMeta.pathname);
-    const microblogYearMatch = routeMicroblogYear.match(
+    const isTimelinePost = routeTimelinePost.match(siteRenderMeta.pathname);
+    const isTimelineFrontpage =
+      timelineListMatch !== null &&
+      (timelineListMatch.page === null || timelineListMatch.page === 1);
+    const timelineTagMatch = routeTimelineTag.match(siteRenderMeta.pathname);
+    const timelineYearMatch = routeTimelineYear.match(
       siteRenderMeta.pathname,
     );
-    const isMicroblogGenericRoute =
-      routeMicroblogTagList.match(siteRenderMeta.pathname) ||
-      (microblogTagMatch &&
-        (!microblogTagMatch.page || microblogTagMatch.page <= 1)) ||
-      routeMicroblogYearList.match(siteRenderMeta.pathname) ||
-      (microblogYearMatch &&
-        (!microblogYearMatch.page || microblogYearMatch.page <= 1));
-    const isMicroblogPagination =
-      (microblogListMatch !== null &&
-        microblogListMatch.page &&
-        microblogListMatch.page > 1) ||
-      (microblogTagMatch &&
-        microblogTagMatch.page &&
-        microblogTagMatch.page > 1) ||
-      (microblogYearMatch &&
-        microblogYearMatch.page &&
-        microblogYearMatch.page > 1);
+    const isTimelineGenericRoute =
+      routeTimelineTagList.match(siteRenderMeta.pathname) ||
+      (timelineTagMatch &&
+        (!timelineTagMatch.page || timelineTagMatch.page <= 1)) ||
+      routeTimelineYearList.match(siteRenderMeta.pathname) ||
+      (timelineYearMatch &&
+        (!timelineYearMatch.page || timelineYearMatch.page <= 1));
+    const isTimelinePagination =
+      (timelineListMatch !== null &&
+        timelineListMatch.page &&
+        timelineListMatch.page > 1) ||
+      (timelineTagMatch &&
+        timelineTagMatch.page &&
+        timelineTagMatch.page > 1) ||
+      (timelineYearMatch &&
+        timelineYearMatch.page &&
+        timelineYearMatch.page > 1);
 
     return {
       reactNode: <Root siteRenderMeta={siteRenderMeta} />,
@@ -161,13 +161,13 @@ const render =
               ? { priority: 0.9 }
               : isBlogArticle
                 ? { priority: 0.85 }
-                : isMicroblogPost
+                : isTimelinePost
                   ? { priority: 0.8 }
-                  : isBlogArticleFrontpage || isMicroblogFrontpage
+                  : isBlogArticleFrontpage || isTimelineFrontpage
                     ? { priority: 0.7 }
-                    : isBlogGenericRoute || isMicroblogGenericRoute
+                    : isBlogGenericRoute || isTimelineGenericRoute
                       ? { priority: 0.3 }
-                      : isBlogPagination || isMicroblogPagination
+                      : isBlogPagination || isTimelinePagination
                         ? { priority: 0.2 }
                         : undefined,
       },
@@ -258,12 +258,12 @@ export async function makeSite(): Promise<
     sitemapFormats: ["atom"],
   });
 
-  const microblogFeeds = feedsPlugin({
-    getItems: ({ baseUrl }) => getMicroblogFeedSourceItems(baseUrl),
-    homePagePathname: routeMicroblogList.build({ page: null }),
+  const timelineFeeds = feedsPlugin({
+    getItems: ({ baseUrl }) => getTimelineFeedSourceItems(baseUrl),
+    homePagePathname: routeTimelineList.build({ page: null }),
     mountPointFragments: ["timeline"],
     title: makeTitle(["Timeline"], { disableReverse: true }),
-    description: MICROBLOG_BLURB_DESCRIPTION,
+    description: TIMELINE_BLURB_DESCRIPTION,
     authors: ({ baseUrl }) => [
       {
         name: MY_NAME,
@@ -280,18 +280,18 @@ export async function makeSite(): Promise<
 
   const allFeeds = feedsPlugin({
     getItems: async ({ baseUrl }) => {
-      const [blogItems, microblogItems] = await Promise.all([
+      const [blogItems, timelineItems] = await Promise.all([
         getBlogFeedSourceItems(baseUrl),
-        getMicroblogFeedSourceItems(baseUrl),
+        getTimelineFeedSourceItems(baseUrl),
       ]);
 
-      // Exclude implicit (blog-generated) microblog items from the aggregate
+      // Exclude implicit (blog-generated) timeline items from the aggregate
       // feed since the blog posts are already included directly
-      const nonImplicitMicroblogItems = microblogItems.filter(
+      const nonImplicitTimelineItems = timelineItems.filter(
         (item) => !item.metadata?.implicit,
       );
 
-      return [...blogItems, ...nonImplicitMicroblogItems].sort((a, b) =>
+      return [...blogItems, ...nonImplicitTimelineItems].sort((a, b) =>
         compareInstants(b.datePublished, a.datePublished),
       );
     },
@@ -322,7 +322,7 @@ export async function makeSite(): Promise<
     additionalPathnames: async () => [
       ...(await allFeeds.getFeedSitemapPathnames()),
       ...(await blogFeeds.getFeedSitemapPathnames()),
-      ...(await microblogFeeds.getFeedSitemapPathnames()),
+      ...(await timelineFeeds.getFeedSitemapPathnames()),
     ],
   });
 
@@ -346,7 +346,7 @@ export async function makeSite(): Promise<
       feedUrls: {
         all: allFeeds.relativeUrls.atom,
         blog: blogFeeds.relativeUrls.atom,
-        timeline: microblogFeeds.relativeUrls.atom,
+        timeline: timelineFeeds.relativeUrls.atom,
       },
     }),
     renderToStreamOptions: RENDER_TO_STREAM_OPTIONS,
@@ -360,7 +360,7 @@ export async function makeSite(): Promise<
       starryNightCss,
       allFeeds,
       blogFeeds,
-      microblogFeeds,
+      timelineFeeds,
       sitemap,
     ],
   };

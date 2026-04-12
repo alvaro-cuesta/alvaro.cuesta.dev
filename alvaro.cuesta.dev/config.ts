@@ -39,10 +39,10 @@ export const BLOG_BLURB_DESCRIPTION =
 export const makeBlogBlurbSocialDescription = (browsing?: string | undefined) =>
   `You're browsing ${browsing ? `${browsing} of ` : ""}Álvaro Cuesta's blog — keep exploring articles on technology, music, and creativity.`;
 
-export const MICROBLOG_BLURB_DESCRIPTION =
+export const TIMELINE_BLURB_DESCRIPTION =
   "Álvaro Cuesta's timeline — short-form thoughts on technology, music, creativity, and more.";
 
-export const makeMicroblogBlurbSocialDescription = (
+export const makeTimelineBlurbSocialDescription = (
   browsing?: string | undefined,
 ) =>
   `You're browsing ${browsing ? `${browsing} of ` : ""}Álvaro Cuesta's timeline — short-form thoughts on technology, music, creativity, and more.`;

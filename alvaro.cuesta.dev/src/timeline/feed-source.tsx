@@ -1,5 +1,5 @@
-import { getMicroblogItems } from "./promise";
-import { routeMicroblogPost } from "../routes";
+import { getTimelineItems } from "./promise";
+import { routeTimelinePost } from "../routes";
 import { htmlToPlainText } from "../utils/html";
 import {
   renderContentItemHtml,
@@ -19,10 +19,10 @@ function makeExcerptTitle(html: string): string {
   return `${text.slice(0, EXCERPT_LENGTH)}…`;
 }
 
-export const getMicroblogFeedSourceItems = createFeedSource(
-  getMicroblogItems,
+export const getTimelineFeedSourceItems = createFeedSource(
+  getTimelineItems,
   async (baseUrl, item) => {
-    const pathname = routeMicroblogPost.build({ slug: item.module.slug });
+    const pathname = routeTimelinePost.build({ slug: item.module.slug });
 
     const html = await renderContentItemHtml({
       baseUrl,

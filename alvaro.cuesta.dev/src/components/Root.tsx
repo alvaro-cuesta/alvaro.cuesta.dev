@@ -8,12 +8,12 @@ import {
   routeBlogYear,
   routeBlogYearList,
   routeHome,
-  routeMicroblogPost,
-  routeMicroblogList,
-  routeMicroblogTag,
-  routeMicroblogTagList,
-  routeMicroblogYear,
-  routeMicroblogYearList,
+  routeTimelinePost,
+  routeTimelineList,
+  routeTimelineTag,
+  routeTimelineTagList,
+  routeTimelineYear,
+  routeTimelineYearList,
   routeNow,
   routeBookmarks,
 } from "../routes";
@@ -24,12 +24,12 @@ import { BlogTagList } from "./pages/blog/BlogTagsList";
 import { BlogYear } from "./pages/blog/BlogYear";
 import { BlogYearList } from "./pages/blog/BlogYearList";
 import { Homepage } from "./pages/Homepage";
-import { MicroblogPostPage } from "./pages/microblog/MicroblogPost";
-import { MicroblogList } from "./pages/microblog/MicroblogList";
-import { MicroblogTag } from "./pages/microblog/MicroblogTag";
-import { MicroblogTagList } from "./pages/microblog/MicroblogTagList";
-import { MicroblogYear } from "./pages/microblog/MicroblogYear";
-import { MicroblogYearList } from "./pages/microblog/MicroblogYearList";
+import { TimelinePostPage } from "./pages/timeline/TimelinePost";
+import { TimelineList } from "./pages/timeline/TimelineList";
+import { TimelineTag } from "./pages/timeline/TimelineTag";
+import { TimelineTagList } from "./pages/timeline/TimelineTagList";
+import { TimelineYear } from "./pages/timeline/TimelineYear";
+import { TimelineYearList } from "./pages/timeline/TimelineYearList";
 import { NotFound } from "./pages/NotFound";
 import { makeMdxPage } from "./molecules/MdxPage";
 
@@ -59,52 +59,52 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
     return <Bookmarks siteRenderMeta={siteRenderMeta} />;
   }
 
-  const routeMicroblogListMatch = routeMicroblogList.match(pathname);
-  if (routeMicroblogListMatch) {
+  const routeTimelineListMatch = routeTimelineList.match(pathname);
+  if (routeTimelineListMatch) {
     return (
-      <MicroblogList
+      <TimelineList
         siteRenderMeta={siteRenderMeta}
-        page={routeMicroblogListMatch.page}
+        page={routeTimelineListMatch.page}
       />
     );
   }
 
-  if (routeMicroblogTagList.match(pathname)) {
-    return <MicroblogTagList siteRenderMeta={siteRenderMeta} />;
+  if (routeTimelineTagList.match(pathname)) {
+    return <TimelineTagList siteRenderMeta={siteRenderMeta} />;
   }
 
-  const routeMicroblogTagMatch = routeMicroblogTag.match(pathname);
-  if (routeMicroblogTagMatch) {
+  const routeTimelineTagMatch = routeTimelineTag.match(pathname);
+  if (routeTimelineTagMatch) {
     return (
-      <MicroblogTag
+      <TimelineTag
         siteRenderMeta={siteRenderMeta}
-        tag={routeMicroblogTagMatch.tag}
-        page={routeMicroblogTagMatch.page}
+        tag={routeTimelineTagMatch.tag}
+        page={routeTimelineTagMatch.page}
       />
     );
   }
 
-  if (routeMicroblogYearList.match(pathname)) {
-    return <MicroblogYearList siteRenderMeta={siteRenderMeta} />;
+  if (routeTimelineYearList.match(pathname)) {
+    return <TimelineYearList siteRenderMeta={siteRenderMeta} />;
   }
 
-  const routeMicroblogYearMatch = routeMicroblogYear.match(pathname);
-  if (routeMicroblogYearMatch) {
+  const routeTimelineYearMatch = routeTimelineYear.match(pathname);
+  if (routeTimelineYearMatch) {
     return (
-      <MicroblogYear
+      <TimelineYear
         siteRenderMeta={siteRenderMeta}
-        year={routeMicroblogYearMatch.year}
-        page={routeMicroblogYearMatch.page}
+        year={routeTimelineYearMatch.year}
+        page={routeTimelineYearMatch.page}
       />
     );
   }
 
-  const routeMicroblogPostMatch = routeMicroblogPost.match(pathname);
-  if (routeMicroblogPostMatch) {
+  const routeTimelinePostMatch = routeTimelinePost.match(pathname);
+  if (routeTimelinePostMatch) {
     return (
-      <MicroblogPostPage
+      <TimelinePostPage
         siteRenderMeta={siteRenderMeta}
-        slug={routeMicroblogPostMatch.slug}
+        slug={routeTimelinePostMatch.slug}
       />
     );
   }

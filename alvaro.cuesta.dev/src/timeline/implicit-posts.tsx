@@ -2,8 +2,8 @@ import type { MDXContent } from "mdx/types";
 import type { Item } from "../utils/analyze";
 import type { BlogItemModuleParsed } from "../blog/item-module";
 import {
-  type MicroblogItemModuleParsed,
-  microblogSlugFromDate,
+  type TimelineItemModuleParsed,
+  timelineSlugFromDate,
 } from "./item-module";
 
 const PREFIXES = [
@@ -69,7 +69,7 @@ function makeImplicitComponent(module: BlogItemModuleParsed): MDXContent {
             {module.tags.map((tag, i) => (
               <span key={tag.slug}>
                 {i > 0 ? " " : ""}
-                <A href={`microblog-tag:///${tag.slug}`}>#{tag.original}</A>
+                <A href={`timeline-tag:///${tag.slug}`}>#{tag.original}</A>
               </span>
             ))}
           </p>
@@ -81,11 +81,11 @@ function makeImplicitComponent(module: BlogItemModuleParsed): MDXContent {
   return ImplicitBlogPost;
 }
 
-export function blogItemToImplicitMicroblogItem(
+export function blogItemToImplicitTimelineItem(
   blogItem: Item<BlogItemModuleParsed>,
-): Item<MicroblogItemModuleParsed> {
+): Item<TimelineItemModuleParsed> {
   const { module } = blogItem;
-  const slug = microblogSlugFromDate(module.creationDate);
+  const slug = timelineSlugFromDate(module.creationDate);
 
   return {
     filename: `implicit:${module.slug}`,

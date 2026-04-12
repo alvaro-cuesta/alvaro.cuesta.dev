@@ -1,51 +1,51 @@
 import { Template } from "../../Template";
 import { Pagination } from "../../atoms/Pagination";
-import { useMicroblogItems } from "../../../microblog/promise";
+import { useTimelineItems } from "../../../timeline/promise";
 import type { SiteRenderMeta } from "../../../site";
-import { routeMicroblogPost, routeMicroblogList } from "../../../routes";
+import { routeTimelinePost, routeTimelineList } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
-  MICROBLOG_BLURB_DESCRIPTION,
-  makeMicroblogBlurbSocialDescription,
+  TIMELINE_BLURB_DESCRIPTION,
+  makeTimelineBlurbSocialDescription,
 } from "../../../../config";
 import {
   blogItemDateToShortString,
   getBlogItemDateYear,
 } from "../../../utils/item-dates";
-import { MicroblogLayout } from "./components/MicroblogLayout";
-import { MicroblogPostItem } from "./components/MicroblogPostItem";
+import { TimelineLayout } from "./components/TimelineLayout";
+import { TimelinePostItem } from "./components/TimelinePostItem";
 
-type MicroblogPostPageProps = {
+type TimelinePostPageProps = {
   siteRenderMeta: SiteRenderMeta;
   slug: string;
 };
 
-export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
+export const TimelinePostPage: React.FC<TimelinePostPageProps> = ({
   siteRenderMeta,
   slug,
 }) => {
-  const microblogItems = useMicroblogItems();
+  const timelineItems = useTimelineItems();
 
-  const item = microblogItems.bySlug.get(slug);
+  const item = timelineItems.bySlug.get(slug);
 
   if (item === undefined) {
-    throw new Error(`Microblog post "${slug}" not found`);
+    throw new Error(`Timeline post "${slug}" not found`);
   }
 
   const { publicationDate, lastModificationDate, tags } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);
 
-  const page = microblogItems.pageBySlug.get(slug) ?? 1;
+  const page = timelineItems.pageBySlug.get(slug) ?? 1;
 
-  const sortedIndex = microblogItems.allSortedByDescendingDate.indexOf(item);
-  const newerPost = microblogItems.allSortedByDescendingDate[sortedIndex - 1];
-  const olderPost = microblogItems.allSortedByDescendingDate[sortedIndex + 1];
+  const sortedIndex = timelineItems.allSortedByDescendingDate.indexOf(item);
+  const newerPost = timelineItems.allSortedByDescendingDate[sortedIndex - 1];
+  const olderPost = timelineItems.allSortedByDescendingDate[sortedIndex + 1];
 
   const newerPostHref = newerPost
-    ? routeMicroblogPost.build({ slug: newerPost.module.slug })
+    ? routeTimelinePost.build({ slug: newerPost.module.slug })
     : null;
   const olderPostHref = olderPost
-    ? routeMicroblogPost.build({ slug: olderPost.module.slug })
+    ? routeTimelinePost.build({ slug: olderPost.module.slug })
     : null;
 
   return (
@@ -53,27 +53,27 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
       siteRenderMeta={siteRenderMeta}
       metaTags={{
         title: makeTitle(["Timeline", dateStr]),
-        description: MICROBLOG_BLURB_DESCRIPTION,
+        description: TIMELINE_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
-        socialDescription: makeMicroblogBlurbSocialDescription(dateStr),
+        socialDescription: makeTimelineBlurbSocialDescription(dateStr),
         publishedTime: publicationDate,
         modifiedTime: lastModificationDate ?? undefined,
         openGraph: { type: "article" },
       }}
     >
-      <MicroblogLayout
+      <TimelineLayout
         breadcrumbs={[
           ...(page > 1
             ? [
                 {
                   name: `Page ${page}`,
-                  href: routeMicroblogList.build({ page }),
+                  href: routeTimelineList.build({ page }),
                 },
               ]
             : []),
           { name: dateStr, href: siteRenderMeta.pathname },
         ]}
-        microblogItems={microblogItems}
+        timelineItems={timelineItems}
         currentTags={tags}
         currentYear={getBlogItemDateYear(publicationDate)}
         isTagListCurrent={tags.length > 0}
@@ -84,9 +84,9 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
           <small>{blogItemDateToShortString(publicationDate)}</small>
         </h2>
 
-        <MicroblogPostItem item={item} />
+        <TimelinePostItem item={item} />
 
-        <section className="microblog-pagination">
+        <section className="timeline-pagination">
           <Pagination
             prevPageLink={newerPostHref}
             nextPageLink={olderPostHref}
@@ -94,7 +94,7 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
             nextLabel="Older post"
           />
         </section>
-      </MicroblogLayout>
+      </TimelineLayout>
     </Template>
   );
 };

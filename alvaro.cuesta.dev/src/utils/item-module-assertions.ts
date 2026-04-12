@@ -127,7 +127,7 @@ export type ContentItemModule = NodeModule & {
 };
 
 /**
- * Assert common content item module fields shared by blog and microblog:
+ * Assert common content item module fields shared by blog and timeline:
  * MDX default export, date fields, draft, and tableOfContents.
  *
  * Note: individual assertion helpers intentionally don't use `asserts` return

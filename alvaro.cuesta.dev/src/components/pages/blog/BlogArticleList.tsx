@@ -6,7 +6,7 @@ import { BlogArticleListItem } from "./components/BlogArticleListItem";
 import type { SiteRenderMeta } from "../../../site";
 import {
   routeBlogArticleList,
-  routeMicroblogList,
+  routeTimelineList,
   routeNow,
 } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
@@ -88,7 +88,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
             </p>
             <p>
               Check out my{" "}
-              <Link href={routeMicroblogList.build({ page: null })}>
+              <Link href={routeTimelineList.build({ page: null })}>
                 timeline
               </Link>{" "}
               for more frequent updates, quick thoughts, and random musings. You

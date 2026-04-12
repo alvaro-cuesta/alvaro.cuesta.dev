@@ -1,6 +1,6 @@
 import type { MDXContent } from "mdx/types";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
-import { parseMicroblogItemFilename } from "./item-filename";
+import { parseTimelineItemFilename } from "./item-filename";
 import {
   type BlogItemDate,
   type ItemModuleDate,
@@ -13,7 +13,7 @@ import {
   assertOptionalStringArray,
 } from "../utils/item-module-assertions";
 
-type MicroblogItemModule = NodeModule & {
+type TimelineItemModule = NodeModule & {
   default: MDXContent;
 
   // Known properties exportable from the MDX file
@@ -27,16 +27,16 @@ type MicroblogItemModule = NodeModule & {
   tableOfContents: Toc;
 };
 
-function assertIsMicroblogItemModule(
+function assertIsTimelineItemModule(
   module: NodeModule,
-): asserts module is MicroblogItemModule {
-  const label = "microblog post";
+): asserts module is TimelineItemModule {
+  const label = "timeline post";
 
   assertIsContentItemModule(module, label);
   assertOptionalStringArray(module, "hashtags", label);
 }
 
-export function microblogSlugFromDate(date: BlogItemDate): string {
+export function timelineSlugFromDate(date: BlogItemDate): string {
   const dt = blogItemDateToPlainDateTime(date);
   return `${dt.year.toString().padStart(4, "0")}${dt.month
     .toString()
@@ -45,7 +45,7 @@ export function microblogSlugFromDate(date: BlogItemDate): string {
     .padStart(2, "0")}${dt.minute.toString().padStart(2, "0")}`;
 }
 
-export type MicroblogItemModuleParsed = {
+export type TimelineItemModuleParsed = {
   Component: MDXContent;
   slug: string;
   creationDate: BlogItemDate;
@@ -57,18 +57,18 @@ export type MicroblogItemModuleParsed = {
   implicit: boolean;
 };
 
-type MicroblogItemModuleInferredMetadata = {
+type TimelineItemModuleInferredMetadata = {
   lastModificationDate: ItemModuleDate | null;
 };
 
-export const parseMicroblogItemModuleFromImportModule = (
+export const parseTimelineItemModuleFromImportModule = (
   filename: string,
   module: NodeModule,
-  inferredMetadata: MicroblogItemModuleInferredMetadata,
-): MicroblogItemModuleParsed => {
-  assertIsMicroblogItemModule(module);
+  inferredMetadata: TimelineItemModuleInferredMetadata,
+): TimelineItemModuleParsed => {
+  assertIsTimelineItemModule(module);
 
-  const parsedFilename = parseMicroblogItemFilename(filename);
+  const parsedFilename = parseTimelineItemFilename(filename);
 
   const creationDate = module.creationDate
     ? itemModuleDateToBlogItemDate(module.creationDate)
@@ -86,7 +86,7 @@ export const parseMicroblogItemModuleFromImportModule = (
 
   return {
     Component: module.default,
-    slug: microblogSlugFromDate(creationDate),
+    slug: timelineSlugFromDate(creationDate),
     creationDate,
     publicationDate,
     lastModificationDate,

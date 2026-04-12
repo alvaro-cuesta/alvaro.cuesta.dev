@@ -1,27 +1,27 @@
 import type { AnalyzedItems } from "./analyze";
 import type { BlogItemModuleParsed } from "../blog/item-module";
-import type { MicroblogItemModuleParsed } from "../microblog/item-module";
+import type { TimelineItemModuleParsed } from "../timeline/item-module";
 import {
   routeBlogArticle,
   routeBlogTag,
   routeBlogYear,
-  routeMicroblogPost,
-  routeMicroblogTag,
-  routeMicroblogYear,
+  routeTimelinePost,
+  routeTimelineTag,
+  routeTimelineYear,
 } from "../routes";
 
 type RewriteContext = {
   blogItems: AnalyzedItems<BlogItemModuleParsed>;
-  microblogItems: AnalyzedItems<MicroblogItemModuleParsed>;
+  timelineItems: AnalyzedItems<TimelineItemModuleParsed>;
 };
 
 const SUPPORTED_PROTOCOLS = new Set([
   "blog-post",
   "blog-tag",
   "blog-year",
-  "microblog-post",
-  "microblog-tag",
-  "microblog-year",
+  "timeline-post",
+  "timeline-tag",
+  "timeline-year",
 ]);
 
 const parseCustomProtocolUrl = (href: string): URL | null => {
@@ -47,7 +47,7 @@ const makeBrokenHrefError = (href: string, reason: string): Error =>
 
 export const rewriteCustomProtocolHref = (
   href: string | undefined,
-  { blogItems, microblogItems }: RewriteContext,
+  { blogItems, timelineItems }: RewriteContext,
 ): string | undefined => {
   if (href === undefined) {
     return href;
@@ -110,39 +110,39 @@ export const rewriteCustomProtocolHref = (
       return `${routeBlogYear.build({ year })}${suffix}`;
     }
 
-    case "microblog-post": {
-      if (!microblogItems.bySlug.has(value)) {
+    case "timeline-post": {
+      if (!timelineItems.bySlug.has(value)) {
         throw makeBrokenHrefError(
           href,
-          `microblog post "${value}" does not exist`,
+          `timeline post "${value}" does not exist`,
         );
       }
 
-      return `${routeMicroblogPost.build({ slug: value })}${suffix}`;
+      return `${routeTimelinePost.build({ slug: value })}${suffix}`;
     }
 
-    case "microblog-tag": {
-      if (!microblogItems.byTag.has(value)) {
+    case "timeline-tag": {
+      if (!timelineItems.byTag.has(value)) {
         throw makeBrokenHrefError(
           href,
-          `microblog tag "${value}" does not exist`,
+          `timeline tag "${value}" does not exist`,
         );
       }
 
-      return `${routeMicroblogTag.build({ tag: value, page: null })}${suffix}`;
+      return `${routeTimelineTag.build({ tag: value, page: null })}${suffix}`;
     }
 
-    case "microblog-year": {
+    case "timeline-year": {
       const year = parseInt(value, 10);
 
-      if (Number.isNaN(year) || !microblogItems.byYear.has(year)) {
+      if (Number.isNaN(year) || !timelineItems.byYear.has(year)) {
         throw makeBrokenHrefError(
           href,
-          `microblog year "${value}" does not exist`,
+          `timeline year "${value}" does not exist`,
         );
       }
 
-      return `${routeMicroblogYear.build({ year, page: null })}${suffix}`;
+      return `${routeTimelineYear.build({ year, page: null })}${suffix}`;
     }
 
     default:

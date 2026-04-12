@@ -1,20 +1,20 @@
 import type { ReactNode } from "react";
 import { ContentSidebar } from "../../../molecules/ContentSidebar";
 import type { AnalyzedItems } from "../../../../utils/analyze";
-import type { MicroblogItemModuleParsed } from "../../../../microblog/item-module";
+import type { TimelineItemModuleParsed } from "../../../../timeline/item-module";
 import type { BreadcrumbItem } from "../../../atoms/Breadcrumb";
 import {
-  routeMicroblogList,
-  routeMicroblogTag,
-  routeMicroblogTagList,
-  routeMicroblogYear,
-  routeMicroblogYearList,
+  routeTimelineList,
+  routeTimelineTag,
+  routeTimelineTagList,
+  routeTimelineYear,
+  routeTimelineYearList,
 } from "../../../../routes";
 import { ContentListsLayout } from "../../../molecules/ContentListsLayout";
 
-type MicroblogLayoutProps = {
+type TimelineLayoutProps = {
   breadcrumbs?: BreadcrumbItem[];
-  microblogItems: AnalyzedItems<MicroblogItemModuleParsed>;
+  timelineItems: AnalyzedItems<TimelineItemModuleParsed>;
   currentTags?: readonly string[];
   currentYear?: number | null;
   isTagListCurrent?: boolean;
@@ -22,9 +22,9 @@ type MicroblogLayoutProps = {
   children?: ReactNode;
 };
 
-export const MicroblogLayout: React.FC<MicroblogLayoutProps> = ({
+export const TimelineLayout: React.FC<TimelineLayoutProps> = ({
   breadcrumbs,
-  microblogItems,
+  timelineItems,
   currentTags,
   currentYear,
   isTagListCurrent,
@@ -33,23 +33,23 @@ export const MicroblogLayout: React.FC<MicroblogLayoutProps> = ({
 }) => (
   <ContentListsLayout
     rootName="Timeline"
-    rootHref={routeMicroblogList.build({ page: null })}
+    rootHref={routeTimelineList.build({ page: null })}
     breadcrumbs={breadcrumbs}
     sidebar={
       <ContentSidebar
-        className="microblog-sidebar"
+        className="timeline-sidebar"
         tagsDescendingByArticleCount={
-          microblogItems.tagsDescendingByArticleCount
+          timelineItems.tagsDescendingByArticleCount
         }
-        yearsSortedDescending={microblogItems.yearsSortedDescending}
+        yearsSortedDescending={timelineItems.yearsSortedDescending}
         currentTags={currentTags}
         currentYear={currentYear}
         isTagListCurrent={isTagListCurrent}
         isYearListCurrent={isYearListCurrent}
-        buildTagListHref={() => routeMicroblogTagList.build({})}
-        buildTagHref={(tag) => routeMicroblogTag.build({ tag, page: null })}
-        buildYearListHref={() => routeMicroblogYearList.build({})}
-        buildYearHref={(year) => routeMicroblogYear.build({ year, page: null })}
+        buildTagListHref={() => routeTimelineTagList.build({})}
+        buildTagHref={(tag) => routeTimelineTag.build({ tag, page: null })}
+        buildYearListHref={() => routeTimelineYearList.build({})}
+        buildYearHref={(year) => routeTimelineYear.build({ year, page: null })}
       />
     }
   >

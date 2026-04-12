@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AnalyzedItems } from "./analyze";
 import type { BlogItemModuleParsed } from "../blog/item-module";
-import type { MicroblogItemModuleParsed } from "../microblog/item-module";
+import type { TimelineItemModuleParsed } from "../timeline/item-module";
 import { rewriteCustomProtocolHref } from "./href";
 
 const blogItems: AnalyzedItems<BlogItemModuleParsed> = {
@@ -36,7 +36,7 @@ const blogItems: AnalyzedItems<BlogItemModuleParsed> = {
   tagsDescendingByArticleCount: [],
 };
 
-const microblogItems: AnalyzedItems<MicroblogItemModuleParsed> = {
+const timelineItems: AnalyzedItems<TimelineItemModuleParsed> = {
   all: [
     {
       filename: "2026-04-10_12-00.mdx",
@@ -82,7 +82,7 @@ const microblogItems: AnalyzedItems<MicroblogItemModuleParsed> = {
   tagsDescendingByArticleCount: [],
 };
 
-const ctx = { blogItems, microblogItems };
+const ctx = { blogItems, timelineItems };
 
 describe("rewriteCustomProtocolHref", () => {
   it("returns undefined for undefined input", () => {
@@ -187,17 +187,17 @@ describe("rewriteCustomProtocolHref", () => {
     });
   });
 
-  describe("microblog-post:///", () => {
-    it("rewrites to the microblog post page", () => {
+  describe("timeline-post:///", () => {
+    it("rewrites to the timeline post page", () => {
       expect(
-        rewriteCustomProtocolHref("microblog-post:///202604101200", ctx),
+        rewriteCustomProtocolHref("timeline-post:///202604101200", ctx),
       ).toBe("/timeline/202604101200/");
     });
 
     it("preserves hash and query string", () => {
       expect(
         rewriteCustomProtocolHref(
-          "microblog-post:///202604101200?q=1#section",
+          "timeline-post:///202604101200?q=1#section",
           ctx,
         ),
       ).toBe("/timeline/202604101200/?q=1#section");
@@ -205,48 +205,48 @@ describe("rewriteCustomProtocolHref", () => {
 
     it("throws on missing post", () => {
       expect(() =>
-        rewriteCustomProtocolHref("microblog-post:///999999999999", ctx),
-      ).toThrow('microblog post "999999999999" does not exist');
+        rewriteCustomProtocolHref("timeline-post:///999999999999", ctx),
+      ).toThrow('timeline post "999999999999" does not exist');
     });
   });
 
-  describe("microblog-tag:///", () => {
-    it("rewrites to the microblog tag route", () => {
-      expect(rewriteCustomProtocolHref("microblog-tag:///webdev", ctx)).toBe(
+  describe("timeline-tag:///", () => {
+    it("rewrites to the timeline tag route", () => {
+      expect(rewriteCustomProtocolHref("timeline-tag:///webdev", ctx)).toBe(
         "/timeline/tags/webdev/",
       );
     });
 
     it("preserves hash and query string", () => {
       expect(
-        rewriteCustomProtocolHref("microblog-tag:///webdev?p=2#top", ctx),
+        rewriteCustomProtocolHref("timeline-tag:///webdev?p=2#top", ctx),
       ).toBe("/timeline/tags/webdev/?p=2#top");
     });
 
     it("throws on missing tag", () => {
       expect(() =>
-        rewriteCustomProtocolHref("microblog-tag:///missing", ctx),
-      ).toThrow('microblog tag "missing" does not exist');
+        rewriteCustomProtocolHref("timeline-tag:///missing", ctx),
+      ).toThrow('timeline tag "missing" does not exist');
     });
   });
 
-  describe("microblog-year:///", () => {
-    it("rewrites to the microblog year route", () => {
-      expect(rewriteCustomProtocolHref("microblog-year:///2026", ctx)).toBe(
+  describe("timeline-year:///", () => {
+    it("rewrites to the timeline year route", () => {
+      expect(rewriteCustomProtocolHref("timeline-year:///2026", ctx)).toBe(
         "/timeline/years/2026/",
       );
     });
 
     it("preserves hash and query string", () => {
       expect(
-        rewriteCustomProtocolHref("microblog-year:///2026#april", ctx),
+        rewriteCustomProtocolHref("timeline-year:///2026#april", ctx),
       ).toBe("/timeline/years/2026/#april");
     });
 
     it("throws on missing year", () => {
       expect(() =>
-        rewriteCustomProtocolHref("microblog-year:///2020", ctx),
-      ).toThrow('microblog year "2020" does not exist');
+        rewriteCustomProtocolHref("timeline-year:///2020", ctx),
+      ).toThrow('timeline year "2020" does not exist');
     });
   });
 

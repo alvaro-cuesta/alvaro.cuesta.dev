@@ -173,7 +173,7 @@ nav[aria-label="breadcrumb"] li :where(a, [role="link"]):not(:hover) {
 }
 
 ul.blog-sidebar,
-ul.microblog-sidebar {
+ul.timeline-sidebar {
   list-style-type: none;
   padding-left: 0;
 
@@ -213,7 +213,7 @@ ul.blog-sidebar {
   }
 }
 
-ul.microblog-sidebar {
+ul.timeline-sidebar {
   @media (min-width: 1024px) {
     width: 15em;
   }
@@ -442,13 +442,13 @@ pre > code {
   }
 }
 
-.microblog-list {
+.timeline-list {
   display: flex;
   flex-direction: column;
 }
 
-.microblog-post-item,
-.microblog-pagination {
+.timeline-post-item,
+.timeline-pagination {
   width: 100%;
   max-width: 70ch;
   align-self: center;

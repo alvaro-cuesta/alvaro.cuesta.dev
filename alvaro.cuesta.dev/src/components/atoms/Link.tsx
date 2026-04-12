@@ -4,7 +4,7 @@ import { canonicalizeHref } from "xenon-ssg/src/url";
 import { getDomain } from "tldts";
 import { Icon } from "./Icon";
 import { useBlogItems } from "../../blog/promise";
-import { useMicroblogItems } from "../../microblog/promise";
+import { useTimelineItems } from "../../timeline/promise";
 import { rewriteCustomProtocolHref } from "../../utils/href";
 
 type LinkProps = ComponentPropsWithoutRef<"a"> & {
@@ -23,11 +23,11 @@ export const Link: React.FC<LinkProps> = ({
   ...props
 }) => {
   const blogItems = useBlogItems();
-  const microblogItems = useMicroblogItems();
+  const timelineItems = useTimelineItems();
 
   const rewrittenHref = rewriteCustomProtocolHref(props.href, {
     blogItems,
-    microblogItems,
+    timelineItems,
   });
 
   const calculatedIsExternal =

@@ -7,7 +7,7 @@ import {
   type TableOfContentsProps,
 } from "../components/molecules/TableOfContents";
 import { useBlogItems } from "../blog/promise";
-import { useMicroblogItems } from "../microblog/promise";
+import { useTimelineItems } from "../timeline/promise";
 import { rewriteCustomProtocolHref } from "../utils/href";
 import { canonicalizeHref } from "xenon-ssg/src/url";
 
@@ -51,7 +51,7 @@ export const makeMdxDefaultComponents = ({
       tag ?? (typeof children === "string" ? children : undefined);
 
     return tagName ? (
-      <Link href={`microblog-tag:///${tagName}`}>#{children}</Link>
+      <Link href={`timeline-tag:///${tagName}`}>#{children}</Link>
     ) : (
       <>#{children}</>
     );
@@ -60,11 +60,11 @@ export const makeMdxDefaultComponents = ({
   a: canonicalizeBaseUrl
     ? function MdxAnchorCanonicalized(props) {
         const blogItems = useBlogItems();
-        const microblogItems = useMicroblogItems();
+        const timelineItems = useTimelineItems();
 
         let href = rewriteCustomProtocolHref(props.href, {
           blogItems,
-          microblogItems,
+          timelineItems,
         });
 
         if (href) {
@@ -85,10 +85,10 @@ export const makeMdxDefaultComponents = ({
         if (!tagName) return renderHashtag(props);
 
         const blogItems = useBlogItems();
-        const microblogItems = useMicroblogItems();
+        const timelineItems = useTimelineItems();
 
-        let href: string | undefined = `microblog-tag:///${tagName}`;
-        href = rewriteCustomProtocolHref(href, { blogItems, microblogItems });
+        let href: string | undefined = `timeline-tag:///${tagName}`;
+        href = rewriteCustomProtocolHref(href, { blogItems, timelineItems });
 
         if (href) {
           href = canonicalizeHref(href, canonicalizeBaseUrl).pathUrl.toString();
