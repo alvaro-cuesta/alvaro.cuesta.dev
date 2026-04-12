@@ -39,6 +39,8 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
     return null;
   }
 
+  const omittedTags = tagsDescendingByArticleCount.length - MAX_TAGS;
+
   // TODO: would like this to be wrapped in <aside> but it's ugly in Pico
   return (
     <ul className={className}>
@@ -65,10 +67,12 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
                   <span className="no-wrap">&nbsp;({items.length})</span>
                 </li>
               ))}
-            {tagsDescendingByArticleCount.length > MAX_TAGS ? (
+            {omittedTags > 0 ? (
               <li>
                 <Link href={buildTagListHref()}>
-                  <i>(More tags...)</i>
+                  <i>
+                    ({omittedTags} more tag{omittedTags > 1 ? "s" : ""}...)
+                  </i>
                 </Link>
               </li>
             ) : null}
