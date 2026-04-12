@@ -49,7 +49,7 @@ async function loadContentItems<TModuleParsed extends { draft: boolean }>(
         const [lastModificationDate, rawModule] = await Promise.all([
           getGitLastModifiedDate(
             siteRootPath,
-            path.posix.relative(siteRootPath, filePath),
+            path.relative(siteRootPath, filePath),
           ),
           import(`${fileUrl}?${Date.now()}`),
         ]);
