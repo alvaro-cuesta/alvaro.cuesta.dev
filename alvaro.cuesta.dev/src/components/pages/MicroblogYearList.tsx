@@ -36,7 +36,6 @@ export const MicroblogYearList: React.FC<MicroblogYearListProps> = ({
         ]}
         microblogItems={microblogItems}
         isYearListCurrent
-        feedUrls={siteRenderMeta.feedUrls}
       >
         <h2>Timeline years</h2>
 

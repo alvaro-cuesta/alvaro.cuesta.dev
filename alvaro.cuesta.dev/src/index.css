@@ -144,14 +144,6 @@ article > header {
   flex-direction: column;
 }
 
-body > footer {
-  .fa,
-  .fas,
-  .fab {
-    display: inline;
-  }
-}
-
 body > footer nav ul li + li::before {
   content: "/";
   position: relative;
@@ -168,10 +160,6 @@ body > footer nav ul li + li::before {
   align-self: end;
 
   padding: 0 0.15em;
-
-  > .feeds {
-    margin-left: auto;
-  }
 }
 
 nav[aria-label="breadcrumb"] li {
@@ -438,6 +426,22 @@ pre > code {
   object-fit: contain;
 }
 
+.page-blurb {
+  overflow: hidden;
+}
+
+.page-blurb-icon {
+  float: right;
+  color: var(--pico-muted-color);
+  shape-outside: circle(0.75em at 0.5em 0.5em);
+}
+
+@media (max-width: 575.99999px) {
+  .page-blurb-icon {
+    display: none;
+  }
+}
+
 .microblog-list {
   display: flex;
   flex-direction: column;
@@ -448,4 +452,22 @@ pre > code {
   width: 100%;
   max-width: 70ch;
   align-self: center;
+}
+
+body > footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  row-gap: calc(var(--pico-grid-row-gap) / 2);
+
+  :nth-child(2n - 1) {
+    justify-self: start;
+  }
+  :nth-child(2n) {
+    justify-self: end;
+  }
+}
+
+.no-underline-icon {
+  display: inline-block;
 }

@@ -11,7 +11,6 @@ import {
   routeMicroblogYearList,
 } from "../../routes";
 import { ContentListsLayout } from "./ContentListsLayout";
-import type { SiteFeedUrls } from "../../site";
 
 type MicroblogListsLayoutProps = {
   breadcrumbs?: BreadcrumbItem[];
@@ -20,7 +19,6 @@ type MicroblogListsLayoutProps = {
   currentYear?: number | null;
   isTagListCurrent?: boolean;
   isYearListCurrent?: boolean;
-  feedUrls: SiteFeedUrls;
   children?: ReactNode;
 };
 
@@ -31,15 +29,12 @@ export const MicroblogListsLayout: React.FC<MicroblogListsLayoutProps> = ({
   currentYear,
   isTagListCurrent,
   isYearListCurrent,
-  feedUrls,
   children,
 }) => (
   <ContentListsLayout
     rootName="Timeline"
     rootHref={routeMicroblogList.build({ page: null })}
     breadcrumbs={breadcrumbs}
-    feedUrls={feedUrls}
-    currentSection="timeline"
     sidebar={
       <ContentSidebar
         className="microblog-sidebar"

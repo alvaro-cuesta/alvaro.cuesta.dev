@@ -76,7 +76,6 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
             : []
         }
         blogItems={blogItems}
-        feedUrls={siteRenderMeta.feedUrls}
       >
         <h2>Blog{page > 1 ? ` (page ${page} of ${totalPages})` : ""}</h2>
 
