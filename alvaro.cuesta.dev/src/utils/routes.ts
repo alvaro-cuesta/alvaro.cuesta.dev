@@ -9,6 +9,7 @@ type Route<Params> = {
 
 type MakeRouteOptions = {
   activePrefix?: string;
+  exact?: boolean;
 };
 
 export function makeRoute<Params extends ParamData>(
@@ -40,10 +41,12 @@ export function makeRoute<Params extends ParamData, ParsedParams>(
   const buildFn = compile<Params>(path);
 
   const activePrefix = resolvedOptions?.activePrefix;
+  const exact = resolvedOptions?.exact ?? false;
 
   return {
     isActive: (pathname: string) =>
-      activePrefix !== undefined && pathname.startsWith(activePrefix),
+      activePrefix !== undefined &&
+      (exact ? pathname === activePrefix : pathname.startsWith(activePrefix)),
 
     match: (requestedPath: string) => {
       const matched = matchFn(requestedPath);

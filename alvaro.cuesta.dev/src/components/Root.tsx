@@ -15,6 +15,7 @@ import {
   routeMicroblogYear,
   routeMicroblogYearList,
   routeNow,
+  routeBookmarks,
 } from "../routes";
 import { BlogArticle } from "./pages/BlogArticle";
 import { BlogArticleList } from "./pages/BlogArticleList";
@@ -30,7 +31,10 @@ import { MicroblogTagList } from "./pages/MicroblogTagList";
 import { MicroblogYear } from "./pages/MicroblogYear";
 import { MicroblogYearList } from "./pages/MicroblogYearList";
 import { NotFound } from "./pages/NotFound";
-import { Now } from "./pages/Now";
+import { makeMdxPage } from "./molecules/MdxPage";
+
+const Now = makeMdxPage(import.meta.resolve("./pages/Now.mdx"));
+const Bookmarks = makeMdxPage(import.meta.resolve("./pages/Bookmarks.mdx"));
 
 type RootProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -49,6 +53,10 @@ export const Root: React.FC<RootProps> = ({ siteRenderMeta }) => {
 
   if (routeNow.match(pathname)) {
     return <Now siteRenderMeta={siteRenderMeta} />;
+  }
+
+  if (routeBookmarks.match(pathname)) {
+    return <Bookmarks siteRenderMeta={siteRenderMeta} />;
   }
 
   const routeMicroblogListMatch = routeMicroblogList.match(pathname);

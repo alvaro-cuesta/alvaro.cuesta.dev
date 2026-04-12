@@ -9,6 +9,7 @@ import {
   routeHome,
   routeMicroblogList,
   routeNow,
+  routeBookmarks,
 } from "../routes";
 import { useMicroblogItems } from "../microblog/promise";
 import {
@@ -235,13 +236,13 @@ export const Template: React.FC<TemplateProps> = ({
             </ul>
             <ul className="navlinks">
               <li>
-                <Link href={routeHome.build({}, { hash: "technologies" })}>
-                  Tech
-                </Link>
-              </li>
-              <li>
-                <Link href={routeHome.build({}, { hash: "knowledge" })}>
-                  Knowledge
+                <Link
+                  className={cx(
+                    routeHome.isActive(canonicalPathname) && "is-active",
+                  )}
+                  href={routeHome.build({})}
+                >
+                  About
                 </Link>
               </li>
               <li>
@@ -283,6 +284,16 @@ export const Template: React.FC<TemplateProps> = ({
                   href={routeNow.build({})}
                 >
                   Now
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={cx(
+                    routeBookmarks.isActive(canonicalPathname) && "is-active",
+                  )}
+                  href={routeBookmarks.build({})}
+                >
+                  Bookmarks
                 </Link>
               </li>
             </ul>

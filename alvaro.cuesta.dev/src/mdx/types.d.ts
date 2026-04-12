@@ -9,4 +9,7 @@ declare module "*.mdx" {
 
   let MDXComponent: (props: MDXComponentProps) => React.JSX.Element;
   export default MDXComponent;
+
+  export const title: string | undefined;
+  export const description: string | undefined;
 }

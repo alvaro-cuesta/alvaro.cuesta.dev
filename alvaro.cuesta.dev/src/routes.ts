@@ -1,10 +1,19 @@
 import { makeRoute } from "./utils/routes";
 
-export const routeHome = makeRoute<{}>("/");
-
+// META PAGES
 export const route404 = makeRoute<{}>("/404.html");
 
+// STATIC PAGES
+export const routeHome = makeRoute<{}>("/", {
+  activePrefix: "/",
+  exact: true,
+});
+
 export const routeNow = makeRoute<{}>("/now/", { activePrefix: "/now" });
+
+export const routeBookmarks = makeRoute<{}>("/bookmarks/", {
+  activePrefix: "/bookmarks",
+});
 
 // BLOG ARTICLES
 export const routeBlogArticleList = makeRoute<
