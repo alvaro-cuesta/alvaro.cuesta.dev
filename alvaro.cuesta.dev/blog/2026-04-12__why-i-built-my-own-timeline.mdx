@@ -1,0 +1,70 @@
+export const title = "Why I built my own timeline";
+export const tags = ["timeline", "indie-web", "social-media", "publishing"];
+
+I recently launched my [timeline](/timeline/) or, as we used to call it, my _microblog_. It is not all that different from ~~Twitter~~ X or Mastodon, which raises an obvious question: why build this instead of using an existing social media platform?
+
+It was not really a conscious choice so much as something that... happened.
+
+<TableOfContents />
+
+# Making my personal notes public
+
+I have been building my own website for a while now (with Xenon SSG[^xenon-ssg]), and I wanted to have a place where I could share my thoughts and updates in a more casual way, without the pressure of writing a full blog post.
+
+My goal was clear: **I wanted a ledger of my thoughts, ideas, and updates**. Nothing more. Nothing less. But... why not share it with the world in the process?
+
+Since I had already done a lot of work on the [blog](/blog/) system, adding a new section for [my timeline](/timeline/) was not a big deal. But it is still more work than posting on an established platform. So, is it worth it?
+
+# Asocial media
+
+_"Why not Twitter"_ may be obvious to some, but Mastodon or BlueSky are often framed as the alternative. I dislike both, though not only for the reasons you might expect (censorship, moderation, addictive design, etc.).
+
+I think **the _social_ angle fundamentally taints the experience**. Followers, likes, retweets, and all that jazz create a dynamic that is not conducive to genuine self-expression. They create a feedback loop where you are constantly trying to optimize for engagement rather than simply sharing your thoughts and updates. _Gamification_ at its finest: say what you are supposed to say, and earn those _juicy Internet Points™_.
+
+_Social_ is not inherently bad, and you might think you are immune to it, but humans interact with websites the way they are designed to be used, just as we behave in public the way we are expected to. We play a role, and we do so subconsciously. If you give us a platform designed for social interaction, we will use it socially. If you give us a platform designed for reflection, we will reflect on the ideas presented.
+
+# Friction is good
+
+Social media platforms are designed to be as frictionless as possible, to keep you engaged and coming back for more. That only exacerbates the _social_ problem. It becomes too easy to react without giving ideas the thought they deserve. You do not _need_ to react, but you are absolutely _encouraged_ to do so.
+
+I believe that a little friction can be a good thing. It gives us a moment to pause and reflect before we react. It allows us to think about what we want to say rather than blurting out the first thing that comes to mind. Limitations breed creativity, and **friction breeds quality**.
+
+In a world flooded with information and constant updates, having a space that encourages thoughtful reflection can be refreshing. It can help us to slow down and appreciate the content we are consuming, rather than just mindlessly scrolling through an endless feed.
+
+And I built my [timeline](/timeline/) with that in mind. It is easy for me to post, but not _too easy_.
+
+# My content is mine
+
+...and I am obsessed with my data.
+
+My mind is busy (well, whose isn't?) Over time, I built systems to keep myself organized. As a software engineer, I naturally gravitate toward Git[^git] as a platform. It has become my second brain: a place where I store notes, ideas, and updates, where I can look back and see how my thoughts evolve over time.
+
+So it has always felt wrong to keep part of my thoughts and updates on a platform I do not control. **I want all my content in one place**, where I can access it, edit it, and share it as I see fit. I do not want to be at the mercy of algorithms or platforms that can change the rules at any time, or worry about my content being deleted, censored, or lost.
+
+I have been migrating more and more of my infrastructure and workflows to Git repositories. Deploying a new domain is as simple as changing a few lines in a config file and pushing to GitHub, and automated workflows handle the rest. I can easily back up my content, and I have a clear history of every update. It is a system that works well for me.
+
+So it felt natural to build my blog and my timeline on top of it. All the [source files for my blog](https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/alvaro.cuesta.dev/blog) and [my timeline](https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/alvaro.cuesta.dev/microblog) are just Markdown files in a Git repository. I can edit them, organize them, and publish them from GitHub's web UI or my local Git client.
+
+_"But isn't GitHub just another established platform?"_ Well, yes, but Git itself gives me an exit. I can choose to store my data on GitHub and publish it on Amazon's servers, and if GitHub ever becomes a problem, I can migrate to another Git hosting service or even self-host it. That is the nice thing about Git being a distributed version control system: the repositories on my computer are just as valid as the ones on GitHub's servers.
+
+# The IndieWeb
+
+Turns out that my goals are not very different from the IndieWeb movement:
+
+> The IndieWeb is a people-focused alternative to the “corporate web”.
+>
+> We are a community of independent and personal websites based on the principles of: owning your domain and using it as your primary online identity, publishing on your own site first (optionally elsewhere), and owning your content.
+>
+> — [indieweb.org](https://indieweb.org/)
+
+That framing resonates with me because it treats a personal website not as a portfolio or a business card, but as an actual place to live online. A place that can be messy, opinionated, evolving, and fully yours. Not every thought needs to be optimized for reach. Not every update needs to be packaged for a feed algorithm. Sometimes you just want a small corner of the web that answers to you.
+
+That is also why the IndieWeb idea of publishing on your own site first feels so right to me. I want the URL to be mine, the content to be mine, and the surrounding context to be mine too. No algorithmic timeline, no engagement bait, no platform reshaping what the post is supposed to be. Just a home for the most precious thing I have and what makes me, _me_: my thoughts and ideas.
+
+My timeline is a tiny expression of that. It is not an attempt to build the next social network. Quite the opposite: it is an attempt to have less network and more personal space. A simpler, quieter, more durable way to publish small things without handing them over to platforms whose incentives do not match mine.
+
+And I hope you enjoy it.
+
+[^xenon-ssg]: [Xenon SSG](https://github.com/alvaro-cuesta/alvaro.cuesta.dev/) is a React static site generator that aims to radically challenge how websites can be built and maintained. It powers this very website!
+
+[^git]: [Git](https://git-scm.com/) is a distributed version control system that allows you to track changes in your files and collaborate with others. Think of it as Dropbox for code, _on steroids_. It is the backbone of many modern software development workflows, and it has become a powerful tool for personal organization and content management as well.
