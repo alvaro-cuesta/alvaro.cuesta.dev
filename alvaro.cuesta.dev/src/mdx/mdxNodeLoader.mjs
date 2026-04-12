@@ -14,7 +14,7 @@ import withTocExport from "@stefanprobst/rehype-extract-toc/mdx";
 import remarkParseCodeMeta from "./remarkParseCodeMeta.mts";
 import remarkCodeCaptionToFigure from "./remarkCodeCaptionToFigure.mts";
 import remarkHashtags from "./remarkHashtags.mts";
-import { CANONICAL_HASHTAGS } from "../../config.ts";
+import { CANONICAL_TAGS } from "../../config.ts";
 
 const hooks = createLoader({
   remarkRehypeOptions: {
@@ -50,7 +50,7 @@ const hooks = createLoader({
   remarkPlugins: [
     remarkGfm,
     remarkMath,
-    [remarkHashtags, { canonicalTags: CANONICAL_HASHTAGS }],
+    [remarkHashtags, { canonicalTags: CANONICAL_TAGS }],
     remarkParseCodeMeta,
     remarkCodeCaptionToFigure,
   ],

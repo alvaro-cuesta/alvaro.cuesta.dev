@@ -48,10 +48,10 @@ export const makeMicroblogBlurbSocialDescription = (
   `You're browsing ${browsing ? `${browsing} of ` : ""}Álvaro Cuesta's timeline — short-form thoughts on technology, music, creativity, and more.`;
 
 /**
- * Maps non-canonical hashtag names to their canonical form.
- * E.g. `{ llm: "llms" }` means `#llm` will link to the `#llms` tag page.
+ * Maps non-canonical tag names to their canonical form.
+ * E.g. `{ llms: "llm" }` means `#llms` will link to the `#llm` tag page.
  * The display text stays as the author wrote it.
  */
-export const CANONICAL_HASHTAGS: Record<string, string> = {
+export const CANONICAL_TAGS: Record<string, string> = {
   llms: "llm",
 };

@@ -1,5 +1,6 @@
 import cx from "classnames";
 import { Link } from "../atoms/Link";
+import { CANONICAL_TAGS } from "../../../config";
 
 type ContentSidebarProps = {
   className: string;
@@ -30,7 +31,9 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
   buildYearListHref,
   buildYearHref,
 }) => {
-  const currentTagsSet = new Set(currentTags);
+  const currentTagsSet = new Set(
+    currentTags.map((tag) => CANONICAL_TAGS[tag] ?? tag),
+  );
 
   const hasTags = tagsDescendingByArticleCount.length > 0;
   const hasYears = yearsSortedDescending.length > 0;

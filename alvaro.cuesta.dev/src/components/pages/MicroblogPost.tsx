@@ -5,7 +5,10 @@ import type { SiteRenderMeta } from "../../site";
 import { routeMicroblogPost, routeMicroblogList } from "../../routes";
 import { makeTitle } from "../../utils/meta";
 import { MICROBLOG_BLURB_DESCRIPTION } from "../../../config";
-import { blogItemDateToShortString } from "../../utils/item-dates";
+import {
+  blogItemDateToShortString,
+  getBlogItemDateYear,
+} from "../../utils/item-dates";
 import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
 import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
 
@@ -26,7 +29,7 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
     throw new Error(`Microblog post "${slug}" not found`);
   }
 
-  const { publicationDate, lastModificationDate } = item.module;
+  const { publicationDate, lastModificationDate, tags } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);
 
   const page = microblogItems.pageBySlug.get(slug) ?? 1;
@@ -68,6 +71,10 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
           { name: dateStr, href: siteRenderMeta.pathname },
         ]}
         microblogItems={microblogItems}
+        currentTags={tags}
+        currentYear={getBlogItemDateYear(publicationDate)}
+        isTagListCurrent={tags.length > 0}
+        isYearListCurrent
       >
         <h2>Timeline post <small>{blogItemDateToShortString(publicationDate)}</small></h2>
 

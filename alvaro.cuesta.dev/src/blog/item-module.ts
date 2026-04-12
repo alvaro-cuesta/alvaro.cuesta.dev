@@ -6,6 +6,7 @@ import {
   itemModuleDateToBlogItemDate,
   resolveLastModificationDate,
 } from "../utils/item-dates";
+import { CANONICAL_TAGS } from "../../config";
 import {
   assertIsContentItemModule,
   assertOptionalString,
@@ -118,10 +119,13 @@ export const parseBlogItemModuleFromImportModule = (
     lastModificationDate,
     draft: module.draft ?? false,
     slug,
-    tags: (module.tags ?? []).map((tag) => ({
-      original: tag,
-      slug: tag.toLowerCase().replace(/\s+/g, "-"),
-    })),
+    tags: (module.tags ?? []).map((tag) => {
+      const rawSlug = tag.toLowerCase().replace(/\s+/g, "-");
+      return {
+        original: tag,
+        slug: CANONICAL_TAGS[rawSlug] ?? rawSlug,
+      };
+    }),
     tableOfContents: module.tableOfContents,
   };
 };
