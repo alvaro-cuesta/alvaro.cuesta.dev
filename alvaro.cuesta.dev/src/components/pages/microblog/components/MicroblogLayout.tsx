@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
-import { ContentSidebar } from "./ContentSidebar";
-import type { AnalyzedItems } from "../../utils/analyze";
-import type { MicroblogItemModuleParsed } from "../../microblog/item-module";
-import type { BreadcrumbItem } from "../atoms/Breadcrumb";
+import { ContentSidebar } from "../../../molecules/ContentSidebar";
+import type { AnalyzedItems } from "../../../../utils/analyze";
+import type { MicroblogItemModuleParsed } from "../../../../microblog/item-module";
+import type { BreadcrumbItem } from "../../../atoms/Breadcrumb";
 import {
   routeMicroblogList,
   routeMicroblogTag,
   routeMicroblogTagList,
   routeMicroblogYear,
   routeMicroblogYearList,
-} from "../../routes";
-import { ContentListsLayout } from "./ContentListsLayout";
+} from "../../../../routes";
+import { ContentListsLayout } from "../../../molecules/ContentListsLayout";
 
-type MicroblogListsLayoutProps = {
+type MicroblogLayoutProps = {
   breadcrumbs?: BreadcrumbItem[];
   microblogItems: AnalyzedItems<MicroblogItemModuleParsed>;
   currentTags?: readonly string[];
@@ -22,7 +22,7 @@ type MicroblogListsLayoutProps = {
   children?: ReactNode;
 };
 
-export const MicroblogListsLayout: React.FC<MicroblogListsLayoutProps> = ({
+export const MicroblogLayout: React.FC<MicroblogLayoutProps> = ({
   breadcrumbs,
   microblogItems,
   currentTags,

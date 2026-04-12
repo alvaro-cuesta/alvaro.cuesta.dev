@@ -1,15 +1,15 @@
-import { useBlogItems } from "../../blog/promise";
-import { Template } from "../Template";
-import { BlogListsLayout } from "../molecules/BlogListsLayout";
-import { BlogArticleListItem } from "../molecules/BlogArticleListItem";
-import { type BlogItemMonth } from "../../utils/item-dates";
-import type { SiteRenderMeta } from "../../site";
-import { routeBlogYear, routeBlogYearList } from "../../routes";
+import { useBlogItems } from "../../../blog/promise";
+import { Template } from "../../Template";
+import { BlogLayout } from "./components/BlogLayout";
+import { BlogArticleListItem } from "./components/BlogArticleListItem";
+import { type BlogItemMonth } from "../../../utils/item-dates";
+import type { SiteRenderMeta } from "../../../site";
+import { routeBlogYear, routeBlogYearList } from "../../../routes";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
-import { makeTitle } from "../../utils/meta";
+} from "../../../../config";
+import { makeTitle } from "../../../utils/meta";
 
 type BlogYearProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -68,7 +68,7 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
         openGraph: { type: "website" },
       }}
     >
-      <BlogListsLayout
+      <BlogLayout
         breadcrumbs={[
           { name: "Years", href: routeBlogYearList.build({}) },
           { name: year.toString(), href: routeBlogYear.build({ year }) },
@@ -100,7 +100,7 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
             })}
           </ul>
         </article>
-      </BlogListsLayout>
+      </BlogLayout>
     </Template>
   );
 };

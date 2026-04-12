@@ -1,16 +1,16 @@
-import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
-import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
-import { Template } from "../Template";
-import { useMicroblogItems } from "../../microblog/promise";
-import type { SiteRenderMeta } from "../../site";
-import { routeMicroblogTag, routeMicroblogTagList } from "../../routes";
-import { makeTitle } from "../../utils/meta";
+import { MicroblogLayout } from "./components/MicroblogLayout";
+import { MicroblogPostItem } from "./components/MicroblogPostItem";
+import { Template } from "../../Template";
+import { useMicroblogItems } from "../../../microblog/promise";
+import type { SiteRenderMeta } from "../../../site";
+import { routeMicroblogTag, routeMicroblogTagList } from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
 import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
-} from "../../../config";
-import { Pagination } from "../atoms/Pagination";
-import { paginateItems } from "../../utils/pagination";
+} from "../../../../config";
+import { Pagination } from "../../atoms/Pagination";
+import { paginateItems } from "../../../utils/pagination";
 
 type MicroblogTagProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -66,7 +66,7 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
         openGraph: { type: "website" },
       }}
     >
-      <MicroblogListsLayout
+      <MicroblogLayout
         breadcrumbs={[
           { name: "Tags", href: routeMicroblogTagList.build({}) },
           { name: tag, href: routeMicroblogTag.build({ tag, page: null }) },
@@ -100,7 +100,7 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
             />
           </section>
         </div>
-      </MicroblogListsLayout>
+      </MicroblogLayout>
     </Template>
   );
 };

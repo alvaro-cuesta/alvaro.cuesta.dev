@@ -1,23 +1,23 @@
-import { Template } from "../Template";
-import { Link } from "../atoms/Link";
-import { BlogListsLayout } from "../molecules/BlogListsLayout";
-import { useBlogItems } from "../../blog/promise";
+import { Template } from "../../Template";
+import { Link } from "../../atoms/Link";
+import { BlogLayout } from "./components/BlogLayout";
+import { useBlogItems } from "../../../blog/promise";
 import React from "react";
 import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
   getBlogItemDateYear,
-} from "../../utils/item-dates";
-import type { SiteRenderMeta } from "../../site";
-import { BlogDateTime } from "../atoms/BlogDateTime";
-import { Icon } from "../atoms/Icon";
+} from "../../../utils/item-dates";
+import type { SiteRenderMeta } from "../../../site";
+import { BlogDateTime } from "../../atoms/BlogDateTime";
+import { Icon } from "../../atoms/Icon";
 import {
   routeBlogArticle,
   routeBlogArticleList,
   routeBlogTag,
-} from "../../routes";
-import { makeTitle } from "../../utils/meta";
-import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
+} from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
+import { MDX_DEFAULT_COMPONENTS } from "../../../mdx/mdx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -108,7 +108,7 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
         ),
       }}
     >
-      <BlogListsLayout
+      <BlogLayout
         breadcrumbs={[
           ...(page > 1
             ? [
@@ -168,7 +168,7 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
             </footer>
           ) : null}
         </article>
-      </BlogListsLayout>
+      </BlogLayout>
     </Template>
   );
 };

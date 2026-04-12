@@ -1,19 +1,19 @@
-import { Template } from "../Template";
-import { Pagination } from "../atoms/Pagination";
-import { useMicroblogItems } from "../../microblog/promise";
-import type { SiteRenderMeta } from "../../site";
-import { routeMicroblogPost, routeMicroblogList } from "../../routes";
-import { makeTitle } from "../../utils/meta";
+import { Template } from "../../Template";
+import { Pagination } from "../../atoms/Pagination";
+import { useMicroblogItems } from "../../../microblog/promise";
+import type { SiteRenderMeta } from "../../../site";
+import { routeMicroblogPost, routeMicroblogList } from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
 import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
-} from "../../../config";
+} from "../../../../config";
 import {
   blogItemDateToShortString,
   getBlogItemDateYear,
-} from "../../utils/item-dates";
-import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
-import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
+} from "../../../utils/item-dates";
+import { MicroblogLayout } from "./components/MicroblogLayout";
+import { MicroblogPostItem } from "./components/MicroblogPostItem";
 
 type MicroblogPostPageProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -61,7 +61,7 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
         openGraph: { type: "article" },
       }}
     >
-      <MicroblogListsLayout
+      <MicroblogLayout
         breadcrumbs={[
           ...(page > 1
             ? [
@@ -94,7 +94,7 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
             nextLabel="Older post"
           />
         </section>
-      </MicroblogListsLayout>
+      </MicroblogLayout>
     </Template>
   );
 };

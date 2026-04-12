@@ -1,14 +1,14 @@
-import { useBlogItems } from "../../blog/promise";
-import { Template } from "../Template";
-import { BlogListsLayout } from "../molecules/BlogListsLayout";
-import { Link } from "../atoms/Link";
-import type { SiteRenderMeta } from "../../site";
-import { routeBlogYear, routeBlogYearList } from "../../routes";
+import { useBlogItems } from "../../../blog/promise";
+import { Template } from "../../Template";
+import { BlogLayout } from "./components/BlogLayout";
+import { Link } from "../../atoms/Link";
+import type { SiteRenderMeta } from "../../../site";
+import { routeBlogYear, routeBlogYearList } from "../../../routes";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
-import { makeTitle } from "../../utils/meta";
+} from "../../../../config";
+import { makeTitle } from "../../../utils/meta";
 
 type BlogYearListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -30,7 +30,7 @@ export const BlogYearList: React.FC<BlogYearListProps> = ({
         openGraph: { type: "website" },
       }}
     >
-      <BlogListsLayout
+      <BlogLayout
         breadcrumbs={[{ name: "Years", href: routeBlogYearList.build({}) }]}
         blogItems={blogItems}
         isYearListCurrent
@@ -47,7 +47,7 @@ export const BlogYearList: React.FC<BlogYearListProps> = ({
             ))}
           </ul>
         </article>
-      </BlogListsLayout>
+      </BlogLayout>
     </Template>
   );
 };

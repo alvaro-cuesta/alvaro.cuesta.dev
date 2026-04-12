@@ -1,20 +1,20 @@
-import { Template } from "../Template";
-import { Pagination } from "../atoms/Pagination";
-import { BlogListsLayout } from "../molecules/BlogListsLayout";
-import { useBlogItems } from "../../blog/promise";
-import { BlogArticleListItem } from "../molecules/BlogArticleListItem";
-import type { SiteRenderMeta } from "../../site";
+import { Template } from "../../Template";
+import { Pagination } from "../../atoms/Pagination";
+import { BlogLayout } from "./components/BlogLayout";
+import { useBlogItems } from "../../../blog/promise";
+import { BlogArticleListItem } from "./components/BlogArticleListItem";
+import type { SiteRenderMeta } from "../../../site";
 import {
   routeBlogArticleList,
   routeMicroblogList,
   routeNow,
-} from "../../routes";
-import { makeTitle } from "../../utils/meta";
+} from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
-import { Link } from "../atoms/Link";
+} from "../../../../config";
+import { Link } from "../../atoms/Link";
 
 type BlogArticleListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -64,7 +64,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
         openGraph: { type: "website" },
       }}
     >
-      <BlogListsLayout
+      <BlogLayout
         breadcrumbs={
           page > 1 && totalPages > 1
             ? [
@@ -109,7 +109,7 @@ export const BlogArticleList: React.FC<BlogArticleListProps> = ({
         <section>
           <Pagination prevPageLink={prevPageLink} nextPageLink={nextPageLink} />
         </section>
-      </BlogListsLayout>
+      </BlogLayout>
     </Template>
   );
 };

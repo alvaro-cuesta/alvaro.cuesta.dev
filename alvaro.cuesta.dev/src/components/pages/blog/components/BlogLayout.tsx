@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
-import { ContentSidebar } from "./ContentSidebar";
-import type { AnalyzedItems } from "../../utils/analyze";
-import type { BlogItemModuleParsed } from "../../blog/item-module";
-import type { BreadcrumbItem } from "../atoms/Breadcrumb";
+import { ContentSidebar } from "../../../molecules/ContentSidebar";
+import type { AnalyzedItems } from "../../../../utils/analyze";
+import type { BlogItemModuleParsed } from "../../../../blog/item-module";
+import type { BreadcrumbItem } from "../../../atoms/Breadcrumb";
 import {
   routeBlogArticleList,
   routeBlogTag,
   routeBlogTagList,
   routeBlogYear,
   routeBlogYearList,
-} from "../../routes";
-import { ContentListsLayout } from "./ContentListsLayout";
+} from "../../../../routes";
+import { ContentListsLayout } from "../../../molecules/ContentListsLayout";
 
-type BlogListsLayoutProps = {
+type BlogLayoutProps = {
   breadcrumbs: BreadcrumbItem[];
   blogItems: AnalyzedItems<BlogItemModuleParsed>;
   currentTags?: readonly string[];
@@ -22,7 +22,7 @@ type BlogListsLayoutProps = {
   children?: ReactNode;
 };
 
-export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
+export const BlogLayout: React.FC<BlogLayoutProps> = ({
   breadcrumbs,
   blogItems,
   currentTags,

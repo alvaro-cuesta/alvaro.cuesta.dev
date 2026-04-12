@@ -17,19 +17,19 @@ import {
   routeNow,
   routeBookmarks,
 } from "../routes";
-import { BlogArticle } from "./pages/BlogArticle";
-import { BlogArticleList } from "./pages/BlogArticleList";
-import { BlogTag } from "./pages/BlogTag";
-import { BlogTagList } from "./pages/BlogTagsList";
-import { BlogYear } from "./pages/BlogYear";
-import { BlogYearList } from "./pages/BlogYearList";
+import { BlogArticle } from "./pages/blog/BlogArticle";
+import { BlogArticleList } from "./pages/blog/BlogArticleList";
+import { BlogTag } from "./pages/blog/BlogTag";
+import { BlogTagList } from "./pages/blog/BlogTagsList";
+import { BlogYear } from "./pages/blog/BlogYear";
+import { BlogYearList } from "./pages/blog/BlogYearList";
 import { Homepage } from "./pages/Homepage";
-import { MicroblogPostPage } from "./pages/MicroblogPost";
-import { MicroblogList } from "./pages/MicroblogList";
-import { MicroblogTag } from "./pages/MicroblogTag";
-import { MicroblogTagList } from "./pages/MicroblogTagList";
-import { MicroblogYear } from "./pages/MicroblogYear";
-import { MicroblogYearList } from "./pages/MicroblogYearList";
+import { MicroblogPostPage } from "./pages/microblog/MicroblogPost";
+import { MicroblogList } from "./pages/microblog/MicroblogList";
+import { MicroblogTag } from "./pages/microblog/MicroblogTag";
+import { MicroblogTagList } from "./pages/microblog/MicroblogTagList";
+import { MicroblogYear } from "./pages/microblog/MicroblogYear";
+import { MicroblogYearList } from "./pages/microblog/MicroblogYearList";
 import { NotFound } from "./pages/NotFound";
 import { makeMdxPage } from "./molecules/MdxPage";
 

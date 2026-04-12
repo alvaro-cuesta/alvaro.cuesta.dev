@@ -1,14 +1,14 @@
-import { useMicroblogItems } from "../../microblog/promise";
-import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
-import { Template } from "../Template";
-import { Link } from "../atoms/Link";
-import type { SiteRenderMeta } from "../../site";
-import { routeMicroblogTag, routeMicroblogTagList } from "../../routes";
-import { makeTitle } from "../../utils/meta";
+import { useMicroblogItems } from "../../../microblog/promise";
+import { MicroblogLayout } from "./components/MicroblogLayout";
+import { Template } from "../../Template";
+import { Link } from "../../atoms/Link";
+import type { SiteRenderMeta } from "../../../site";
+import { routeMicroblogTag, routeMicroblogTagList } from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
 import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
-} from "../../../config";
+} from "../../../../config";
 
 type MicroblogTagListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -30,7 +30,7 @@ export const MicroblogTagList: React.FC<MicroblogTagListProps> = ({
         openGraph: { type: "website" },
       }}
     >
-      <MicroblogListsLayout
+      <MicroblogLayout
         breadcrumbs={[{ name: "Tags", href: routeMicroblogTagList.build({}) }]}
         microblogItems={microblogItems}
         isTagListCurrent
@@ -47,7 +47,7 @@ export const MicroblogTagList: React.FC<MicroblogTagListProps> = ({
             </li>
           ))}
         </ul>
-      </MicroblogListsLayout>
+      </MicroblogLayout>
     </Template>
   );
 };

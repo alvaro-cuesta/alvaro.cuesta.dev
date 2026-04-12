@@ -1,14 +1,14 @@
-import { useMicroblogItems } from "../../microblog/promise";
-import { Template } from "../Template";
-import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
-import { Link } from "../atoms/Link";
-import type { SiteRenderMeta } from "../../site";
-import { routeMicroblogYear, routeMicroblogYearList } from "../../routes";
+import { useMicroblogItems } from "../../../microblog/promise";
+import { Template } from "../../Template";
+import { MicroblogLayout } from "./components/MicroblogLayout";
+import { Link } from "../../atoms/Link";
+import type { SiteRenderMeta } from "../../../site";
+import { routeMicroblogYear, routeMicroblogYearList } from "../../../routes";
 import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
-} from "../../../config";
-import { makeTitle } from "../../utils/meta";
+} from "../../../../config";
+import { makeTitle } from "../../../utils/meta";
 
 type MicroblogYearListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -30,7 +30,7 @@ export const MicroblogYearList: React.FC<MicroblogYearListProps> = ({
         openGraph: { type: "website" },
       }}
     >
-      <MicroblogListsLayout
+      <MicroblogLayout
         breadcrumbs={[
           { name: "Years", href: routeMicroblogYearList.build({}) },
         ]}
@@ -49,7 +49,7 @@ export const MicroblogYearList: React.FC<MicroblogYearListProps> = ({
             </li>
           ))}
         </ul>
-      </MicroblogListsLayout>
+      </MicroblogLayout>
     </Template>
   );
 };

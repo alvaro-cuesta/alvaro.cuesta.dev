@@ -1,20 +1,20 @@
-import { Template } from "../Template";
-import { Pagination } from "../atoms/Pagination";
-import { useMicroblogItems } from "../../microblog/promise";
-import type { SiteRenderMeta } from "../../site";
+import { Template } from "../../Template";
+import { Pagination } from "../../atoms/Pagination";
+import { useMicroblogItems } from "../../../microblog/promise";
+import type { SiteRenderMeta } from "../../../site";
 import {
   routeBlogArticleList,
   routeMicroblogList,
   routeNow,
-} from "../../routes";
-import { makeTitle } from "../../utils/meta";
+} from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
 import {
   MICROBLOG_BLURB_DESCRIPTION,
   makeMicroblogBlurbSocialDescription,
-} from "../../../config";
-import { MicroblogListsLayout } from "../molecules/MicroblogListsLayout";
-import { MicroblogPostItem } from "../molecules/MicroblogPostItem";
-import { Link } from "../atoms/Link";
+} from "../../../../config";
+import { MicroblogLayout } from "./components/MicroblogLayout";
+import { MicroblogPostItem } from "./components/MicroblogPostItem";
+import { Link } from "../../atoms/Link";
 
 type MicroblogListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -67,7 +67,7 @@ export const MicroblogList: React.FC<MicroblogListProps> = ({
         openGraph: { type: "website" },
       }}
     >
-      <MicroblogListsLayout
+      <MicroblogLayout
         breadcrumbs={
           page > 1 && totalPages > 1
             ? [
@@ -113,7 +113,7 @@ export const MicroblogList: React.FC<MicroblogListProps> = ({
             />
           </section>
         </div>
-      </MicroblogListsLayout>
+      </MicroblogLayout>
     </Template>
   );
 };

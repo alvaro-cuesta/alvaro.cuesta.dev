@@ -1,14 +1,14 @@
-import { BlogListsLayout } from "../molecules/BlogListsLayout";
-import { Template } from "../Template";
-import { useBlogItems } from "../../blog/promise";
-import { BlogArticleListItem } from "../molecules/BlogArticleListItem";
-import type { SiteRenderMeta } from "../../site";
-import { routeBlogTag, routeBlogTagList } from "../../routes";
-import { makeTitle } from "../../utils/meta";
+import { BlogLayout } from "./components/BlogLayout";
+import { Template } from "../../Template";
+import { useBlogItems } from "../../../blog/promise";
+import { BlogArticleListItem } from "./components/BlogArticleListItem";
+import type { SiteRenderMeta } from "../../../site";
+import { routeBlogTag, routeBlogTagList } from "../../../routes";
+import { makeTitle } from "../../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
+} from "../../../../config";
 
 type BlogTagProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -37,7 +37,7 @@ export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
         openGraph: { type: "website" },
       }}
     >
-      <BlogListsLayout
+      <BlogLayout
         breadcrumbs={[
           { name: "Tags", href: routeBlogTagList.build({}) },
           { name: tag, href: routeBlogTag.build({ tag }) },
@@ -55,7 +55,7 @@ export const BlogTag: React.FC<BlogTagProps> = ({ siteRenderMeta, tag }) => {
             ))}
           </ul>
         </article>
-      </BlogListsLayout>
+      </BlogLayout>
     </Template>
   );
 };

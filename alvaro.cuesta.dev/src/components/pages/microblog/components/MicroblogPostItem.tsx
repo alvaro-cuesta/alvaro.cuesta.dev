@@ -1,9 +1,9 @@
-import type { Item } from "../../utils/analyze";
-import type { MicroblogItemModuleParsed } from "../../microblog/item-module";
-import { BlogDateTime } from "../atoms/BlogDateTime";
-import { Link } from "../atoms/Link";
-import { makeMdxDefaultComponents } from "../../mdx/mdx";
-import { routeMicroblogPost } from "../../routes";
+import type { Item } from "../../../../utils/analyze";
+import type { MicroblogItemModuleParsed } from "../../../../microblog/item-module";
+import { BlogDateTime } from "../../../atoms/BlogDateTime";
+import { Link } from "../../../atoms/Link";
+import { makeMdxDefaultComponents } from "../../../../mdx/mdx";
+import { routeMicroblogPost } from "../../../../routes";
 
 const MICROBLOG_MDX_COMPONENTS = makeMdxDefaultComponents({
   showDomain: true,
