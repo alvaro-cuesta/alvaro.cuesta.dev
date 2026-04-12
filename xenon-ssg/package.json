@@ -34,7 +34,7 @@
     "@types/express": "catalog:",
     "@types/node": "^20.14.11",
     "@types/react": "catalog:",
-    "@types/react-dom": "^18.3.0",
+    "@types/react-dom": "catalog:",
     "type-fest": "catalog:",
     "vitest": "catalog:"
   }
