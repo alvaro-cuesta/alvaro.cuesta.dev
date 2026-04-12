@@ -1,4 +1,5 @@
-import { useBlogItems } from "../../../blog/promise";
+import { use } from "react";
+import { getBlogItems } from "../../../blog/promise";
 import { BlogLayout } from "./components/BlogLayout";
 import { Template } from "../../Template";
 import { Link } from "../../atoms/Link";
@@ -15,7 +16,7 @@ type BlogTagListProps = {
 };
 
 export function BlogTagList({ siteRenderMeta }: BlogTagListProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
 
   return (
     <Template

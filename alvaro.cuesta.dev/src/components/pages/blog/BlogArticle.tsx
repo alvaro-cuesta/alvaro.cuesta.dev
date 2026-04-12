@@ -1,8 +1,8 @@
 import { Template } from "../../Template";
 import { Link } from "../../atoms/Link";
 import { BlogLayout } from "./components/BlogLayout";
-import { useBlogItems } from "../../../blog/promise";
-import React from "react";
+import { getBlogItems } from "../../../blog/promise";
+import React, { use } from "react";
 import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
@@ -25,7 +25,7 @@ type BlogArticleProps = {
 };
 
 export function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
 
   const article = blogItems.bySlug.get(slug);
 

@@ -1,16 +1,14 @@
 import path from "node:path";
+import { use } from "react";
 import { parseTimelineItemModuleFromImportModule } from "./item-module";
 import type { TimelineItemModuleParsed } from "./item-module";
 import { createContentLoader } from "../utils/content-loader";
-import { getBlogItems, useBlogItems } from "../blog/promise";
+import { getBlogItems } from "../blog/promise";
 import { blogItemToImplicitTimelineItem } from "./implicit-posts";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze";
 import type { BlogItemModuleParsed } from "../blog/item-module";
 
-const {
-  getItems: getRawTimelineItems,
-  useItems: useRawTimelineItems,
-} = createContentLoader({
+const getRawTimelineItems = createContentLoader({
   siteRootPath: path.join(import.meta.dirname, "..", ".."),
   contentFolderPath: path.join(import.meta.dirname, "..", "..", "timeline"),
   contentFolderUrl: new URL("../../timeline/", import.meta.url),
@@ -102,8 +100,8 @@ async function getTimelineItems(): Promise<
 }
 
 function useTimelineItems(): AnalyzedItems<TimelineItemModuleParsed> {
-  const raw = useRawTimelineItems();
-  const blog = useBlogItems();
+  const raw = use(getRawTimelineItems());
+  const blog = use(getBlogItems());
   return mergeWithCache(raw, blog);
 }
 

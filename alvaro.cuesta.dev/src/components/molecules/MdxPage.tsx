@@ -1,11 +1,12 @@
 import url from "node:url";
+import { use } from "react";
 import type { MDXContent } from "mdx/types";
 import { Template } from "../Template";
 import type { SiteRenderMeta } from "../../site";
 import { makeTitle } from "../../utils/meta";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 import { getGitLastModifiedDate } from "../../utils/git";
-import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
+import { cachedPromise } from "xenon-ssg/src/promise";
 import { Temporal } from "temporal-polyfill";
 import { instantToBlogItemDate } from "../../utils/item-dates";
 
@@ -20,7 +21,7 @@ type MdxPageProps = {
 };
 
 export function makeMdxPage(contentFileUrl: string) {
-  const promise = suspendablePromiseMaker(
+  const page = cachedPromise(
     async () => {
       const [module, lastModified] = await Promise.all([
         import(contentFileUrl) as Promise<MdxPageModule>,
@@ -41,7 +42,7 @@ export function makeMdxPage(contentFileUrl: string) {
     const {
       module: { default: Content, title, description },
       lastModified,
-    } = promise.use();
+    } = use(page.get());
 
     if (title === undefined) {
       throw new Error(

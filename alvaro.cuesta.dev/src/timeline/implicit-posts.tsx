@@ -1,3 +1,4 @@
+import type { ElementType } from "react";
 import type { MDXContent } from "mdx/types";
 import type { Item } from "../utils/analyze";
 import type { BlogItemModuleParsed } from "../blog/item-module";
@@ -54,7 +55,7 @@ const hashSlug = (slug: string): number => {
 
 function makeImplicitComponent(module: BlogItemModuleParsed): MDXContent {
   const ImplicitBlogPost: MDXContent = ({ components }) => {
-    const A = components?.a ?? "a";
+    const A = (components?.["a"] ?? "a") as ElementType;
 
     const prefix = PREFIXES[hashSlug(module.slug) % PREFIXES.length];
 

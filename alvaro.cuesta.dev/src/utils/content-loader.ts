@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getGitLastModifiedDate, getGitWatchPaths } from "./git";
-import { suspendablePromiseMaker } from "xenon-ssg/src/promise";
+import { cachedPromise } from "xenon-ssg/src/promise";
 import {
   analyzeItems,
   type AnalyzedItems,
@@ -69,21 +69,18 @@ async function loadContentItems<TModuleParsed extends { draft: boolean }>(
 }
 
 type ContentLoader<TModuleParsed> = {
-  getItems: () => Promise<AnalyzedItems<TModuleParsed>>;
-  useItems: () => AnalyzedItems<TModuleParsed>;
+  (): Promise<AnalyzedItems<TModuleParsed>>;
 };
 
 export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
 ): ContentLoader<TModuleParsed> {
-  const load = () => loadContentItems(options);
-
-  const { use, reset } = suspendablePromiseMaker(load, { lazy: true });
+  const cache = cachedPromise(() => loadContentItems(options), { lazy: true });
 
   if (process.env["NODE_ENV"] === "development") {
     const startWatch = async (watchPath: string) => {
       for await (const _ of fs.watch(watchPath)) {
-        reset();
+        cache.reset();
       }
     };
 
@@ -97,5 +94,5 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
     })();
   }
 
-  return { getItems: load, useItems: use };
+  return cache.get;
 }

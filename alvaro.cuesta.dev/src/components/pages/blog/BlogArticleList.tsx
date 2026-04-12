@@ -1,7 +1,8 @@
+import { use } from "react";
 import { Template } from "../../Template";
 import { Pagination } from "../../atoms/Pagination";
 import { BlogLayout } from "./components/BlogLayout";
-import { useBlogItems } from "../../../blog/promise";
+import { getBlogItems } from "../../../blog/promise";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
 import type { SiteRenderMeta } from "../../../site";
 import {
@@ -26,7 +27,7 @@ export function BlogArticleList({
   siteRenderMeta,
   page: rawPage,
 }: BlogArticleListProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
 
   const page = rawPage ?? 1;
 

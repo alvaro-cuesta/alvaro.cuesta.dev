@@ -1,12 +1,12 @@
 import type { MDXComponents } from "mdx/types";
 import { Link } from "../components/atoms/Link";
-import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import { use, type ComponentPropsWithoutRef, type ReactElement } from "react";
 import { BlogDateTime } from "../components/atoms/BlogDateTime";
 import {
   TableOfContents,
   type TableOfContentsProps,
 } from "../components/molecules/TableOfContents";
-import { useBlogItems } from "../blog/promise";
+import { getBlogItems } from "../blog/promise";
 import { useTimelineItems } from "../timeline/promise";
 import { rewriteCustomProtocolHref } from "../utils/href";
 import { canonicalizeHref } from "xenon-ssg/src/url";
@@ -59,7 +59,7 @@ export const makeMdxDefaultComponents = ({
 }: MakeMdxDefaultComponentsOptions = {}): MDXComponents => ({
   a: canonicalizeBaseUrl
     ? function MdxAnchorCanonicalized(props) {
-        const blogItems = useBlogItems();
+        const blogItems = use(getBlogItems());
         const timelineItems = useTimelineItems();
 
         let href = rewriteCustomProtocolHref(props.href, {
@@ -84,7 +84,7 @@ export const makeMdxDefaultComponents = ({
 
         if (!tagName) return renderHashtag(props);
 
-        const blogItems = useBlogItems();
+        const blogItems = use(getBlogItems());
         const timelineItems = useTimelineItems();
 
         let href: string | undefined = `timeline-tag:///${tagName}`;

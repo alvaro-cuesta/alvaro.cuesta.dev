@@ -1,9 +1,9 @@
-import { type ComponentPropsWithoutRef } from "react";
+import { use, type ComponentPropsWithoutRef } from "react";
 import { Link as XenonLink } from "xenon-ssg/src/generate/Link";
 import { canonicalizeHref } from "xenon-ssg/src/url";
 import { getDomain } from "tldts";
 import { Icon } from "./Icon";
-import { useBlogItems } from "../../blog/promise";
+import { getBlogItems } from "../../blog/promise";
 import { useTimelineItems } from "../../timeline/promise";
 import { rewriteCustomProtocolHref } from "../../utils/href";
 
@@ -22,7 +22,7 @@ export function Link({
   Component = XenonLink,
   ...props
 }: LinkProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
   const timelineItems = useTimelineItems();
 
   const rewrittenHref = rewriteCustomProtocolHref(props.href, {

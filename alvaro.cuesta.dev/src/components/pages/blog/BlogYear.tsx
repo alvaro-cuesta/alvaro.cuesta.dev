@@ -1,4 +1,5 @@
-import { useBlogItems } from "../../../blog/promise";
+import { use } from "react";
+import { getBlogItems } from "../../../blog/promise";
 import { Template } from "../../Template";
 import { BlogLayout } from "./components/BlogLayout";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
@@ -36,7 +37,7 @@ const MONTH_NUMBER_TO_NAME: {
 const NULL_MONTH_TO_NAME = "Other";
 
 export function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
 
   const yearInfo = blogItems.byYear.get(year);
   if (yearInfo === undefined) {

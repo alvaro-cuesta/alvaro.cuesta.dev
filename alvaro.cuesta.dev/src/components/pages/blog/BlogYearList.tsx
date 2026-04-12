@@ -1,4 +1,5 @@
-import { useBlogItems } from "../../../blog/promise";
+import { use } from "react";
+import { getBlogItems } from "../../../blog/promise";
 import { Template } from "../../Template";
 import { BlogLayout } from "./components/BlogLayout";
 import { Link } from "../../atoms/Link";
@@ -15,7 +16,7 @@ type BlogYearListProps = {
 };
 
 export function BlogYearList({ siteRenderMeta }: BlogYearListProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
 
   return (
     <Template

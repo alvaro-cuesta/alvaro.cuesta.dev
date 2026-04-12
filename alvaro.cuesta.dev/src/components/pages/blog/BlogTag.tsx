@@ -1,6 +1,7 @@
 import { BlogLayout } from "./components/BlogLayout";
 import { Template } from "../../Template";
-import { useBlogItems } from "../../../blog/promise";
+import { use } from "react";
+import { getBlogItems } from "../../../blog/promise";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
 import type { SiteRenderMeta } from "../../../site";
 import { routeBlogTag, routeBlogTagList } from "../../../routes";
@@ -16,7 +17,7 @@ type BlogTagProps = {
 };
 
 export function BlogTag({ siteRenderMeta, tag }: BlogTagProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
 
   const itemsInTag = blogItems.byTag.get(tag);
 

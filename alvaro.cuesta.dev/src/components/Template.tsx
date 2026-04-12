@@ -1,8 +1,8 @@
-import { type ReactNode } from "react";
+import { use, type ReactNode } from "react";
 import cx from "classnames";
 import { Link } from "./atoms/Link";
 import { Icon } from "./atoms/Icon";
-import { useBlogItems } from "../blog/promise";
+import { getBlogItems } from "../blog/promise";
 import type { SiteRenderMeta } from "../site";
 import {
   routeBlogArticleList,
@@ -65,7 +65,7 @@ export function Template({
   mainClassName,
   children,
 }: TemplateProps) {
-  const blogItems = useBlogItems();
+  const blogItems = use(getBlogItems());
   const timelineItems = useTimelineItems();
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;

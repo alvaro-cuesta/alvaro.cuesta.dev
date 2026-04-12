@@ -4,7 +4,7 @@ import { createContentLoader } from "../utils/content-loader";
 
 const UNCATEGORIZED_TAG = "uncategorized";
 
-const { getItems: getBlogItems, useItems: useBlogItems } = createContentLoader({
+export const getBlogItems = createContentLoader({
   siteRootPath: path.join(import.meta.dirname, "..", ".."),
   contentFolderPath: path.join(import.meta.dirname, "..", "..", "blog"),
   contentFolderUrl: new URL("../../blog/", import.meta.url),
@@ -20,5 +20,3 @@ const { getItems: getBlogItems, useItems: useBlogItems } = createContentLoader({
     },
   },
 });
-
-export { getBlogItems, useBlogItems };
