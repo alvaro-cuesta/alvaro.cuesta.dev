@@ -44,6 +44,7 @@ import {
   routeNow,
 } from "./routes";
 import { feedsPlugin } from "./plugins/feeds";
+import { compareInstants } from "./plugins/feeds/dates";
 import { getBlogFeedSourceItems } from "./blog/feed-source";
 import { getMicroblogFeedSourceItems } from "./microblog/feed-source";
 import { makeTitle } from "./utils/meta";
@@ -251,6 +252,33 @@ export async function makeSite(): Promise<
     ],
     content: {
       html: "full",
+      text: "full",
+    },
+  });
+
+  const allFeeds = feedsPlugin({
+    getItems: async ({ baseUrl }) => {
+      const [blogItems, microblogItems] = await Promise.all([
+        getBlogFeedSourceItems(baseUrl),
+        getMicroblogFeedSourceItems(baseUrl),
+      ]);
+
+      return [...blogItems, ...microblogItems].sort((a, b) =>
+        compareInstants(b.datePublished, a.datePublished),
+      );
+    },
+    homePagePathname: routeHome.build({}),
+    mountPointFragments: [],
+    title: makeTitle(["All"], { disableReverse: true }),
+    description: SITE_SHORT_DESCRIPTION,
+    authors: ({ baseUrl }) => [
+      {
+        name: MY_NAME,
+        url: baseUrl,
+      },
+    ],
+    content: {
+      html: "full",
       text: "none",
     },
   });
@@ -262,6 +290,7 @@ export async function makeSite(): Promise<
     ),
     outputFilename: "sitemap.xml",
     additionalPathnames: async () => [
+      ...(await allFeeds.getFeedSitemapPathnames()),
       ...(await blogFeeds.getFeedSitemapPathnames()),
       ...(await microblogFeeds.getFeedSitemapPathnames()),
     ],
@@ -293,6 +322,7 @@ export async function makeSite(): Promise<
       fontawesomeWebfontsFolder,
       indexCss,
       starryNightCss,
+      allFeeds,
       blogFeeds,
       microblogFeeds,
       sitemap,
