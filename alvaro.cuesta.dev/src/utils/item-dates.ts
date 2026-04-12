@@ -117,7 +117,7 @@ const DEFAULT_PLAIN_DATE_TIME_PARTS: Temporal.PlainDateTimeLike = {
   nanosecond: 0,
 };
 
-const blogItemDateToPlainDateTime = (
+export const blogItemDateToPlainDateTime = (
   blogItemDate: BlogItemDate,
 ): Temporal.PlainDateTime => {
   switch (blogItemDate.type) {

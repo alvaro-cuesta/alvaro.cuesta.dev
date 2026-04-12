@@ -37,6 +37,7 @@ export const getMicroblogFeedSourceItems = createFeedSource(
       publicationDate: item.module.publicationDate,
       lastModificationDate: item.module.lastModificationDate,
       tags: item.module.tags,
+      metadata: { implicit: item.module.implicit },
     });
   },
 );

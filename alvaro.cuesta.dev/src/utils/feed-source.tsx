@@ -31,7 +31,7 @@ export function renderContentItemHtml({
   );
 }
 
-type BuildFeedSourceItemOptions = {
+type BuildFeedSourceItemOptions<TMetadata = unknown> = {
   pathname: string;
   title: string;
   summary?: string | undefined;
@@ -39,9 +39,10 @@ type BuildFeedSourceItemOptions = {
   publicationDate: BlogItemDate;
   lastModificationDate: BlogItemDate | null;
   tags: string[];
+  metadata?: TMetadata;
 };
 
-export function buildFeedSourceItem({
+export function buildFeedSourceItem<TMetadata = unknown>({
   pathname,
   title,
   summary,
@@ -49,7 +50,8 @@ export function buildFeedSourceItem({
   publicationDate,
   lastModificationDate,
   tags,
-}: BuildFeedSourceItemOptions): FeedSourceItem {
+  metadata,
+}: BuildFeedSourceItemOptions<TMetadata>): FeedSourceItem<TMetadata> {
   return {
     pathname,
     title,
@@ -62,19 +64,18 @@ export function buildFeedSourceItem({
         }
       : {}),
     ...(tags.length ? { tags } : {}),
-  };
+    ...(metadata !== undefined ? { metadata } : {}),
+  } as FeedSourceItem<TMetadata>;
 }
 
-type FeedSource = (baseUrl: string) => Promise<FeedSourceItem[]>;
-
-export function createFeedSource<TModuleParsed>(
+export function createFeedSource<TModuleParsed, const TMetadata = unknown>(
   getAnalyzedItems: () => Promise<AnalyzedItems<TModuleParsed>>,
   toFeedSourceItem: (
     baseUrl: string,
     item: Item<TModuleParsed>,
-  ) => FeedSourceItem | Promise<FeedSourceItem>,
-): FeedSource {
-  return async (baseUrl: string): Promise<FeedSourceItem[]> => {
+  ) => FeedSourceItem<TMetadata> | Promise<FeedSourceItem<TMetadata>>,
+): (baseUrl: string) => Promise<FeedSourceItem<TMetadata>[]> {
+  return async (baseUrl: string): Promise<FeedSourceItem<TMetadata>[]> => {
     const analyzed = await getAnalyzedItems();
     return Promise.all(
       analyzed.allSortedByDescendingDate.map((item) =>

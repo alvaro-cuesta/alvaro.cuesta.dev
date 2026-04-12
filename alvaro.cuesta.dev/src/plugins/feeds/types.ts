@@ -23,7 +23,7 @@ export type FeedItem = {
   tags?: string[];
 };
 
-export type FeedSourceItem = {
+export type FeedSourceItem<TMetadata = unknown> = {
   id?: string;
   pathname: string;
   title: string;
@@ -33,6 +33,7 @@ export type FeedSourceItem = {
   dateModified?: Temporal.Instant;
   authors?: FeedAuthor[];
   tags?: string[];
+  metadata?: TMetadata;
 };
 
 export type FeedFormat = "jsonfeed" | "atom" | "rss";

@@ -263,7 +263,13 @@ export async function makeSite(): Promise<
         getMicroblogFeedSourceItems(baseUrl),
       ]);
 
-      return [...blogItems, ...microblogItems].sort((a, b) =>
+      // Exclude implicit (blog-generated) microblog items from the aggregate
+      // feed since the blog posts are already included directly
+      const nonImplicitMicroblogItems = microblogItems.filter(
+        (item) => !item.metadata?.implicit,
+      );
+
+      return [...blogItems, ...nonImplicitMicroblogItems].sort((a, b) =>
         compareInstants(b.datePublished, a.datePublished),
       );
     },

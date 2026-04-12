@@ -4,6 +4,7 @@ import { parseMicroblogItemFilename } from "./item-filename";
 import {
   type BlogItemDate,
   type ItemModuleDate,
+  blogItemDateToPlainDateTime,
   itemModuleDateToBlogItemDate,
   resolveLastModificationDate,
 } from "../utils/item-dates";
@@ -35,14 +36,8 @@ function assertIsMicroblogItemModule(
   assertOptionalStringArray(module, "hashtags", label);
 }
 
-function microblogSlugFromCreationDate(creationDate: BlogItemDate): string {
-  if (creationDate.type !== "dateTimeNoSeconds") {
-    throw new Error(
-      `Cannot infer microblog slug from creation date of type "${creationDate.type}".`,
-    );
-  }
-
-  const dt = creationDate.dateTime;
+export function microblogSlugFromDate(date: BlogItemDate): string {
+  const dt = blogItemDateToPlainDateTime(date);
   return `${dt.year.toString().padStart(4, "0")}${dt.month
     .toString()
     .padStart(2, "0")}${dt.day.toString().padStart(2, "0")}${dt.hour
@@ -59,6 +54,7 @@ export type MicroblogItemModuleParsed = {
   draft: boolean;
   tags: string[];
   tableOfContents: Toc;
+  implicit: boolean;
 };
 
 type MicroblogItemModuleInferredMetadata = {
@@ -90,12 +86,13 @@ export const parseMicroblogItemModuleFromImportModule = (
 
   return {
     Component: module.default,
-    slug: microblogSlugFromCreationDate(creationDate),
+    slug: microblogSlugFromDate(creationDate),
     creationDate,
     publicationDate,
     lastModificationDate,
     draft: module.draft ?? false,
     tags: module.hashtags ?? [],
     tableOfContents: module.tableOfContents,
+    implicit: false,
   };
 };

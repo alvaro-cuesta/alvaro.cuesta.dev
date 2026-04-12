@@ -60,10 +60,12 @@ type FeedContext = {
 
 type FeedValueResolver<T> = T | ((context: FeedContext) => T);
 
-type FeedItemsResolver = (context: FeedContext) => Promise<FeedSourceItem[]>;
+type FeedItemsResolver<TMetadata = unknown> = (
+  context: FeedContext,
+) => Promise<FeedSourceItem<TMetadata>[]>;
 
-export type FeedsPluginOptions = {
-  getItems: FeedItemsResolver;
+export type FeedsPluginOptions<TMetadata = unknown> = {
+  getItems: FeedItemsResolver<TMetadata>;
   homePagePathname: FeedValueResolver<string>;
   title: string;
   description: string;
@@ -186,7 +188,7 @@ async function ensureParentFolder(filepath: string): Promise<void> {
 /**
  * Feed plugin entry point. Generates JSON Feed, Atom and RSS outputs.
  */
-export function feedsPlugin({
+export function feedsPlugin<TMetadata = unknown>({
   getItems,
   homePagePathname,
   title,
@@ -197,7 +199,7 @@ export function feedsPlugin({
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
   language = DEFAULT_LANGUAGE,
   generator = { name: DEFAULT_GENERATOR_NAME },
-}: FeedsPluginOptions): FeedsPlugin {
+}: FeedsPluginOptions<TMetadata>): FeedsPlugin {
   const getConfiguredFeedSitemapPathnames = async (): Promise<string[]> => {
     return resolveFeedSitemapPathnames({
       mountPointFragments,
