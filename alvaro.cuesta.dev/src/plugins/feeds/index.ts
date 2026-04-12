@@ -13,6 +13,7 @@ import { serializeAtomDocument } from "./atom";
 import { compileFeedPageModels } from "./content";
 import { serializeJsonDocuments } from "./jsonfeed";
 import {
+  ALL_FEED_FORMATS,
   DEFAULT_MOUNT_POINT_FRAGMENTS,
   FEED_FORMATS,
   getFeedFormatRoute,
@@ -24,7 +25,6 @@ import { serializeRssDocument } from "./rss";
 import type {
   FeedFormat,
   FeedPage,
-  FeedPageRoutes,
   FeedContentOptions,
   FeedAuthor,
   FeedSourceItem,
@@ -42,7 +42,7 @@ type FeedGeneratorConfig = {
 
 type SerializedFeedPage = {
   page: FeedPage;
-  documents: Record<FeedFormat, string>;
+  documents: Partial<Record<FeedFormat, string>>;
 };
 
 type FeedsBuildPreResult = {
@@ -64,7 +64,10 @@ type FeedItemsResolver<TMetadata = unknown> = (
   context: FeedContext,
 ) => Promise<FeedSourceItem<TMetadata>[]>;
 
-export type FeedsPluginOptions<TMetadata = unknown> = {
+export type FeedsPluginOptions<
+  TFormat extends FeedFormat = FeedFormat,
+  TMetadata = unknown,
+> = {
   getItems: FeedItemsResolver<TMetadata>;
   homePagePathname: FeedValueResolver<string>;
   title: string;
@@ -75,6 +78,12 @@ export type FeedsPluginOptions<TMetadata = unknown> = {
   itemsPerPage?: number;
   language?: string;
   generator?: FeedGeneratorConfig;
+  /** Which feed formats to generate. Defaults to all formats. */
+  formats?: readonly TFormat[];
+  /** Which feed formats to inject as `<link rel="alternate">`. Must be a subset of `formats`. Defaults to `formats`. */
+  linkRelFormats?: readonly TFormat[];
+  /** Which feed formats to include in the sitemap. Must be a subset of `formats`. Defaults to `formats`. */
+  sitemapFormats?: readonly TFormat[];
 };
 
 export type FeedSitemapPathnamesOptions = {
@@ -82,11 +91,14 @@ export type FeedSitemapPathnamesOptions = {
   itemsPerPage?: number;
   totalItems?: number;
   getTotalItems?: () => Promise<number>;
+  formats?: readonly FeedFormat[];
 };
 
-export type FeedsPlugin = Plugin<FeedsBuildPreResult> & {
-  getFeedSitemapPathnames: () => Promise<string[]>;
-};
+export type FeedsPlugin<TFormat extends FeedFormat = FeedFormat> =
+  Plugin<FeedsBuildPreResult> & {
+    getFeedSitemapPathnames: () => Promise<string[]>;
+    relativeUrls: Record<TFormat, string>;
+  };
 
 function resolveContextValue<T>(
   value: FeedValueResolver<T>,
@@ -103,40 +115,62 @@ async function resolveFeedSitemapPathnames({
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
   totalItems,
   getTotalItems,
+  formats = ALL_FEED_FORMATS,
 }: FeedSitemapPathnamesOptions = {}): Promise<string[]> {
   const resolvedTotalItems =
     totalItems ?? (getTotalItems ? await getTotalItems() : 0);
   const totalPages = Math.ceil(resolvedTotalItems / itemsPerPage);
 
-  return getFeedSitemapPathnamesForTotalPages(totalPages, mountPointFragments);
+  return getFeedSitemapPathnamesForTotalPages(
+    totalPages,
+    mountPointFragments,
+    formats,
+  );
 }
 
-/** Serialize one page model into all supported feed document formats. */
+/** Serialize one page model into the requested feed document formats. */
 function serializeFeedPage(
   page: FeedPage,
   language: string,
   generator: FeedGeneratorConfig,
+  formats: readonly FeedFormat[],
 ): SerializedFeedPage {
-  const jsonFeedDocument = serializeJsonDocuments(page, language);
-  const atomDocument = serializeAtomDocument(page, language, {
-    value: generator.name,
-    version: packageVersion,
-    ...(generator.uri ? { uri: generator.uri } : {}),
-  });
-  const rssDocument = serializeRssDocument(page, language);
+  const documents: Partial<Record<FeedFormat, string>> = {};
 
-  return {
-    page,
-    documents: {
-      jsonfeed: jsonFeedDocument,
-      atom: atomDocument,
-      rss: rssDocument,
-    },
-  };
+  if (formats.includes("jsonfeed")) {
+    documents.jsonfeed = serializeJsonDocuments(page, language);
+  }
+  if (formats.includes("atom")) {
+    documents.atom = serializeAtomDocument(page, language, {
+      value: generator.name,
+      version: packageVersion,
+      ...(generator.uri ? { uri: generator.uri } : {}),
+    });
+  }
+  if (formats.includes("rss")) {
+    documents.rss = serializeRssDocument(page, language);
+  }
+
+  return { page, documents };
 }
 
+type CompileFeedsInput<TMetadata = unknown> = {
+  baseUrl: string;
+  getItems: FeedItemsResolver<TMetadata>;
+  mountPointFragments: string[];
+  itemsPerPage: number;
+  language: string;
+  title: string;
+  description: string;
+  homePagePathname: string;
+  authors: FeedAuthor[];
+  generator: FeedGeneratorConfig;
+  content: Required<FeedContentOptions>;
+  formats: readonly FeedFormat[];
+};
+
 /** Compile and serialize all feed pages for the current site state. */
-async function compileFeeds({
+async function compileFeeds<TMetadata = unknown>({
   baseUrl,
   getItems,
   mountPointFragments,
@@ -148,23 +182,8 @@ async function compileFeeds({
   authors,
   generator,
   content,
-}: Required<
-  Pick<
-    FeedsPluginOptions,
-    | "getItems"
-    | "title"
-    | "description"
-    | "mountPointFragments"
-    | "itemsPerPage"
-    | "language"
-    | "generator"
-  >
-> & {
-  baseUrl: string;
-  homePagePathname: string;
-  authors: FeedAuthor[];
-  content: Required<FeedContentOptions>;
-}): Promise<SerializedFeedPage[]> {
+  formats,
+}: CompileFeedsInput<TMetadata>): Promise<SerializedFeedPage[]> {
   const pages = await compileFeedPageModels({
     baseUrl,
     getItems,
@@ -177,7 +196,9 @@ async function compileFeeds({
     content,
   });
 
-  return pages.map((page) => serializeFeedPage(page, language, generator));
+  return pages.map((page) =>
+    serializeFeedPage(page, language, generator, formats),
+  );
 }
 
 /** Ensure output folder exists before writing serialized feed files. */
@@ -188,7 +209,10 @@ async function ensureParentFolder(filepath: string): Promise<void> {
 /**
  * Feed plugin entry point. Generates JSON Feed, Atom and RSS outputs.
  */
-export function feedsPlugin<TMetadata = unknown>({
+export function feedsPlugin<
+  const TFormat extends FeedFormat = FeedFormat,
+  TMetadata = unknown,
+>({
   getItems,
   homePagePathname,
   title,
@@ -199,11 +223,46 @@ export function feedsPlugin<TMetadata = unknown>({
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
   language = DEFAULT_LANGUAGE,
   generator = { name: DEFAULT_GENERATOR_NAME },
-}: FeedsPluginOptions<TMetadata>): FeedsPlugin {
+  formats,
+  linkRelFormats,
+  sitemapFormats,
+}: FeedsPluginOptions<TFormat, TMetadata>): FeedsPlugin<TFormat> {
+  const resolvedFormats: readonly TFormat[] =
+    formats ?? (ALL_FEED_FORMATS as readonly TFormat[]);
+  const resolvedLinkRelFormats: readonly TFormat[] =
+    linkRelFormats ?? resolvedFormats;
+  const resolvedSitemapFormats: readonly TFormat[] =
+    sitemapFormats ?? resolvedFormats;
+
+  const invalidLinkRel = resolvedLinkRelFormats.filter(
+    (format) => !resolvedFormats.includes(format),
+  );
+  if (invalidLinkRel.length > 0) {
+    throw new Error(
+      `feedsPlugin: linkRelFormats contains formats not listed in formats: ${invalidLinkRel.join(", ")}`,
+    );
+  }
+
+  const invalidSitemap = resolvedSitemapFormats.filter(
+    (format) => !resolvedFormats.includes(format),
+  );
+  if (invalidSitemap.length > 0) {
+    throw new Error(
+      `feedsPlugin: sitemapFormats contains formats not listed in formats: ${invalidSitemap.join(", ")}`,
+    );
+  }
+
+  const relativeUrls = Object.fromEntries(
+    resolvedFormats.map((format) => [
+      format,
+      getFeedFormatRoute(mountPointFragments, 1, format).pathname,
+    ]),
+  ) as Record<TFormat, string>;
   const getConfiguredFeedSitemapPathnames = async (): Promise<string[]> => {
     return resolveFeedSitemapPathnames({
       mountPointFragments,
       itemsPerPage,
+      formats: resolvedSitemapFormats,
       totalItems: (
         await getItems({
           baseUrl: SITEMAP_COUNT_BASE_URL,
@@ -212,7 +271,7 @@ export function feedsPlugin<TMetadata = unknown>({
     });
   };
 
-  const plugin: FeedsPlugin = Object.assign(
+  const plugin: FeedsPlugin<TFormat> = Object.assign(
     ({ baseUrl }: { baseUrl: string }) => {
       const context = { baseUrl };
       const resolvedContent: Required<FeedContentOptions> = {
@@ -240,6 +299,7 @@ export function feedsPlugin<TMetadata = unknown>({
           title,
           description,
           generator,
+          formats: resolvedFormats,
         });
 
         return { pages };
@@ -261,12 +321,13 @@ export function feedsPlugin<TMetadata = unknown>({
             title,
             description,
             generator,
+            formats: resolvedFormats,
           });
 
           return pages.find((entry) => entry.page.currentPage === pageNumber);
         };
 
-        for (const format of Object.keys(FEED_FORMATS) as FeedFormat[]) {
+        for (const format of resolvedFormats) {
           app.get(
             getFeedFormatRoute(mountPointFragments, 1, format).pathname,
             async (_req, res, next) => {
@@ -329,19 +390,17 @@ export function feedsPlugin<TMetadata = unknown>({
         Record<string, unknown>
       > = async ({ baseOutputFolder, buildPreResult }) => {
         for (const serializedPage of buildPreResult.pages) {
-          for (const format of Object.keys(
-            serializedPage.documents,
-          ) as FeedFormat[]) {
+          for (const format of resolvedFormats) {
+            const document = serializedPage.documents[format];
+            if (document === undefined) continue;
+
             const outputFilepath = path.join(
               baseOutputFolder,
               serializedPage.page.routes[format].outputRelativePath,
             );
             console.debug(`[Feed:${format}] ${outputFilepath}`);
             await ensureParentFolder(outputFilepath);
-            await fs.writeFile(
-              outputFilepath,
-              serializedPage.documents[format],
-            );
+            await fs.writeFile(outputFilepath, document);
           }
         }
       };
@@ -349,35 +408,27 @@ export function feedsPlugin<TMetadata = unknown>({
       const getInjectable: PluginGetInjectableFunction<
         FeedsBuildPreResult
       > = (): PluginInjectableTag[] => {
-        const firstPageRoutes: FeedPageRoutes = {
-          jsonfeed: getFeedFormatRoute(mountPointFragments, 1, "jsonfeed"),
-          atom: getFeedFormatRoute(mountPointFragments, 1, "atom"),
-          rss: getFeedFormatRoute(mountPointFragments, 1, "rss"),
+        const formatLabels: Record<FeedFormat, string> = {
+          rss: "RSS Feed",
+          jsonfeed: "JSON Feed",
+          atom: "Atom Feed",
         };
 
-        return [
-          {
+        return resolvedLinkRelFormats.map((format) => {
+          const route = getFeedFormatRoute(mountPointFragments, 1, format);
+          const formatTitle =
+            resolvedLinkRelFormats.length > 1
+              ? `${title} (${formatLabels[format]})`
+              : title;
+
+          return {
             tagType: "link",
             rel: "alternate",
-            type: FEED_FORMATS.rss.contentType,
-            title: `${title} (RSS Feed)`,
-            href: toAbsoluteUrl(baseUrl, firstPageRoutes.rss.pathname),
-          },
-          {
-            tagType: "link",
-            rel: "alternate",
-            type: FEED_FORMATS.jsonfeed.contentType,
-            title: `${title} (JSON Feed)`,
-            href: toAbsoluteUrl(baseUrl, firstPageRoutes.jsonfeed.pathname),
-          },
-          {
-            tagType: "link",
-            rel: "alternate",
-            type: FEED_FORMATS.atom.contentType,
-            title: `${title} (Atom Feed)`,
-            href: toAbsoluteUrl(baseUrl, firstPageRoutes.atom.pathname),
-          },
-        ];
+            type: FEED_FORMATS[format].contentType,
+            title: formatTitle,
+            href: toAbsoluteUrl(baseUrl, route.pathname),
+          };
+        });
       };
 
       return {
@@ -389,6 +440,7 @@ export function feedsPlugin<TMetadata = unknown>({
     },
     {
       getFeedSitemapPathnames: getConfiguredFeedSitemapPathnames,
+      relativeUrls,
     },
   );
 

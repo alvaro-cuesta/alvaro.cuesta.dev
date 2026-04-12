@@ -82,6 +82,7 @@ export const MicroblogTag: React.FC<MicroblogTagProps> = ({
         microblogItems={microblogItems}
         currentTags={[tag]}
         isTagListCurrent
+        feedUrls={siteRenderMeta.feedUrls}
       >
         <h2>
           Timeline tag "{tag}"

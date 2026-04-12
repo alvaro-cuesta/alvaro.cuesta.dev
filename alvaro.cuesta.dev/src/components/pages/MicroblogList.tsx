@@ -79,6 +79,7 @@ export const MicroblogList: React.FC<MicroblogListProps> = ({
             : []
         }
         microblogItems={microblogItems}
+        feedUrls={siteRenderMeta.feedUrls}
       >
         <h2>Timeline{page > 1 ? ` (page ${page} of ${totalPages})` : ""}</h2>
 

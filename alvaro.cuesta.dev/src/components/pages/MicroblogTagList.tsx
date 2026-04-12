@@ -34,6 +34,7 @@ export const MicroblogTagList: React.FC<MicroblogTagListProps> = ({
         breadcrumbs={[{ name: "Tags", href: routeMicroblogTagList.build({}) }]}
         microblogItems={microblogItems}
         isTagListCurrent
+        feedUrls={siteRenderMeta.feedUrls}
       >
         <h2>Timeline tags</h2>
 

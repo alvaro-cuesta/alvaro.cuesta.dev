@@ -76,6 +76,7 @@ export const BlogYear: React.FC<BlogYearProps> = ({ siteRenderMeta, year }) => {
         blogItems={blogItems}
         currentYear={year}
         isYearListCurrent
+        feedUrls={siteRenderMeta.feedUrls}
       >
         <h2>Blog year {year}</h2>
 

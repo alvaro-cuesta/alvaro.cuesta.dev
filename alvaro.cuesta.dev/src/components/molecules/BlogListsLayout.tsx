@@ -11,6 +11,7 @@ import {
   routeBlogYearList,
 } from "../../routes";
 import { ContentListsLayout } from "./ContentListsLayout";
+import type { SiteFeedUrls } from "../../site";
 
 type BlogListsLayoutProps = {
   breadcrumbs: BreadcrumbItem[];
@@ -19,6 +20,7 @@ type BlogListsLayoutProps = {
   currentYear?: number | null;
   isTagListCurrent?: boolean;
   isYearListCurrent?: boolean;
+  feedUrls: SiteFeedUrls;
   children?: ReactNode;
 };
 
@@ -29,13 +31,15 @@ export const BlogListsLayout: React.FC<BlogListsLayoutProps> = ({
   currentYear,
   isTagListCurrent,
   isYearListCurrent,
+  feedUrls,
   children,
 }) => (
   <ContentListsLayout
     rootName="Blog"
     rootHref={routeBlogArticleList.build({ page: null })}
-    feedBasePath="/blog/"
     breadcrumbs={breadcrumbs}
+    feedUrls={feedUrls}
+    currentSection="blog"
     sidebar={
       <ContentSidebar
         className="blog-sidebar"

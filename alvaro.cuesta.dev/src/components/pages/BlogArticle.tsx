@@ -125,6 +125,7 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
         currentYear={getBlogItemDateYear(publicationDate)}
         isTagListCurrent={tagSlugs.length > 0}
         isYearListCurrent
+        feedUrls={siteRenderMeta.feedUrls}
       >
         <article>
           <header>

@@ -24,7 +24,12 @@ export const FEED_FORMATS: Record<
   },
 };
 
-const DISCOVERABLE_FEED_FORMATS = ["rss", "jsonfeed", "atom"] as const;
+export const ALL_FEED_FORMATS: readonly FeedFormat[] = [
+  "rss",
+  "jsonfeed",
+  "atom",
+];
+
 const PAGE_PARAM_PATTERN = "\\d+";
 
 /** Build an absolute URL from a site base URL and pathname. */
@@ -90,12 +95,13 @@ export function getPaginatedFeedFormatRoutePath(
 export function getFeedSitemapPathnames(
   totalPages: number,
   mountPointFragments = DEFAULT_MOUNT_POINT_FRAGMENTS,
+  formats: readonly FeedFormat[] = ALL_FEED_FORMATS,
 ): string[] {
   return Array.from(
     { length: totalPages },
     (_value, index) => index + 1,
   ).flatMap((page) => {
-    return DISCOVERABLE_FEED_FORMATS.map((format) => {
+    return formats.map((format) => {
       return getFeedFormatRoute(mountPointFragments, page, format).pathname;
     });
   });

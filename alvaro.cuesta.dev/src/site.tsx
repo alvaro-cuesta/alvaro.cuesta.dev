@@ -49,112 +49,130 @@ import { getBlogFeedSourceItems } from "./blog/feed-source";
 import { getMicroblogFeedSourceItems } from "./microblog/feed-source";
 import { makeTitle } from "./utils/meta";
 
+export type SiteFeedUrls = {
+  all: string;
+  blog: string;
+  timeline: string;
+};
+
 export type SiteRenderMeta = XenonExpressRenderMeta & {
   defaultOgImage: string;
   woff2PreloadPaths: string[];
+  feedUrls: SiteFeedUrls;
+};
+
+type XenonExpressRenderFunctionInput = {
+  feedUrls: SiteFeedUrls;
 };
 
 // TODO: changing the type here won't make the other fail
-const render: XenonExpressRenderFunction<SitemapPluginMetadata> = (
-  renderMeta,
-) => {
-  const defaultOgImageHref = renderMeta.injectableRaw?.find(
-    (tag): tag is PluginInjectableLink =>
-      tag.tagType === "link" &&
-      tag.rel === "apple-touch-icon" &&
-      tag.sizes === "1024x1024",
-  )?.href;
+const render =
+  (
+    input: XenonExpressRenderFunctionInput,
+  ): XenonExpressRenderFunction<SitemapPluginMetadata> =>
+  (renderMeta) => {
+    const defaultOgImageHref = renderMeta.injectableRaw?.find(
+      (tag): tag is PluginInjectableLink =>
+        tag.tagType === "link" &&
+        tag.rel === "apple-touch-icon" &&
+        tag.sizes === "1024x1024",
+    )?.href;
 
-  if (!defaultOgImageHref) {
-    throw new Error(
-      "Default og:image not found -- possibly the `favicon` plugin is missing or misconfigured",
+    if (!defaultOgImageHref) {
+      throw new Error(
+        "Default og:image not found -- possibly the `favicon` plugin is missing or misconfigured",
+      );
+    }
+
+    const siteRenderMeta: SiteRenderMeta = {
+      ...renderMeta,
+      defaultOgImage: `${renderMeta.baseUrl}${defaultOgImageHref}`,
+      woff2PreloadPaths: [
+        `${FONTAWESOME_MOUNT_POINT_PATH}/fa-solid-900.woff2`,
+        `${FONTAWESOME_MOUNT_POINT_PATH}/fa-brands-400.woff2`,
+      ],
+      feedUrls: input.feedUrls,
+    };
+
+    const isHome = routeHome.match(siteRenderMeta.pathname);
+    const is404 = route404.match(siteRenderMeta.pathname);
+    const isNow = routeNow.match(siteRenderMeta.pathname);
+
+    const isHighSignalPage = isNow;
+
+    // Blog
+    const blogArticleListMatch = routeBlogArticleList.match(
+      siteRenderMeta.pathname,
     );
-  }
 
-  const siteRenderMeta: SiteRenderMeta = {
-    ...renderMeta,
-    defaultOgImage: `${renderMeta.baseUrl}${defaultOgImageHref}`,
-    woff2PreloadPaths: [
-      `${FONTAWESOME_MOUNT_POINT_PATH}/fa-solid-900.woff2`,
-      `${FONTAWESOME_MOUNT_POINT_PATH}/fa-brands-400.woff2`,
-    ],
+    const isBlogArticle = routeBlogArticle.match(siteRenderMeta.pathname);
+    const isBlogArticleFrontpage =
+      blogArticleListMatch !== null &&
+      (blogArticleListMatch.page === null || blogArticleListMatch.page === 1);
+    const isBlogGenericRoute =
+      routeBlogTagList.match(siteRenderMeta.pathname) ||
+      routeBlogTag.match(siteRenderMeta.pathname) ||
+      routeBlogYearList.match(siteRenderMeta.pathname) ||
+      routeBlogYear.match(siteRenderMeta.pathname);
+    const isBlogPagination =
+      blogArticleListMatch !== null &&
+      blogArticleListMatch.page &&
+      blogArticleListMatch.page > 1;
+
+    // Microblog
+    const microblogListMatch = routeMicroblogList.match(
+      siteRenderMeta.pathname,
+    );
+
+    const isMicroblogPost = routeMicroblogPost.match(siteRenderMeta.pathname);
+    const isMicroblogFrontpage =
+      microblogListMatch !== null &&
+      (microblogListMatch.page === null || microblogListMatch.page === 1);
+    const microblogTagMatch = routeMicroblogTag.match(siteRenderMeta.pathname);
+    const microblogYearMatch = routeMicroblogYear.match(
+      siteRenderMeta.pathname,
+    );
+    const isMicroblogGenericRoute =
+      routeMicroblogTagList.match(siteRenderMeta.pathname) ||
+      (microblogTagMatch &&
+        (!microblogTagMatch.page || microblogTagMatch.page <= 1)) ||
+      routeMicroblogYearList.match(siteRenderMeta.pathname) ||
+      (microblogYearMatch &&
+        (!microblogYearMatch.page || microblogYearMatch.page <= 1));
+    const isMicroblogPagination =
+      (microblogListMatch !== null &&
+        microblogListMatch.page &&
+        microblogListMatch.page > 1) ||
+      (microblogTagMatch &&
+        microblogTagMatch.page &&
+        microblogTagMatch.page > 1) ||
+      (microblogYearMatch &&
+        microblogYearMatch.page &&
+        microblogYearMatch.page > 1);
+
+    return {
+      reactNode: <Root siteRenderMeta={siteRenderMeta} />,
+      metadata: {
+        [sitemapPluginKey]: is404
+          ? { exclude: true }
+          : isHome
+            ? { priority: 1.0 }
+            : isHighSignalPage
+              ? { priority: 0.9 }
+              : isBlogArticle
+                ? { priority: 0.85 }
+                : isMicroblogPost
+                  ? { priority: 0.8 }
+                  : isBlogArticleFrontpage || isMicroblogFrontpage
+                    ? { priority: 0.7 }
+                    : isBlogGenericRoute || isMicroblogGenericRoute
+                      ? { priority: 0.3 }
+                      : isBlogPagination || isMicroblogPagination
+                        ? { priority: 0.2 }
+                        : undefined,
+      },
+    };
   };
-
-  const isHome = routeHome.match(siteRenderMeta.pathname);
-  const is404 = route404.match(siteRenderMeta.pathname);
-  const isNow = routeNow.match(siteRenderMeta.pathname);
-
-  const isHighSignalPage = isNow;
-
-  // Blog
-  const blogArticleListMatch = routeBlogArticleList.match(
-    siteRenderMeta.pathname,
-  );
-
-  const isBlogArticle = routeBlogArticle.match(siteRenderMeta.pathname);
-  const isBlogArticleFrontpage =
-    blogArticleListMatch !== null &&
-    (blogArticleListMatch.page === null || blogArticleListMatch.page === 1);
-  const isBlogGenericRoute =
-    routeBlogTagList.match(siteRenderMeta.pathname) ||
-    routeBlogTag.match(siteRenderMeta.pathname) ||
-    routeBlogYearList.match(siteRenderMeta.pathname) ||
-    routeBlogYear.match(siteRenderMeta.pathname);
-  const isBlogPagination =
-    blogArticleListMatch !== null &&
-    blogArticleListMatch.page &&
-    blogArticleListMatch.page > 1;
-
-  // Microblog
-  const microblogListMatch = routeMicroblogList.match(siteRenderMeta.pathname);
-
-  const isMicroblogPost = routeMicroblogPost.match(siteRenderMeta.pathname);
-  const isMicroblogFrontpage =
-    microblogListMatch !== null &&
-    (microblogListMatch.page === null || microblogListMatch.page === 1);
-  const microblogTagMatch = routeMicroblogTag.match(siteRenderMeta.pathname);
-  const microblogYearMatch = routeMicroblogYear.match(siteRenderMeta.pathname);
-  const isMicroblogGenericRoute =
-    routeMicroblogTagList.match(siteRenderMeta.pathname) ||
-    (microblogTagMatch &&
-      (!microblogTagMatch.page || microblogTagMatch.page <= 1)) ||
-    routeMicroblogYearList.match(siteRenderMeta.pathname) ||
-    (microblogYearMatch &&
-      (!microblogYearMatch.page || microblogYearMatch.page <= 1));
-  const isMicroblogPagination =
-    (microblogListMatch !== null &&
-      microblogListMatch.page &&
-      microblogListMatch.page > 1) ||
-    (microblogTagMatch &&
-      microblogTagMatch.page &&
-      microblogTagMatch.page > 1) ||
-    (microblogYearMatch &&
-      microblogYearMatch.page &&
-      microblogYearMatch.page > 1);
-
-  return {
-    reactNode: <Root siteRenderMeta={siteRenderMeta} />,
-    metadata: {
-      [sitemapPluginKey]: is404
-        ? { exclude: true }
-        : isHome
-          ? { priority: 1.0 }
-          : isHighSignalPage
-            ? { priority: 0.9 }
-            : isBlogArticle
-              ? { priority: 0.85 }
-              : isMicroblogPost
-                ? { priority: 0.8 }
-                : isBlogArticleFrontpage || isMicroblogFrontpage
-                  ? { priority: 0.7 }
-                  : isBlogGenericRoute || isMicroblogGenericRoute
-                    ? { priority: 0.3 }
-                    : isBlogPagination || isMicroblogPagination
-                      ? { priority: 0.2 }
-                      : undefined,
-    },
-  };
-};
 
 const PICO_FILE = "pico.blue.min.css";
 const PICO_FILE_PATH = url.fileURLToPath(
@@ -236,6 +254,8 @@ export async function makeSite(): Promise<
       html: "full",
       text: "none",
     },
+    linkRelFormats: ["atom"],
+    sitemapFormats: ["atom"],
   });
 
   const microblogFeeds = feedsPlugin({
@@ -254,6 +274,8 @@ export async function makeSite(): Promise<
       html: "full",
       text: "full",
     },
+    linkRelFormats: ["atom"],
+    sitemapFormats: ["atom"],
   });
 
   const allFeeds = feedsPlugin({
@@ -287,6 +309,8 @@ export async function makeSite(): Promise<
       html: "full",
       text: "none",
     },
+    linkRelFormats: ["atom"],
+    sitemapFormats: ["atom"],
   });
 
   const sitemap = sitemapPlugin({
@@ -318,7 +342,13 @@ export async function makeSite(): Promise<
   });
 
   return {
-    render,
+    render: render({
+      feedUrls: {
+        all: allFeeds.relativeUrls.atom,
+        blog: blogFeeds.relativeUrls.atom,
+        timeline: microblogFeeds.relativeUrls.atom,
+      },
+    }),
     renderToStreamOptions: RENDER_TO_STREAM_OPTIONS,
     plugins: [
       favicon,

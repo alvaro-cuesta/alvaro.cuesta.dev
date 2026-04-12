@@ -78,8 +78,12 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
         currentYear={getBlogItemDateYear(publicationDate)}
         isTagListCurrent={tags.length > 0}
         isYearListCurrent
+        feedUrls={siteRenderMeta.feedUrls}
       >
-        <h2>Timeline post <small>{blogItemDateToShortString(publicationDate)}</small></h2>
+        <h2>
+          Timeline post{" "}
+          <small>{blogItemDateToShortString(publicationDate)}</small>
+        </h2>
 
         <MicroblogPostItem item={item} />
 
