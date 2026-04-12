@@ -11,13 +11,13 @@ import {
 import type { SiteRenderMeta } from "../../site";
 import { BlogDateTime } from "../atoms/BlogDateTime";
 import { Icon } from "../atoms/Icon";
-import { BlogArticleContent } from "../molecules/BlogArticleContent";
 import {
   routeBlogArticle,
   routeBlogArticleList,
   routeBlogTag,
 } from "../../routes";
 import { makeTitle } from "../../utils/meta";
+import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -155,7 +155,9 @@ export const BlogArticle: React.FC<BlogArticleProps> = ({
             )}
           </header>
 
-          <BlogArticleContent article={article} />
+          <section>
+            <article.module.Component components={MDX_DEFAULT_COMPONENTS} />
+          </section>
 
           {lastModificationDate ? (
             <footer>
