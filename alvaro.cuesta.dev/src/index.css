@@ -219,6 +219,20 @@ ul.timeline-sidebar {
   }
 }
 
+@media (max-width: 1024px) {
+  ul.blog-sidebar,
+  ul.timeline-sidebar {
+    display: flex;
+    gap: var(--pico-grid-column-gap);
+  }
+
+  ul.blog-sidebar > li,
+  ul.timeline-sidebar > li {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
 .is-active {
   font-weight: bold;
 }
