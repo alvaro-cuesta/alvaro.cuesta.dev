@@ -1,14 +1,22 @@
-import { renderToPipeableStream } from "react-dom/server";
-import { PassThrough, Readable, Transform, type TransformCallback } from "node:stream";
+import { prerenderToNodeStream } from "react-dom/static";
+import {
+  PassThrough,
+  Readable,
+  Transform,
+  type TransformCallback,
+} from "node:stream";
 import fs from "node:fs/promises";
 import type { ReactNode } from "react";
 import type { PathLike } from "node:fs";
 
-// Matches React's placeholder comments: <!-- -->, <!--$-->, <!--/$-->, <!--$?-->
-const REACT_COMMENT_RE = /<!--[\s/$?]*-->/g;
+// Matches React's placeholder comments:
+// - <!-- --> (text node separator)
+// - <!--$-->, <!--/$-->, <!--$?--> (Suspense boundary markers)
+// - <!--html-->, <!--head-->, <!--body--> (React 19 section markers from prerender)
+const REACT_COMMENT_RE = /<!--(?: |\/?\$\??|html|head|body)-->/g;
 
-// Max length of a React comment (<!--/$-->) so we can handle chunk boundaries
-const MAX_COMMENT_LENGTH = "<!--/$-->".length;
+// Max length of a React comment (<!--html-->) so we can handle chunk boundaries
+const MAX_COMMENT_LENGTH = "<!--html-->".length;
 
 export class StripReactComments extends Transform {
   private tail = "";
@@ -51,12 +59,12 @@ export type RenderToStreamOptions = {
   /**
    * The maximum time in milliseconds that the rendering process is allowed to take.
    *
-   * This is important because we allow suspending components to be rendered, and we don't want to
-   * wait forever in case a component takes too long to resolve. Also in case there is an infinite
-   * loop.
+   * This is important because we allow async/suspending components, and we don't want to
+   * wait forever in case a component takes too long to resolve. Also in case there is an
+   * infinite loop.
    *
-   * - If the timeout is reached, the rendering process will be aborted and an error will be emitted
-   *   by the stream.
+   * - If the timeout is reached, the rendering process will be aborted and an error will
+   *   be emitted by the stream.
    *
    * - If not provided, the rendering process will not have a timeout.
    */
@@ -65,6 +73,9 @@ export type RenderToStreamOptions = {
 
 /**
  * Render a React node to a stream.
+ *
+ * Uses React 19's `prerenderToNodeStream` — the proper SSG API that waits for all async
+ * components / Suspense boundaries to resolve before emitting the final HTML.
  *
  * Will return a readable stream that will emit the HTML content of the React node.
  *
@@ -76,42 +87,51 @@ export const renderToStream = (
 ): Readable => {
   const passthrough = new PassThrough();
 
-  if (options.timeoutMsecs !== undefined) {
-    const timeoutHandle = setTimeout(() => {
-      abort("Timed out while rendering");
-    }, options.timeoutMsecs);
+  const controller = new AbortController();
 
-    // @todo do I need to handle errors specially?
-    passthrough.on("close", () => {
-      clearTimeout(timeoutHandle);
-    });
+  let timeoutHandle: NodeJS.Timeout | undefined;
+  if (options.timeoutMsecs !== undefined) {
+    timeoutHandle = setTimeout(() => {
+      controller.abort(new Error("Timed out while rendering"));
+    }, options.timeoutMsecs);
   }
 
-  const { pipe, abort } = renderToPipeableStream(reactNode, {
-    onError(error, _errorInfo) {
-      // This will get called if `abort` is called while processing a Suspended component
-      // TODO: When else does this happen?
-      // TODO: Is `errorInfo` ever NOT undefined?
-      // TODO: What about error boundaries?
+  passthrough.on("close", () => {
+    if (timeoutHandle !== undefined) clearTimeout(timeoutHandle);
+  });
 
+  prerenderToNodeStream(reactNode, {
+    signal: controller.signal,
+    onError(error) {
       // We inject the error into the stream so the stream consumers notice it
-      // If we don't do this, the stream will just emit a fallback `<template>` that will try
-      // recovering in the client, which is not what we want in this case (we are SSG only!)
       const streamError =
         error instanceof Error ? error : new Error(String(error));
       passthrough.destroy(streamError);
-
-      return "Got an error while rendering a suspended component";
     },
-    onShellError(error) {
-      // TODO: When does this happen?
-      // TODO: What about error boundaries?
-      console.error(error);
+  }).then(
+    ({ prelude, postponed }) => {
+      // xenon-ssg is a pure SSG: every page must fully resolve at build time.
+      // If `postponed` is non-null, a component threw `unstable_postpone`, which
+      // only makes sense in hybrid static+dynamic setups that call `resumeAndPrerenderToNodeStream`
+      // at request time. We have no request-time runtime, so treat this as a build error
+      // instead of silently shipping HTML with unresolved `<!--$?-->` fallback holes.
+      if (postponed !== null) {
+        passthrough.destroy(
+          new Error(
+            "xenon-ssg render produced a postponed state, but this renderer only supports full prerendering. " +
+              "Remove any `unstable_postpone` calls or introduce a resume-capable render path.",
+          ),
+        );
+        return;
+      }
+      prelude.pipe(new StripReactComments()).pipe(passthrough);
     },
-    onAllReady() {
-      pipe(new StripReactComments()).pipe(passthrough);
+    (error) => {
+      const streamError =
+        error instanceof Error ? error : new Error(String(error));
+      passthrough.destroy(streamError);
     },
-  });
+  );
 
   return passthrough;
 };
@@ -119,7 +139,7 @@ export const renderToStream = (
 /**
  * Render a React node to a string.
  *
- * Unlike `renderToStaticMarkup`, this supports React Suspense.
+ * Unlike `renderToStaticMarkup`, this supports React Suspense and async components.
  */
 export const renderToString = async (
   reactNode: ReactNode,
@@ -172,21 +192,3 @@ export const renderToFileAtomic = async (
     throw error;
   }
 };
-
-/*
-
-TODO: Do I want to expose or use any of these?
-
-    identifierPrefix?: string;
-    namespaceURI?: string;
-    nonce?: string;
-    bootstrapScriptContent?: string;
-    bootstrapScripts?: string[];
-    bootstrapModules?: string[];
-    progressiveChunkSize?: number;
-    onShellReady?: () => void;
-    onShellError?: (error: unknown) => void;
-    onAllReady?: () => void;
-    onError?: (error: unknown, errorInfo: ErrorInfo) => string | void;
-
-    */

@@ -45,6 +45,24 @@ describe("StripReactComments", () => {
       );
     });
 
+    test("section marker: <!--html-->", async () => {
+      expect(await strip(["<!--html--><div>hello</div>"])).toBe(
+        "<div>hello</div>",
+      );
+    });
+
+    test("section marker: <!--head-->", async () => {
+      expect(await strip(["<!--head--><title>x</title>"])).toBe(
+        "<title>x</title>",
+      );
+    });
+
+    test("section marker: <!--body-->", async () => {
+      expect(await strip(["<!--body--><div>hello</div>"])).toBe(
+        "<div>hello</div>",
+      );
+    });
+
     test("multiple comments", async () => {
       expect(
         await strip(["<!--$--><div><!-- -->hello<!-- --></div><!--/$-->"]),
@@ -81,6 +99,20 @@ describe("StripReactComments", () => {
 
     test("suspense comment split at every byte", async () => {
       const comment = "<!--/$-->";
+      const before = "<div>";
+      const after = "hello</div>";
+      const full = before + comment + after;
+
+      for (let i = 1; i < full.length; i++) {
+        const chunks = [full.slice(0, i), full.slice(i)];
+        expect(await strip(chunks), `split at ${i}: ${JSON.stringify(chunks)}`).toBe(
+          "<div>hello</div>",
+        );
+      }
+    });
+
+    test("section marker <!--html--> split at every byte", async () => {
+      const comment = "<!--html-->";
       const before = "<div>";
       const after = "hello</div>";
       const full = before + comment + after;
