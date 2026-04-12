@@ -66,7 +66,12 @@ export const singleLightningCssPlugin =
 
     const buildPre: PluginBuildPreFunction<
       SingleLightningCssPluginBuildPreResult
-    > = async ({ baseOutputFolder }) => {
+    > = async ({ baseOutputFolder, emitStaticPathname }) => {
+      // Emit the non-cache-busted pathname — that's what `<Link>` hrefs in
+      // source actually reference. The cache-busted variant only shows up
+      // in injected `<link>` tags, which don't go through the crawler.
+      emitStaticPathname(pathname);
+
       console.debug(`[Single Lightning CSS] ${inputFilepath}`);
 
       const outputFolder = path.join(baseOutputFolder, ...mountPointFragments);

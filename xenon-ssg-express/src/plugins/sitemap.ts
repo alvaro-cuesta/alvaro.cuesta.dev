@@ -4,6 +4,7 @@ import { create } from "xmlbuilder2";
 import type {
   Plugin,
   PluginAttachToExpressFunction,
+  PluginBuildPreFunction,
   PluginBuildPostFunction,
   PluginGetInjectableFunction,
 } from "./plugins";
@@ -69,6 +70,15 @@ export const sitemapPlugin =
   }: SitemapPluginOptions): Plugin<void, SitemapPluginMetadata> =>
   () => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
+
+    const buildPre: PluginBuildPreFunction<void> = async ({
+      emitStaticPathname,
+    }) => {
+      emitStaticPathname(pathname);
+      if (robotsTxtContent) {
+        emitStaticPathname("/robots.txt");
+      }
+    };
 
     const attachToExpress: PluginAttachToExpressFunction = (app) => {
       app.get(pathname, async (_req, res) => {
@@ -188,6 +198,7 @@ ${robotsTxtContent.endsWith("\n") ? "" : "\n"}Sitemap: ${siteMeta.baseUrl}${path
 
     return {
       attachToExpress,
+      buildPre,
       buildPost,
       getInjectable,
     };

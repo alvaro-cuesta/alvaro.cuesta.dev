@@ -37,6 +37,14 @@ type GenerateStaticSiteOptions = {
    * Options for the `renderToStream` function.
    */
   renderToStreamOptions?: RenderToStreamOptions;
+  /**
+   * Pathnames that the link crawler should ignore. Use this for paths that
+   * are emitted as static files by some other system (e.g. feed plugins,
+   * sitemaps) and therefore must not be queued for React rendering.
+   *
+   * Pathnames are canonicalized with the same rules as crawled links.
+   */
+  ignoredPathnames?: Iterable<string>;
 };
 
 export type XenonGeneratedPage<PageMetadata> = {
@@ -55,21 +63,29 @@ export async function generateStaticSite<PageMetadata extends UnknownRecord>(
     entryPaths = ["/"],
     outputDir = path.join(process.cwd(), "dist"),
     renderToStreamOptions,
+    ignoredPathnames = [],
   }: GenerateStaticSiteOptions = {},
 ): Promise<XenonGeneratedPage<PageMetadata>[]> {
   const generatedPages: XenonGeneratedPage<PageMetadata>[] = [];
 
+  // We have to make sure we turn the pathnames into canonical and absolute paths so that
+  // duplicate detection works.
+  //
+  // E.g. ('' -> '/') or ('something/../foo/bar' -> '/foo/bar')
+  const canonicalizePathname = (pathname: string) =>
+    new URL(pathname, FAKE_BASE_URL).pathname;
+
   const pendingRenderPathnames = new Set(
-    mapIter(
-      entryPaths,
-      // We have to make sure we turn the pathnames into canonical and absolute paths so that
-      // duplicate detection works.
-      //
-      // E.g. ('' -> '/') or ('something/../foo/bar' -> '/foo/bar')
-      (pathname) => new URL(pathname, FAKE_BASE_URL).pathname,
-    ),
+    mapIter(entryPaths, canonicalizePathname),
   );
-  const visitedPasthnames = new Set(pendingRenderPathnames);
+  // Pre-seed visited with both the entry paths and the plugin-declared
+  // static pathnames. Static pathnames (e.g. feed documents) are emitted by
+  // other systems, so the crawler should treat them as already-handled and
+  // skip them — no need for a separate ignore set.
+  const visitedPathnames = new Set([
+    ...pendingRenderPathnames,
+    ...mapIter(ignoredPathnames, canonicalizePathname),
+  ]);
 
   while (pendingRenderPathnames.size > 0) {
     // `as` is safe because we know this is not `undefined` because of the `while` condition
@@ -98,22 +114,20 @@ export async function generateStaticSite<PageMetadata extends UnknownRecord>(
     await fs.mkdir(fullFilePathDir, { recursive: true });
 
     const addLink = (href: string) => {
-      // TODO: Detect if it's pointing to a static file and ignore if so
-      //       This is needed to match `dev` behavior since in `dev` any static file is served as-is
-
       const { pathname: linkPathname, isInternal: linkIsInternal } =
         canonicalizeHref(href, pathUrl);
 
       if (
         // Ignore external links
         !linkIsInternal ||
-        // Ignore links to visited pages
-        visitedPasthnames.has(linkPathname)
+        // Ignore links to already-visited pages, including the plugin-
+        // declared static pathnames pre-seeded into `visitedPathnames`.
+        visitedPathnames.has(linkPathname)
       ) {
         return;
       }
 
-      visitedPasthnames.add(linkPathname);
+      visitedPathnames.add(linkPathname);
       pendingRenderPathnames.add(linkPathname);
     };
 

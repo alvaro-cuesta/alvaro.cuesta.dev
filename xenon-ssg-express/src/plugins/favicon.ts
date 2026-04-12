@@ -95,8 +95,11 @@ export const faviconPlugin = async ({
 
   const buildPre: PluginBuildPreFunction<FaviconPluginBuildPreResult> = async ({
     baseOutputFolder,
+    emitStaticPathname,
   }) => {
     const cacheBustingMap: Record<string, string> = {};
+    const toPathname = (filename: string) =>
+      `/${[...mountPointFragments, filename].join("/")}`;
 
     const outputFolder = path.join(baseOutputFolder, ...mountPointFragments);
     await fs.mkdir(outputFolder, { recursive: true });
@@ -120,6 +123,10 @@ export const faviconPlugin = async ({
       const outputFilepath = path.join(outputFolder, realOutputFilename);
       console.debug(`[Favicon Image] /${image.name} -> ${outputFilepath}`);
       await fs.writeFile(outputFilepath, image.contents);
+      // Emit the non-cache-busted pathname — that's what `<Link>` hrefs in
+      // source actually reference. The cache-busted variant only shows up
+      // in injected `<link>` tags, which don't go through the crawler.
+      emitStaticPathname(toPathname(image.name));
     }
 
     for (const file of files) {
@@ -147,6 +154,7 @@ export const faviconPlugin = async ({
       const outputFilepath = path.join(outputFolder, realOutputFilename);
       console.debug(`[Favicon File] /${file.name} -> ${outputFilepath}`);
       await fs.writeFile(outputFilepath, realContents);
+      emitStaticPathname(toPathname(file.name));
     }
 
     return { cacheBustingMap };

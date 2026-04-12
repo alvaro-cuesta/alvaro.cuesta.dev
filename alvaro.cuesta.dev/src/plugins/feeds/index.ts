@@ -284,9 +284,9 @@ export function feedsPlugin<
       );
       const resolvedAuthors = resolveContextValue(authors, context);
 
-      const buildPre: PluginBuildPreFunction<
-        FeedsBuildPreResult
-      > = async () => {
+      const buildPre: PluginBuildPreFunction<FeedsBuildPreResult> = async ({
+        emitStaticPathname,
+      }) => {
         const pages = await compileFeeds({
           baseUrl,
           getItems,
@@ -301,6 +301,15 @@ export function feedsPlugin<
           generator,
           formats: resolvedFormats,
         });
+
+        // Every serialized feed document is written as a standalone static
+        // file by `buildPost`, so the renderer should not crawl them as
+        // React pages.
+        for (const serializedPage of pages) {
+          for (const format of resolvedFormats) {
+            emitStaticPathname(serializedPage.page.routes[format].pathname);
+          }
+        }
 
         return { pages };
       };

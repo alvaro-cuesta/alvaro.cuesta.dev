@@ -33,12 +33,17 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
   console.debug("Running plugins (pre):");
 
   const buildPreResults: unknown[] = [];
+  const ignoredPathnames: string[] = [];
+  const emitStaticPathname = (pathname: string) => {
+    ignoredPathnames.push(pathname);
+  };
 
   const injectableRaws = await Promise.all(
     plugins.map(async (runnablePlugin, pluginIndex) => {
       const buildPreResult = await runnablePlugin.buildPre?.({
         siteMeta,
         baseOutputFolder: outputDir,
+        emitStaticPathname,
       });
 
       buildPreResults[pluginIndex] = buildPreResult;
@@ -74,6 +79,7 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
     entryPaths: entryPaths,
     outputDir: outputDir,
     renderToStreamOptions: site.renderToStreamOptions,
+    ignoredPathnames,
   });
 
   console.debug("\nRunning plugins (post):");

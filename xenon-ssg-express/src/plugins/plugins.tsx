@@ -9,6 +9,12 @@ export type PluginAttachToExpressFunction = (app: Express) => void;
 export type PluginBuildPreOptions = {
   siteMeta: XenonExpressSiteMeta;
   baseOutputFolder: string;
+  /**
+   * Declare a pathname as emitted by this plugin as a static file (e.g.
+   * feed documents, sitemaps, css bundles). The link crawler will skip
+   * these when rendering pages — they're not React-rendered routes.
+   */
+  emitStaticPathname: (pathname: string) => void;
 };
 
 export type PluginBuildPreFunction<BuildPreResult = unknown> = (
@@ -94,6 +100,9 @@ export type RunnablePlugin<
 
   /**
    * Builds the plugin during `build` mode. Runs before the static site is generated.
+   *
+   * This is where plugins should declare the pathnames they emit as static
+   * files via the `emitStaticPathname` callback on the options.
    */
   buildPre?: PluginBuildPreFunction<BuildPreResult> | undefined;
 
