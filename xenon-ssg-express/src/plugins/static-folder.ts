@@ -32,6 +32,7 @@ export const staticFolderPlugin =
 
       console.debug(`[Static folder] ${inputFolder} -> ${outputFolder}`);
 
+      await fs.mkdir(outputFolder, { recursive: true });
       await fs.cp(inputFolder, outputFolder, { recursive: true });
 
       // Walk the copied tree and declare every file as a static pathname so
