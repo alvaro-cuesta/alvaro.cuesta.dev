@@ -1,8 +1,51 @@
 import { renderToPipeableStream } from "react-dom/server";
-import { PassThrough, Readable } from "node:stream";
+import { PassThrough, Readable, Transform, type TransformCallback } from "node:stream";
 import fs from "node:fs/promises";
 import type { ReactNode } from "react";
 import type { PathLike } from "node:fs";
+
+// Matches React's placeholder comments: <!-- -->, <!--$-->, <!--/$-->, <!--$?-->
+const REACT_COMMENT_RE = /<!--[\s/$?]*-->/g;
+
+// Max length of a React comment (<!--/$-->) so we can handle chunk boundaries
+const MAX_COMMENT_LENGTH = "<!--/$-->".length;
+
+class StripReactComments extends Transform {
+  private tail = "";
+
+  constructor() {
+    super({ decodeStrings: false, encoding: "utf-8" });
+  }
+
+  override _transform(
+    chunk: string,
+    _encoding: BufferEncoding,
+    callback: TransformCallback,
+  ) {
+    const data = this.tail + chunk;
+
+    // Find a safe cut point: any `<` in the last MAX_COMMENT_LENGTH-1 chars
+    // could be the start of a comment split across chunks
+    let cutPoint = data.length;
+    for (
+      let i = data.length - 1;
+      i >= Math.max(0, data.length - MAX_COMMENT_LENGTH + 1);
+      i--
+    ) {
+      if (data[i] === "<") {
+        cutPoint = i;
+        break;
+      }
+    }
+
+    this.tail = data.slice(cutPoint);
+    callback(null, data.slice(0, cutPoint).replace(REACT_COMMENT_RE, ""));
+  }
+
+  override _flush(callback: TransformCallback) {
+    callback(null, this.tail.replace(REACT_COMMENT_RE, ""));
+  }
+}
 
 export type RenderToStreamOptions = {
   /**
@@ -66,7 +109,7 @@ export const renderToStream = (
       console.error(error);
     },
     onAllReady() {
-      pipe(passthrough);
+      pipe(new StripReactComments()).pipe(passthrough);
     },
   });
 
