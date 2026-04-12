@@ -1,4 +1,4 @@
-import { useTimelineItems } from "../../../timeline/promise";
+import { getTimelineItems } from "../../../timeline/promise";
 import { Template } from "../../Template";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { Link } from "../../atoms/Link";
@@ -14,8 +14,10 @@ type TimelineYearListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export function TimelineYearList({ siteRenderMeta }: TimelineYearListProps) {
-  const timelineItems = useTimelineItems();
+export async function TimelineYearList({
+  siteRenderMeta,
+}: TimelineYearListProps) {
+  const timelineItems = await getTimelineItems();
 
   return (
     <Template

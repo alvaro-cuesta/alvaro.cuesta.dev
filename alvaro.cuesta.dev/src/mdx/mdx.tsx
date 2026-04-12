@@ -1,13 +1,13 @@
 import type { MDXComponents } from "mdx/types";
 import { Link } from "../components/atoms/Link";
-import { use, type ComponentPropsWithoutRef, type ReactElement } from "react";
+import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import { BlogDateTime } from "../components/atoms/BlogDateTime";
 import {
   TableOfContents,
   type TableOfContentsProps,
 } from "../components/molecules/TableOfContents";
 import { getBlogItems } from "../blog/promise";
-import { useTimelineItems } from "../timeline/promise";
+import { getTimelineItems } from "../timeline/promise";
 import { rewriteCustomProtocolHref } from "../utils/href";
 import { canonicalizeHref } from "xenon-ssg/src/url";
 
@@ -58,9 +58,11 @@ export const makeMdxDefaultComponents = ({
   },
 }: MakeMdxDefaultComponentsOptions = {}): MDXComponents => ({
   a: canonicalizeBaseUrl
-    ? function MdxAnchorCanonicalized(props) {
-        const blogItems = use(getBlogItems());
-        const timelineItems = useTimelineItems();
+    ? async function MdxAnchorCanonicalized(props) {
+        const [blogItems, timelineItems] = await Promise.all([
+          getBlogItems(),
+          getTimelineItems(),
+        ]);
 
         let href = rewriteCustomProtocolHref(props.href, {
           blogItems,
@@ -77,15 +79,17 @@ export const makeMdxDefaultComponents = ({
         return renderAnchor(props);
       },
   Hashtag: canonicalizeBaseUrl
-    ? function MdxHashtagCanonicalized(props: HashtagProps) {
+    ? async function MdxHashtagCanonicalized(props: HashtagProps) {
         const tagName =
           props.tag ??
           (typeof props.children === "string" ? props.children : undefined);
 
         if (!tagName) return renderHashtag(props);
 
-        const blogItems = use(getBlogItems());
-        const timelineItems = useTimelineItems();
+        const [blogItems, timelineItems] = await Promise.all([
+          getBlogItems(),
+          getTimelineItems(),
+        ]);
 
         let href: string | undefined = `timeline-tag:///${tagName}`;
         href = rewriteCustomProtocolHref(href, { blogItems, timelineItems });

@@ -1,4 +1,4 @@
-import { useTimelineItems } from "../../../timeline/promise";
+import { getTimelineItems } from "../../../timeline/promise";
 import { Template } from "../../Template";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
@@ -18,12 +18,12 @@ type TimelineYearProps = {
   page: number | null;
 };
 
-export function TimelineYear({
+export async function TimelineYear({
   siteRenderMeta,
   year,
   page: rawPage,
 }: TimelineYearProps) {
-  const timelineItems = useTimelineItems();
+  const timelineItems = await getTimelineItems();
 
   const yearInfo = timelineItems.byYear.get(year);
   if (yearInfo === undefined) {

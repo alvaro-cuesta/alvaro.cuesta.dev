@@ -1,10 +1,10 @@
-import { use, type ComponentPropsWithoutRef } from "react";
+import { type ComponentPropsWithoutRef } from "react";
 import { Link as XenonLink } from "xenon-ssg/src/generate/Link";
 import { canonicalizeHref } from "xenon-ssg/src/url";
 import { getDomain } from "tldts";
 import { Icon } from "./Icon";
 import { getBlogItems } from "../../blog/promise";
-import { useTimelineItems } from "../../timeline/promise";
+import { getTimelineItems } from "../../timeline/promise";
 import { rewriteCustomProtocolHref } from "../../utils/href";
 
 type LinkProps = ComponentPropsWithoutRef<"a"> & {
@@ -14,7 +14,7 @@ type LinkProps = ComponentPropsWithoutRef<"a"> & {
   Component?: React.ElementType<ComponentPropsWithoutRef<"a">>;
 };
 
-export function Link({
+export async function Link({
   isExternal,
   hideExternalIcon,
   showDomain,
@@ -22,8 +22,10 @@ export function Link({
   Component = XenonLink,
   ...props
 }: LinkProps) {
-  const blogItems = use(getBlogItems());
-  const timelineItems = useTimelineItems();
+  const [blogItems, timelineItems] = await Promise.all([
+    getBlogItems(),
+    getTimelineItems(),
+  ]);
 
   const rewrittenHref = rewriteCustomProtocolHref(props.href, {
     blogItems,

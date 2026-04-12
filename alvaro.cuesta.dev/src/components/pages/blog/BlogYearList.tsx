@@ -1,4 +1,3 @@
-import { use } from "react";
 import { getBlogItems } from "../../../blog/promise";
 import { Template } from "../../Template";
 import { BlogLayout } from "./components/BlogLayout";
@@ -15,8 +14,8 @@ type BlogYearListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export function BlogYearList({ siteRenderMeta }: BlogYearListProps) {
-  const blogItems = use(getBlogItems());
+export async function BlogYearList({ siteRenderMeta }: BlogYearListProps) {
+  const blogItems = await getBlogItems();
 
   return (
     <Template

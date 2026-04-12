@@ -1,5 +1,4 @@
 import url from "node:url";
-import { use } from "react";
 import type { MDXContent } from "mdx/types";
 import { Template } from "../Template";
 import type { SiteRenderMeta } from "../../site";
@@ -38,11 +37,11 @@ export function makeMdxPage(contentFileUrl: string) {
     },
   );
 
-  return function MdxPage({ siteRenderMeta }: MdxPageProps) {
+  return async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const {
       module: { default: Content, title, description },
       lastModified,
-    } = use(page.get());
+    } = await page.get();
 
     if (title === undefined) {
       throw new Error(

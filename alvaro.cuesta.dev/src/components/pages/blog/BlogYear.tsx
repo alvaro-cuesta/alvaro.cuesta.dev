@@ -1,4 +1,3 @@
-import { use } from "react";
 import { getBlogItems } from "../../../blog/promise";
 import { Template } from "../../Template";
 import { BlogLayout } from "./components/BlogLayout";
@@ -36,8 +35,8 @@ const MONTH_NUMBER_TO_NAME: {
 
 const NULL_MONTH_TO_NAME = "Other";
 
-export function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
-  const blogItems = use(getBlogItems());
+export async function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
+  const blogItems = await getBlogItems();
 
   const yearInfo = blogItems.byYear.get(year);
   if (yearInfo === undefined) {

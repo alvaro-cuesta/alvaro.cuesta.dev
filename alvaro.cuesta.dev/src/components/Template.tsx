@@ -1,4 +1,4 @@
-import { use, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import cx from "classnames";
 import { Link } from "./atoms/Link";
 import { Icon } from "./atoms/Icon";
@@ -11,7 +11,7 @@ import {
   routeNow,
   routeBookmarks,
 } from "../routes";
-import { useTimelineItems } from "../timeline/promise";
+import { getTimelineItems } from "../timeline/promise";
 import {
   blogItemDateToUTCISO8601Z,
   type BlogItemDate,
@@ -57,7 +57,7 @@ type TemplateMetaTagsOpenGraph =
       gender?: "male" | "female";
     };
 
-export function Template({
+export async function Template({
   siteRenderMeta,
   canonicalPathname = siteRenderMeta.pathname,
   canonicalUrl = `${siteRenderMeta.baseUrl}${canonicalPathname}`,
@@ -65,8 +65,10 @@ export function Template({
   mainClassName,
   children,
 }: TemplateProps) {
-  const blogItems = use(getBlogItems());
-  const timelineItems = useTimelineItems();
+  const [blogItems, timelineItems] = await Promise.all([
+    getBlogItems(),
+    getTimelineItems(),
+  ]);
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;
 

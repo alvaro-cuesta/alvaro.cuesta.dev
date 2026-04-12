@@ -2,7 +2,7 @@ import { Template } from "../../Template";
 import { Link } from "../../atoms/Link";
 import { BlogLayout } from "./components/BlogLayout";
 import { getBlogItems } from "../../../blog/promise";
-import React, { use } from "react";
+import React from "react";
 import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
@@ -24,8 +24,8 @@ type BlogArticleProps = {
   slug: string;
 };
 
-export function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
-  const blogItems = use(getBlogItems());
+export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
+  const blogItems = await getBlogItems();
 
   const article = blogItems.bySlug.get(slug);
 

@@ -1,7 +1,7 @@
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
 import { Template } from "../../Template";
-import { useTimelineItems } from "../../../timeline/promise";
+import { getTimelineItems } from "../../../timeline/promise";
 import type { SiteRenderMeta } from "../../../site";
 import { routeTimelineTag, routeTimelineTagList } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
@@ -18,12 +18,12 @@ type TimelineTagProps = {
   page: number | null;
 };
 
-export function TimelineTag({
+export async function TimelineTag({
   siteRenderMeta,
   tag,
   page: rawPage,
 }: TimelineTagProps) {
-  const timelineItems = useTimelineItems();
+  const timelineItems = await getTimelineItems();
 
   const allItemsInTag = timelineItems.byTag.get(tag);
 

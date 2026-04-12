@@ -1,4 +1,3 @@
-import { use } from "react";
 import { Template } from "../../Template";
 import { Pagination } from "../../atoms/Pagination";
 import { BlogLayout } from "./components/BlogLayout";
@@ -23,11 +22,11 @@ type BlogArticleListProps = {
   page: number | null;
 };
 
-export function BlogArticleList({
+export async function BlogArticleList({
   siteRenderMeta,
   page: rawPage,
 }: BlogArticleListProps) {
-  const blogItems = use(getBlogItems());
+  const blogItems = await getBlogItems();
 
   const page = rawPage ?? 1;
 

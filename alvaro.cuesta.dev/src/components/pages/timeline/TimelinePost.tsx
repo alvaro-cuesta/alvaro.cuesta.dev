@@ -1,6 +1,6 @@
 import { Template } from "../../Template";
 import { Pagination } from "../../atoms/Pagination";
-import { useTimelineItems } from "../../../timeline/promise";
+import { getTimelineItems } from "../../../timeline/promise";
 import type { SiteRenderMeta } from "../../../site";
 import { routeTimelinePost, routeTimelineList } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
@@ -20,11 +20,11 @@ type TimelinePostPageProps = {
   slug: string;
 };
 
-export function TimelinePostPage({
+export async function TimelinePostPage({
   siteRenderMeta,
   slug,
 }: TimelinePostPageProps) {
-  const timelineItems = useTimelineItems();
+  const timelineItems = await getTimelineItems();
 
   const item = timelineItems.bySlug.get(slug);
 

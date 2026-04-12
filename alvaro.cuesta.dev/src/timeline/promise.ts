@@ -1,5 +1,4 @@
 import path from "node:path";
-import { use } from "react";
 import { parseTimelineItemModuleFromImportModule } from "./item-module";
 import type { TimelineItemModuleParsed } from "./item-module";
 import { createContentLoader } from "../utils/content-loader";
@@ -89,7 +88,7 @@ function mergeWithCache(
   return cachedMerged;
 }
 
-async function getTimelineItems(): Promise<
+export async function getTimelineItems(): Promise<
   AnalyzedItems<TimelineItemModuleParsed>
 > {
   const [raw, blog] = await Promise.all([
@@ -98,11 +97,3 @@ async function getTimelineItems(): Promise<
   ]);
   return mergeWithCache(raw, blog);
 }
-
-function useTimelineItems(): AnalyzedItems<TimelineItemModuleParsed> {
-  const raw = use(getRawTimelineItems());
-  const blog = use(getBlogItems());
-  return mergeWithCache(raw, blog);
-}
-
-export { getTimelineItems, useTimelineItems };
