@@ -4,7 +4,10 @@ import { useMicroblogItems } from "../../microblog/promise";
 import type { SiteRenderMeta } from "../../site";
 import { routeMicroblogPost, routeMicroblogList } from "../../routes";
 import { makeTitle } from "../../utils/meta";
-import { MICROBLOG_BLURB_DESCRIPTION } from "../../../config";
+import {
+  MICROBLOG_BLURB_DESCRIPTION,
+  makeMicroblogBlurbSocialDescription,
+} from "../../../config";
 import {
   blogItemDateToShortString,
   getBlogItemDateYear,
@@ -52,7 +55,7 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
         title: makeTitle(["Timeline", dateStr]),
         description: MICROBLOG_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
-        socialDescription: `Microblog post from ${dateStr}`,
+        socialDescription: makeMicroblogBlurbSocialDescription(dateStr),
         publishedTime: publicationDate,
         modifiedTime: lastModificationDate ?? undefined,
         openGraph: { type: "article" },
