@@ -1,6 +1,5 @@
 import { Template } from "../Template";
-import { Icon } from "../atoms/Icon";
-import { Link } from "../atoms/Link";
+import { Pagination } from "../atoms/Pagination";
 import { useMicroblogItems } from "../../microblog/promise";
 import type { SiteRenderMeta } from "../../site";
 import { routeMicroblogPost, routeMicroblogList } from "../../routes";
@@ -75,20 +74,12 @@ export const MicroblogPostPage: React.FC<MicroblogPostPageProps> = ({
         <MicroblogPostItem item={item} />
 
         <section className="microblog-pagination">
-          <div className="flex-space-between">
-            {newerPostHref ? (
-              <Link href={newerPostHref} className="pagination-link">
-                <span className="no-underline"><Icon name="arrow-left" aria-hidden="true" />&nbsp;</span>Newer post
-              </Link>
-            ) : (
-              <div />
-            )}
-            {olderPostHref ? (
-              <Link href={olderPostHref} className="pagination-link">
-                Older post<span className="no-underline">&nbsp;<Icon name="arrow-right" aria-hidden="true" /></span>
-              </Link>
-            ) : null}
-          </div>
+          <Pagination
+            prevPageLink={newerPostHref}
+            nextPageLink={olderPostHref}
+            prevLabel="Newer post"
+            nextLabel="Older post"
+          />
         </section>
       </MicroblogListsLayout>
     </Template>
