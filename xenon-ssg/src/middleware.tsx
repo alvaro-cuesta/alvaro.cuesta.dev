@@ -5,7 +5,6 @@ import { Root } from "./Root";
 import type { Request, Response, NextFunction } from "express";
 import type { XenonRenderFunction } from ".";
 import type { UnknownRecord } from "type-fest";
-import { NeedsTrailingSlashError } from "xenon-ssg-express/src";
 
 const doNothing = () => {};
 
@@ -42,4 +41,10 @@ export function makeXenonMiddleware<PageMetadata extends UnknownRecord>(
 
     renderedStream.pipe(res);
   };
+}
+
+export class NeedsTrailingSlashError extends Error {
+  constructor(path: string) {
+    super(`Path "${path}" needs a trailing slash`);
+  }
 }

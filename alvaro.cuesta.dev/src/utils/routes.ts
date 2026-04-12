@@ -1,5 +1,5 @@
 import { match, compile, type ParamData } from "path-to-regexp";
-import { NeedsTrailingSlashError } from "xenon-ssg-express/src";
+import { NeedsTrailingSlashError } from "xenon-ssg/src/middleware";
 
 type Route<Params> = {
   match: (path: string) => Params | null;

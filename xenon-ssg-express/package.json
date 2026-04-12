@@ -31,17 +31,20 @@
     "favicons": "^7.2.0",
     "lightningcss": "^1.25.1",
     "morgan": "^1.10.0",
-    "react": "^18.3.1",
-    "temporal-polyfill": "^0.2.5",
-    "xmlbuilder2": "^3.1.1"
+    "react": "catalog:",
+    "temporal-polyfill": "catalog:",
+    "xmlbuilder2": "catalog:"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
+    "@types/express": "catalog:",
+    "@types/mock-fs": "^4.13.4",
     "@types/morgan": "^1.9.9",
-    "@types/react": "^18.3.3",
-    "type-fest": "^4.41.0"
+    "@types/react": "catalog:",
+    "mock-fs": "^5.5.0",
+    "type-fest": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "xenon-ssg": "../xenon-ssg"
+    "xenon-ssg": "workspace:*"
   }
 }
