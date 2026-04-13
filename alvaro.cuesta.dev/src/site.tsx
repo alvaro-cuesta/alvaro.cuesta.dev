@@ -18,6 +18,7 @@ import { singleLightningCssPlugin } from "xenon-ssg-express/src/plugins/single-l
 import path from "node:path";
 import url from "node:url";
 import { faviconPlugin } from "xenon-ssg-express/src/plugins/favicon";
+import { createXenonCache } from "xenon-ssg-express/src/cache";
 import { version } from "../package.json" with { type: "json" };
 import type { PluginInjectableLink } from "xenon-ssg-express/src/plugins/plugins";
 import { Root } from "./Root";
@@ -213,27 +214,33 @@ export const staticFolder = staticFolderPlugin({
 });
 
 const INDEX_CSS_PATH = path.join(import.meta.dirname, "index.css");
-export const indexCss = singleLightningCssPlugin({
-  inputFilepath: INDEX_CSS_PATH,
-  outputFilename: "index.min.css",
-  mountPointFragments: ["css"],
-  critical: true,
-});
 
 const STARRY_NIGHT_FILE = "both";
 const STARRY_NIGHT_FILE_PATH = url.fileURLToPath(
   import.meta.resolve(`@wooorm/starry-night/style/${STARRY_NIGHT_FILE}`),
 );
-export const starryNightCss = singleLightningCssPlugin({
-  inputFilepath: STARRY_NIGHT_FILE_PATH,
-  outputFilename: `${STARRY_NIGHT_FILE}.css`,
-  mountPointFragments: ["css", "starry-night"],
-  critical: true,
-});
 
 export async function makeSite(): Promise<
   XenonExpressSite<SitemapPluginMetadata>
 > {
+  const cache = await createXenonCache({ callerUrl: import.meta.url });
+
+  const indexCss = singleLightningCssPlugin({
+    inputFilepath: INDEX_CSS_PATH,
+    outputFilename: "index.min.css",
+    mountPointFragments: ["css"],
+    critical: true,
+    cache,
+  });
+
+  const starryNightCss = singleLightningCssPlugin({
+    inputFilepath: STARRY_NIGHT_FILE_PATH,
+    outputFilename: `${STARRY_NIGHT_FILE}.css`,
+    mountPointFragments: ["css", "starry-night"],
+    critical: true,
+    cache,
+  });
+
   const blogFeeds = feedsPlugin({
     getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
     homePagePathname: routeBlogArticleList.build({ page: null }),
@@ -324,6 +331,7 @@ export async function makeSite(): Promise<
 
   const favicon = await faviconPlugin({
     inputFilepath: path.join(import.meta.dirname, "favicon.svg"),
+    cache,
     faviconOptions: {
       appName: SITE_TITLE,
       appShortName: SITE_TITLE,

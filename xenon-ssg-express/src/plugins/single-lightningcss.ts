@@ -11,6 +11,8 @@ import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
 } from "../cache-busting";
+import { getContentHash } from "../crypto";
+import type { XenonCache } from "../cache";
 
 type SingleLightningCssPluginOptions = {
   inputFilepath: string;
@@ -23,6 +25,15 @@ type SingleLightningCssPluginOptions = {
    */
   cacheBustingFragment?: string | false | undefined;
   critical?: boolean;
+  /**
+   * Optional shared cache from `createXenonCache(...)`. When provided, the
+   * compiled (minified) CSS bytes get memoized to disk under
+   * `<siteRoot>/node_modules/.cache/xenon-ssg-express/single-lightningcss/`,
+   * keyed by a hash of the source CSS. Every dev restart *and* every browser
+   * refresh after the first one serves the cached bytes instead of re-running
+   * lightningcss. Pass `null` (or omit) to disable caching.
+   */
+  cache?: XenonCache | null;
 };
 
 type SingleLightningCssPluginBuildPreResult = { cacheBustedPathname: string };
@@ -34,17 +45,24 @@ export const singleLightningCssPlugin =
     mountPointFragments = [],
     cacheBustingFragment,
     critical,
+    cache,
   }: SingleLightningCssPluginOptions): Plugin<SingleLightningCssPluginBuildPreResult> =>
   () => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
+    const ns = cache?.namespace("single-lightningcss") ?? null;
 
-    // TODO: Some cache/watch would be nice
     // TODO: This is currently never 304 unlike express.static
-    const compileCss = async () => {
-      const code = await fs.readFile(path.join(inputFilepath));
+    const compileCss = async (): Promise<Buffer> => {
+      const code = await fs.readFile(inputFilepath);
 
-      let { code: outputCode, warnings } = transform({
-        filename: "index.css",
+      const cacheKey = ns ? `${await getContentHash(code, "hex")}.css` : null;
+      if (ns && cacheKey) {
+        const cached = await ns.get(cacheKey);
+        if (cached !== null) return cached;
+      }
+
+      const { code: outputCode, warnings } = transform({
+        filename: path.basename(inputFilepath),
         code,
         minify: true,
         sourceMap: false,
@@ -54,7 +72,11 @@ export const singleLightningCssPlugin =
         console.warn(warnings);
       }
 
-      return outputCode;
+      const outputBuffer = Buffer.from(outputCode);
+      if (ns && cacheKey) {
+        await ns.set(cacheKey, outputBuffer);
+      }
+      return outputBuffer;
     };
 
     const attachToExpress: PluginAttachToExpressFunction = (app) => {

@@ -1,5 +1,10 @@
 import type { Express } from "express";
-import favicons, { type FaviconOptions } from "favicons";
+import favicons, {
+  type FaviconFile,
+  type FaviconImage,
+  type FaviconOptions,
+  type FaviconResponse,
+} from "favicons";
 import type {
   PluginInjectableTag,
   Plugin,
@@ -12,6 +17,8 @@ import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
 } from "../cache-busting";
+import { getContentHash } from "../crypto";
+import type { XenonCache } from "../cache";
 
 const LINK_REGEX =
   /<link\s+rel="(?<rel>.+?)"\s+(?:type="(?<type>.+?)"\s+)?(?:sizes="(?<sizes>.+?)"\s+)?(?:media="(?<media>.+?)"\s+)?href="(?<href>.+?)">/;
@@ -52,10 +59,65 @@ type FaviconPluginOptions = {
    * - `undefined` to calculate from input file hash
    */
   cacheBustingFragment?: string | false | undefined;
+  /**
+   * Optional shared cache from `createXenonCache(...)`. When provided, the
+   * expensive `favicons()` call is memoized to disk under
+   * `<siteRoot>/node_modules/.cache/xenon-ssg-express/favicon/`, keyed by a
+   * hash of the input SVG contents plus the `faviconOptions`. Pass `null` (or
+   * omit) to disable caching.
+   */
+  cache?: XenonCache | null;
 };
 
 type FaviconPluginBuildPreResult = {
   cacheBustingMap: Record<string, string>;
+};
+
+type CachedFaviconResponse = {
+  images: { name: string; contents: string /* base64 */ }[];
+  files: { name: string; contents: string }[];
+  html: string[];
+};
+
+const serializeFaviconResponse = (response: FaviconResponse): string => {
+  const serializable: CachedFaviconResponse = {
+    images: response.images.map((img) => ({
+      name: img.name,
+      contents: img.contents.toString("base64"),
+    })),
+    files: response.files.map((file) => ({
+      name: file.name,
+      contents: file.contents,
+    })),
+    html: [...response.html],
+  };
+  return JSON.stringify(serializable);
+};
+
+const deserializeFaviconResponse = (raw: Buffer): FaviconResponse => {
+  const cached = JSON.parse(raw.toString("utf-8")) as CachedFaviconResponse;
+  const images: FaviconImage[] = cached.images.map((img) => ({
+    name: img.name,
+    contents: Buffer.from(img.contents, "base64"),
+  }));
+  const files: FaviconFile[] = cached.files.map((file) => ({
+    name: file.name,
+    contents: file.contents,
+  }));
+  return { images, files, html: cached.html };
+};
+
+const getFaviconCacheKey = async (
+  inputFilepath: string,
+  faviconOptions: FaviconPluginOptions["faviconOptions"],
+): Promise<string> => {
+  const svgContents = await fs.readFile(inputFilepath);
+  const payload = Buffer.concat([
+    svgContents,
+    Buffer.from("\0"),
+    Buffer.from(JSON.stringify(faviconOptions)),
+  ]);
+  return getContentHash(payload, "hex");
 };
 
 export const faviconPlugin = async ({
@@ -63,9 +125,29 @@ export const faviconPlugin = async ({
   faviconOptions,
   mountPointFragments = [],
   cacheBustingFragment,
+  cache,
 }: FaviconPluginOptions): Promise<Plugin<FaviconPluginBuildPreResult>> => {
-  // TODO: Some cache/watch would be nice -- this is currently taking several secs on every dev server restart
-  const { images, files, html } = await favicons(inputFilepath, faviconOptions);
+  const ns = cache?.namespace("favicon") ?? null;
+  const cacheKey = ns
+    ? `${await getFaviconCacheKey(inputFilepath, faviconOptions)}.json`
+    : null;
+
+  let response: FaviconResponse | null = null;
+  if (ns && cacheKey) {
+    const cached = await ns.get(cacheKey);
+    if (cached !== null) {
+      response = deserializeFaviconResponse(cached);
+    }
+  }
+
+  if (response === null) {
+    response = await favicons(inputFilepath, faviconOptions);
+    if (ns && cacheKey) {
+      await ns.set(cacheKey, serializeFaviconResponse(response));
+    }
+  }
+
+  const { images, files, html } = response;
 
   const filesByName = {
     ...Object.fromEntries(images.map((image) => [image.name, image.contents])),
