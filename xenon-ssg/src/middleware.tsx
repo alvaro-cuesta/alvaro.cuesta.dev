@@ -33,7 +33,11 @@ export function makeXenonMiddleware<PageMetadata extends UnknownRecord>(
         return;
       }
 
-      return next(error);
+      // Let Express 5's async-handler error catching forward this to the
+      // error middleware chain. We only intercept `NeedsTrailingSlashError`
+      // above because it needs to be converted into a redirect; every
+      // other error just re-throws.
+      throw error;
     }
 
     renderedStream.on("error", (error) => {

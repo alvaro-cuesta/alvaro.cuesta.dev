@@ -339,61 +339,53 @@ export function feedsPlugin<
         for (const format of resolvedFormats) {
           app.get(
             getFeedFormatRoute(mountPointFragments, 1, format).pathname,
-            async (_req, res, next) => {
-              try {
-                const firstPage = await sendFeedPage(1);
+            async (_req, res) => {
+              const firstPage = await sendFeedPage(1);
 
-                if (!firstPage) {
-                  res.status(404).end();
-                  return;
-                }
-
-                res
-                  .status(200)
-                  .contentType(firstPage.page.routes[format].contentType)
-                  .end(firstPage.documents[format]);
-              } catch (error) {
-                next(error);
+              if (!firstPage) {
+                res.status(404).end();
+                return;
               }
+
+              res
+                .status(200)
+                .contentType(firstPage.page.routes[format].contentType)
+                .end(firstPage.documents[format]);
             },
           );
 
           app.get(
             getPaginatedFeedFormatRoutePath(mountPointFragments, format),
             async (req, res, next) => {
-              try {
-                const page = req.params["page"];
+              const page = req.params["page"];
 
-                // Express 5 types `req.params[key]` as `string | string[]`
-                // (path-to-regexp v8 can return arrays for repeated match
-                // groups). This specific route has a single `:page` param
-                // so arrays are impossible in practice, but we narrow the
-                // type here to satisfy TypeScript and avoid a cast.
-                if (typeof page !== "string") {
-                  next();
-                  return;
-                }
-
-                const pageNumber = Number.parseInt(page, 10);
-                if (!Number.isFinite(pageNumber) || pageNumber < 2) {
-                  next();
-                  return;
-                }
-
-                const feedPage = await sendFeedPage(pageNumber);
-
-                if (!feedPage) {
-                  res.status(404).end();
-                  return;
-                }
-
-                res
-                  .status(200)
-                  .contentType(feedPage.page.routes[format].contentType)
-                  .end(feedPage.documents[format]);
-              } catch (error) {
-                next(error);
+              // Express 5 types `req.params[key]` as `string | string[]`
+              // (path-to-regexp v8 can return arrays for repeated match
+              // groups). This specific route has a single `:page` param
+              // so arrays are impossible in practice, but we narrow the
+              // type here to satisfy TypeScript and avoid a cast.
+              if (typeof page !== "string") {
+                next();
+                return;
               }
+
+              const pageNumber = Number.parseInt(page, 10);
+              if (!Number.isFinite(pageNumber) || pageNumber < 2) {
+                next();
+                return;
+              }
+
+              const feedPage = await sendFeedPage(pageNumber);
+
+              if (!feedPage) {
+                res.status(404).end();
+                return;
+              }
+
+              res
+                .status(200)
+                .contentType(feedPage.page.routes[format].contentType)
+                .end(feedPage.documents[format]);
             },
           );
         }
