@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { getGitLastModifiedDate, getGitWatchPaths } from "./git";
 import { cachedPromise } from "xenon-ssg/src/promise";
+import { watchInDev } from "xenon-ssg/src/watch";
 import {
   analyzeItems,
   type AnalyzedItems,
@@ -77,19 +78,17 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
 ): ContentLoader<TModuleParsed> {
   const cache = cachedPromise(() => loadContentItems(options), { lazy: true });
 
+  // Reset on edits to any file under the content folder, plus to anything
+  // git considers a "watch path" (so things like commit metadata changes
+  // trigger a re-render of `lastModified` etc.). The outer env check only
+  // exists to avoid shelling out to `git` in production builds —
+  // `watchInDev` itself is already a no-op outside dev.
   if (process.env["NODE_ENV"] === "development") {
-    const startWatch = async (watchPath: string) => {
-      for await (const _ of fs.watch(watchPath)) {
-        cache.reset();
-      }
-    };
-
-    void startWatch(options.contentFolderPath);
-
+    watchInDev(options.contentFolderPath, () => cache.reset());
     void (async () => {
       const gitWatchPaths = await getGitWatchPaths(options.siteRootPath);
       for (const gitWatchPath of gitWatchPaths) {
-        void startWatch(gitWatchPath);
+        watchInDev(gitWatchPath, () => cache.reset());
       }
     })();
   }

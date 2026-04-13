@@ -6,6 +6,7 @@ import { makeTitle } from "../../utils/meta";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 import { getGitLastModifiedDate } from "../../utils/git";
 import { cachedPromise } from "xenon-ssg/src/promise";
+import { watchInDev } from "xenon-ssg/src/watch";
 import { Temporal } from "temporal-polyfill";
 import { instantToBlogItemDate } from "../../utils/item-dates";
 
@@ -20,13 +21,26 @@ type MdxPageProps = {
 };
 
 export function makeMdxPage(contentFileUrl: string) {
+  const isDev = process.env["NODE_ENV"] === "development";
+  const filePath = url.fileURLToPath(contentFileUrl);
+
   const page = cachedPromise(
     async () => {
+      // In dev, cache-bust the dynamic import so the watcher's `page.reset()`
+      // actually picks up the new module instance — without the `?${Date.now()}`
+      // suffix, Node's ESM module cache would return the same (stale) module
+      // object even after the cachedPromise wrapper has been reset. In
+      // production, use the bare URL to avoid leaking unique module
+      // instances at build time. Same trick as `content-loader.ts` uses for
+      // blog/timeline content.
+      const importUrl = isDev
+        ? `${contentFileUrl}?${Date.now()}`
+        : contentFileUrl;
       const [module, lastModified] = await Promise.all([
-        import(contentFileUrl) as Promise<MdxPageModule>,
+        import(importUrl) as Promise<MdxPageModule>,
         getGitLastModifiedDate(
           url.fileURLToPath(import.meta.resolve("../../")),
-          url.fileURLToPath(contentFileUrl),
+          filePath,
         ),
       ]);
 
@@ -36,6 +50,11 @@ export function makeMdxPage(contentFileUrl: string) {
       lazy: true,
     },
   );
+
+  // On source-file change in dev, drop the cached module so the next render
+  // re-imports a fresh one via the cache-busted URL above. Same mechanism
+  // `content-loader.ts` uses for blog/timeline content.
+  watchInDev(filePath, () => page.reset());
 
   return async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const {

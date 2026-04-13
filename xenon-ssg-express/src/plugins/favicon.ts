@@ -14,6 +14,7 @@ import type {
 import path from "node:path";
 import fs from "node:fs/promises";
 import { cachedPromise } from "xenon-ssg/src/promise";
+import { watchInDev } from "xenon-ssg/src/watch";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
@@ -175,36 +176,24 @@ export const faviconPlugin = ({
   // instance until `state.reset()` is called — so `getInjectable` doesn't
   // re-parse the html list, the request handler doesn't rebuild
   // `filesByName`, and `buildPre` doesn't have to redo either. In dev, the
-  // `fs.watch` below resets the cache when the SVG changes; in build we
-  // never reset.
+  // `watchInDev` below resets the cache when the SVG changes and eagerly
+  // re-fires the work so the next request hits an already-resolved state.
   const state = cachedPromise(resolveState, { lazy: true });
 
-  // Surface background-work errors so a failing `favicons()` call doesn't
-  // become an unhandled rejection if nothing awaits the promise.
-  void state.get().catch((err) => {
-    console.error("[faviconPlugin] background favicon work failed:", err);
-  });
+  const surfaceErrors = () => {
+    void state.get().catch((err) => {
+      console.error("[faviconPlugin] background favicon work failed:", err);
+    });
+  };
 
-  if (process.env["NODE_ENV"] === "development") {
-    void (async () => {
-      try {
-        for await (const _event of fs.watch(inputFilepath)) {
-          state.reset();
-          void state.get().catch((err) => {
-            console.error(
-              "[faviconPlugin] background favicon work failed:",
-              err,
-            );
-          });
-        }
-      } catch (err) {
-        console.warn(
-          `[faviconPlugin] watch on ${inputFilepath} aborted:`,
-          err,
-        );
-      }
-    })();
-  }
+  // Eagerly start the work at plugin construction so by the time a request
+  // arrives the result is (most likely) already resolved.
+  surfaceErrors();
+
+  watchInDev(inputFilepath, () => {
+    state.reset();
+    surfaceErrors();
+  });
 
   const attachToExpress = (app: Express) => {
     app.use(
