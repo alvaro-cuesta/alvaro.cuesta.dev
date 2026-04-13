@@ -2,7 +2,7 @@ import { Template } from "../../Template";
 import { Pagination } from "../../atoms/Pagination";
 import { getTimelineItems } from "../../../timeline/promise";
 import type { SiteRenderMeta } from "../../../site";
-import { routeTimelinePost, routeTimelineList } from "../../../routes";
+import { routeTimelinePost } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
   TIMELINE_BLURB_DESCRIPTION,
@@ -14,6 +14,7 @@ import {
 } from "../../../utils/item-dates";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
+import { Link } from "../../atoms/Link";
 
 type TimelinePostPageProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -35,7 +36,7 @@ export async function TimelinePostPage({
   const { publicationDate, lastModificationDate, tags } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);
 
-  const page = timelineItems.pageBySlug.get(slug) ?? 1;
+  const postPath = routeTimelinePost.build({ slug });
 
   const sortedIndex = timelineItems.allSortedByDescendingDate.indexOf(item);
   const newerPost = timelineItems.allSortedByDescendingDate[sortedIndex - 1];
@@ -62,17 +63,6 @@ export async function TimelinePostPage({
       }}
     >
       <TimelineLayout
-        breadcrumbs={[
-          ...(page > 1
-            ? [
-                {
-                  name: `Page ${page}`,
-                  href: routeTimelineList.build({ page }),
-                },
-              ]
-            : []),
-          { name: dateStr, href: siteRenderMeta.pathname },
-        ]}
         timelineItems={timelineItems}
         currentTags={tags}
         currentYear={getBlogItemDateYear(publicationDate)}
@@ -81,7 +71,9 @@ export async function TimelinePostPage({
       >
         <h2>
           Timeline post{" "}
-          <small>{blogItemDateToShortString(publicationDate)}</small>
+          <small>
+            <Link href={postPath}>{dateStr}</Link>
+          </small>
         </h2>
 
         <TimelinePostItem item={item} />

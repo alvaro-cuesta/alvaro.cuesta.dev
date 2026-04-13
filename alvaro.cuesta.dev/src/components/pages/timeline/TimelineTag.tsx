@@ -3,7 +3,7 @@ import { TimelinePostItem } from "./components/TimelinePostItem";
 import { Template } from "../../Template";
 import { getTimelineItems } from "../../../timeline/promise";
 import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineTag, routeTimelineTagList } from "../../../routes";
+import { routeTimelineTag } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
   TIMELINE_BLURB_DESCRIPTION,
@@ -67,18 +67,6 @@ export async function TimelineTag({
       }}
     >
       <TimelineLayout
-        breadcrumbs={[
-          { name: "Tags", href: routeTimelineTagList.build({}) },
-          { name: tag, href: routeTimelineTag.build({ tag, page: null }) },
-          ...(page > 1 && totalPages > 1
-            ? [
-                {
-                  name: `Page ${page} of ${totalPages}`,
-                  href: canonicalPathname,
-                },
-              ]
-            : []),
-        ]}
         timelineItems={timelineItems}
         currentTags={[tag]}
         isTagListCurrent

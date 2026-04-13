@@ -162,16 +162,6 @@ body > footer nav ul li + li::before {
   padding: 0 0.15em;
 }
 
-nav[aria-label="breadcrumb"] li {
-  padding-top: 0;
-}
-
-nav[aria-label="breadcrumb"] li :where(a, [role="link"]):not(:hover) {
-  text-decoration: var(--pico-text-decoration);
-  text-decoration-color: var(--pico-underline);
-  text-underline-offset: 0.125em;
-}
-
 ul.blog-sidebar,
 ul.timeline-sidebar {
   list-style-type: none;

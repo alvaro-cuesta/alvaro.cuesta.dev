@@ -67,19 +67,7 @@ export async function TimelineList({
         openGraph: { type: "website" },
       }}
     >
-      <TimelineLayout
-        breadcrumbs={
-          page > 1 && totalPages > 1
-            ? [
-                {
-                  name: `Page ${page} of ${totalPages}`,
-                  href: canonicalPathname,
-                },
-              ]
-            : []
-        }
-        timelineItems={timelineItems}
-      >
+      <TimelineLayout timelineItems={timelineItems}>
         <h2>Timeline{page > 1 ? ` (page ${page} of ${totalPages})` : ""}</h2>
 
         {page === 1 && (

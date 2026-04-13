@@ -3,7 +3,7 @@ import { BlogLayout } from "./components/BlogLayout";
 import { Template } from "../../Template";
 import { Link } from "../../atoms/Link";
 import type { SiteRenderMeta } from "../../../site";
-import { routeBlogTag, routeBlogTagList } from "../../../routes";
+import { routeBlogTag } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
@@ -28,11 +28,7 @@ export async function BlogTagList({ siteRenderMeta }: BlogTagListProps) {
         openGraph: { type: "website" },
       }}
     >
-      <BlogLayout
-        breadcrumbs={[{ name: "Tags", href: routeBlogTagList.build({}) }]}
-        blogItems={blogItems}
-        isTagListCurrent
-      >
+      <BlogLayout blogItems={blogItems} isTagListCurrent>
         <h2>Blog tags</h2>
 
         <article>

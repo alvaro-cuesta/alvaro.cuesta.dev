@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 import { ContentSidebar } from "../../../molecules/ContentSidebar";
 import type { AnalyzedItems } from "../../../../utils/analyze";
 import type { BlogItemModuleParsed } from "../../../../blog/item-module";
-import type { BreadcrumbItem } from "../../../atoms/Breadcrumb";
 import {
-  routeBlogArticleList,
   routeBlogTag,
   routeBlogTagList,
   routeBlogYear,
@@ -13,7 +11,6 @@ import {
 import { ContentLayout } from "../../../molecules/ContentLayout";
 
 type BlogLayoutProps = {
-  breadcrumbs: BreadcrumbItem[];
   blogItems: AnalyzedItems<BlogItemModuleParsed>;
   currentTags?: readonly string[];
   currentYear?: number | null;
@@ -23,7 +20,6 @@ type BlogLayoutProps = {
 };
 
 export function BlogLayout({
-  breadcrumbs,
   blogItems,
   currentTags,
   currentYear,
@@ -33,9 +29,6 @@ export function BlogLayout({
 }: BlogLayoutProps) {
   return (
     <ContentLayout
-      rootName="Blog"
-      rootHref={routeBlogArticleList.build({ page: null })}
-      breadcrumbs={breadcrumbs}
       sidebar={
         <ContentSidebar
           className="blog-sidebar"

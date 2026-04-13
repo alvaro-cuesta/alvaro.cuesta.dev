@@ -3,7 +3,7 @@ import { TimelineLayout } from "./components/TimelineLayout";
 import { Template } from "../../Template";
 import { Link } from "../../atoms/Link";
 import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineTag, routeTimelineTagList } from "../../../routes";
+import { routeTimelineTag } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
   TIMELINE_BLURB_DESCRIPTION,
@@ -30,11 +30,7 @@ export async function TimelineTagList({
         openGraph: { type: "website" },
       }}
     >
-      <TimelineLayout
-        breadcrumbs={[{ name: "Tags", href: routeTimelineTagList.build({}) }]}
-        timelineItems={timelineItems}
-        isTagListCurrent
-      >
+      <TimelineLayout timelineItems={timelineItems} isTagListCurrent>
         <h2>Timeline tags</h2>
 
         <ul>

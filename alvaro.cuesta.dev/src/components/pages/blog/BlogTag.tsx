@@ -3,7 +3,6 @@ import { Template } from "../../Template";
 import { getBlogItems } from "../../../blog/promise";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
 import type { SiteRenderMeta } from "../../../site";
-import { routeBlogTag, routeBlogTagList } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
@@ -38,10 +37,6 @@ export async function BlogTag({ siteRenderMeta, tag }: BlogTagProps) {
       }}
     >
       <BlogLayout
-        breadcrumbs={[
-          { name: "Tags", href: routeBlogTagList.build({}) },
-          { name: tag, href: routeBlogTag.build({ tag }) },
-        ]}
         blogItems={blogItems}
         currentTags={[tag]}
         isTagListCurrent

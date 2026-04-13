@@ -3,7 +3,7 @@ import { Template } from "../../Template";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { Link } from "../../atoms/Link";
 import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineYear, routeTimelineYearList } from "../../../routes";
+import { routeTimelineYear } from "../../../routes";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
@@ -30,11 +30,7 @@ export async function TimelineYearList({
         openGraph: { type: "website" },
       }}
     >
-      <TimelineLayout
-        breadcrumbs={[{ name: "Years", href: routeTimelineYearList.build({}) }]}
-        timelineItems={timelineItems}
-        isYearListCurrent
-      >
+      <TimelineLayout timelineItems={timelineItems} isYearListCurrent>
         <h2>Timeline years</h2>
 
         <ul>

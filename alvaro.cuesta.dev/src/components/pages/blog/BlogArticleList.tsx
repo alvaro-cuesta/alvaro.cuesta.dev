@@ -64,19 +64,7 @@ export async function BlogArticleList({
         openGraph: { type: "website" },
       }}
     >
-      <BlogLayout
-        breadcrumbs={
-          page > 1 && totalPages > 1
-            ? [
-                {
-                  name: `Page ${page} of ${totalPages}`,
-                  href: canonicalPathname,
-                },
-              ]
-            : []
-        }
-        blogItems={blogItems}
-      >
+      <BlogLayout blogItems={blogItems}>
         <h2>Blog{page > 1 ? ` (page ${page} of ${totalPages})` : ""}</h2>
 
         {page === 1 && (

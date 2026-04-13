@@ -11,11 +11,7 @@ import {
 import type { SiteRenderMeta } from "../../../site";
 import { BlogDateTime } from "../../atoms/BlogDateTime";
 import { Icon } from "../../atoms/Icon";
-import {
-  routeBlogArticle,
-  routeBlogArticleList,
-  routeBlogTag,
-} from "../../../routes";
+import { routeBlogArticle, routeBlogTag } from "../../../routes";
 import { makeTitle } from "../../../utils/meta";
 import { MDX_DEFAULT_COMPONENTS } from "../../../mdx/mdx";
 
@@ -58,7 +54,6 @@ export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
     : null;
 
   const articlePath = routeBlogArticle.build({ slug });
-  const page = blogItems.pageBySlug.get(slug) ?? 1;
 
   const description = summary
     ? summary
@@ -106,17 +101,6 @@ export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
       }}
     >
       <BlogLayout
-        breadcrumbs={[
-          ...(page > 1
-            ? [
-                {
-                  name: `Page ${page}`,
-                  href: routeBlogArticleList.build({ page }),
-                },
-              ]
-            : []),
-          { name: articleTitle, href: articlePath },
-        ]}
         blogItems={blogItems}
         currentTags={tagSlugs}
         currentYear={getBlogItemDateYear(publicationDate)}

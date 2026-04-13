@@ -3,7 +3,7 @@ import { Template } from "../../Template";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
 import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineYear, routeTimelineYearList } from "../../../routes";
+import { routeTimelineYear } from "../../../routes";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
@@ -78,21 +78,6 @@ export async function TimelineYear({
       }}
     >
       <TimelineLayout
-        breadcrumbs={[
-          { name: "Years", href: routeTimelineYearList.build({}) },
-          {
-            name: year.toString(),
-            href: routeTimelineYear.build({ year, page: null }),
-          },
-          ...(page > 1 && totalPages > 1
-            ? [
-                {
-                  name: `Page ${page} of ${totalPages}`,
-                  href: canonicalPathname,
-                },
-              ]
-            : []),
-        ]}
         timelineItems={timelineItems}
         currentYear={year}
         isYearListCurrent

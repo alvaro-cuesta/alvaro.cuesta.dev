@@ -4,7 +4,6 @@ import { BlogLayout } from "./components/BlogLayout";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
 import { type BlogItemMonth } from "../../../utils/item-dates";
 import type { SiteRenderMeta } from "../../../site";
-import { routeBlogYear, routeBlogYearList } from "../../../routes";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
@@ -69,10 +68,6 @@ export async function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
       }}
     >
       <BlogLayout
-        breadcrumbs={[
-          { name: "Years", href: routeBlogYearList.build({}) },
-          { name: year.toString(), href: routeBlogYear.build({ year }) },
-        ]}
         blogItems={blogItems}
         currentYear={year}
         isYearListCurrent

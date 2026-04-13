@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 import { ContentSidebar } from "../../../molecules/ContentSidebar";
 import type { AnalyzedItems } from "../../../../utils/analyze";
 import type { TimelineItemModuleParsed } from "../../../../timeline/item-module";
-import type { BreadcrumbItem } from "../../../atoms/Breadcrumb";
 import {
-  routeTimelineList,
   routeTimelineTag,
   routeTimelineTagList,
   routeTimelineYear,
@@ -13,7 +11,6 @@ import {
 import { ContentLayout } from "../../../molecules/ContentLayout";
 
 type TimelineLayoutProps = {
-  breadcrumbs?: BreadcrumbItem[];
   timelineItems: AnalyzedItems<TimelineItemModuleParsed>;
   currentTags?: readonly string[];
   currentYear?: number | null;
@@ -23,7 +20,6 @@ type TimelineLayoutProps = {
 };
 
 export function TimelineLayout({
-  breadcrumbs,
   timelineItems,
   currentTags,
   currentYear,
@@ -33,9 +29,6 @@ export function TimelineLayout({
 }: TimelineLayoutProps) {
   return (
     <ContentLayout
-      rootName="Timeline"
-      rootHref={routeTimelineList.build({ page: null })}
-      breadcrumbs={breadcrumbs}
       sidebar={
         <ContentSidebar
           className="timeline-sidebar"

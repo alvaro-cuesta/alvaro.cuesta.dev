@@ -3,7 +3,7 @@ import { Template } from "../../Template";
 import { BlogLayout } from "./components/BlogLayout";
 import { Link } from "../../atoms/Link";
 import type { SiteRenderMeta } from "../../../site";
-import { routeBlogYear, routeBlogYearList } from "../../../routes";
+import { routeBlogYear } from "../../../routes";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
@@ -28,11 +28,7 @@ export async function BlogYearList({ siteRenderMeta }: BlogYearListProps) {
         openGraph: { type: "website" },
       }}
     >
-      <BlogLayout
-        breadcrumbs={[{ name: "Years", href: routeBlogYearList.build({}) }]}
-        blogItems={blogItems}
-        isYearListCurrent
-      >
+      <BlogLayout blogItems={blogItems} isYearListCurrent>
         <h2>Blog years</h2>
 
         <article>
