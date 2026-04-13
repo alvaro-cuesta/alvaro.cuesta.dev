@@ -49,12 +49,12 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
       buildPreResults[pluginIndex] = buildPreResult;
 
       return (
-        runnablePlugin.getInjectable?.({
+        (await runnablePlugin.getInjectable?.({
           isBuild: true,
           siteMeta,
           baseOutputFolder: outputDir,
           buildPreResult,
-        }) ?? []
+        })) ?? []
       );
     }),
   );

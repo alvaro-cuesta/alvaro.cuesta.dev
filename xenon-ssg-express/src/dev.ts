@@ -9,10 +9,16 @@ export const DEFAULT_DEV_PORT = 31337;
 
 /**
  * Create an Express app that serves a Xenon site in development mode.
+ *
+ * This is async because plugins may return a `Promise` from their
+ * `getInjectable` — letting them defer expensive work (e.g. image generation,
+ * remote metadata fetches) until they're asked for their tags rather than
+ * forcing it into their factory. Plugins that return tags synchronously keep
+ * working unchanged; the `Promise.all` below resolves them all in parallel.
  */
-export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
-  site: XenonExpressSite<PageMetadata>,
-): Express {
+export async function makeXenonDevExpressApp<
+  PageMetadata extends UnknownRecord,
+>(site: XenonExpressSite<PageMetadata>): Promise<Express> {
   const app = express();
 
   app.use(morgan("dev"));
@@ -28,14 +34,16 @@ export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
     plugin.attachToExpress?.(app);
   }
 
-  const injectableRaw = plugins.flatMap((runnablePlugin) => {
-    return (
-      runnablePlugin.getInjectable?.({
-        isBuild: false,
-        siteMeta,
-      }) ?? []
-    );
-  });
+  const injectableRawArrays = await Promise.all(
+    plugins.map(
+      async (runnablePlugin) =>
+        (await runnablePlugin.getInjectable?.({
+          isBuild: false,
+          siteMeta,
+        })) ?? [],
+    ),
+  );
+  const injectableRaw = injectableRawArrays.flat();
 
   const { injectable, injectableCritical } =
     getTagsFromInjectableRaw(injectableRaw);
@@ -57,10 +65,10 @@ export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
 /**
  * Convenience function if you just want to quickly start a dev server.
  */
-export function startXenonExpressDevApp<PageMetadata extends UnknownRecord>(
-  site: XenonExpressSite<PageMetadata>,
-) {
-  const app = makeXenonDevExpressApp(site);
+export async function startXenonExpressDevApp<
+  PageMetadata extends UnknownRecord,
+>(site: XenonExpressSite<PageMetadata>): Promise<Express> {
+  const app = await makeXenonDevExpressApp(site);
   const port = site.devPort ?? DEFAULT_DEV_PORT;
 
   app.listen(port, "127.0.0.1", () => {

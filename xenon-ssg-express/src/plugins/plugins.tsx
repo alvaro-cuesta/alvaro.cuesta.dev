@@ -87,7 +87,10 @@ export type PluginGetInjectableFunctionOptions<BuildPreResult> = {
 
 export type PluginGetInjectableFunction<BuildPreResult> = (
   options: PluginGetInjectableFunctionOptions<BuildPreResult>,
-) => PluginInjectableTag[] | undefined;
+) =>
+  | PluginInjectableTag[]
+  | undefined
+  | Promise<PluginInjectableTag[] | undefined>;
 
 export type RunnablePlugin<
   BuildPreResult,

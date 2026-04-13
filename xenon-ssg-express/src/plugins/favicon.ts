@@ -120,65 +120,81 @@ const getFaviconCacheKey = async (
   return getContentHash(payload, "hex");
 };
 
-export const faviconPlugin = async ({
+export const faviconPlugin = ({
   inputFilepath,
   faviconOptions,
   mountPointFragments = [],
   cacheBustingFragment,
   cache,
-}: FaviconPluginOptions): Promise<Plugin<FaviconPluginBuildPreResult>> => {
-  const ns = cache?.namespace("favicon") ?? null;
-  const cacheKey = ns
-    ? `${await getFaviconCacheKey(inputFilepath, faviconOptions)}.json`
-    : null;
+}: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
+  // Kick off the expensive `favicons()` work (or cache read) in the background
+  // immediately. The factory itself stays synchronous so `makeSite` doesn't
+  // block on it; consumers (`getInjectable`, `attachToExpress` request
+  // handlers, `buildPre`) all `await` this shared promise.
+  const responsePromise = (async (): Promise<FaviconResponse> => {
+    const ns = cache?.namespace("favicon") ?? null;
+    const cacheKey = ns
+      ? `${await getFaviconCacheKey(inputFilepath, faviconOptions)}.json`
+      : null;
 
-  let response: FaviconResponse | null = null;
-  if (ns && cacheKey) {
-    const cached = await ns.get(cacheKey);
-    if (cached !== null) {
-      response = deserializeFaviconResponse(cached);
-    }
-  }
-
-  if (response === null) {
-    response = await favicons(inputFilepath, faviconOptions);
     if (ns && cacheKey) {
-      await ns.set(cacheKey, serializeFaviconResponse(response));
+      const cached = await ns.get(cacheKey);
+      if (cached !== null) {
+        return deserializeFaviconResponse(cached);
+      }
     }
-  }
 
-  const { images, files, html } = response;
+    const fresh = await favicons(inputFilepath, faviconOptions);
+    if (ns && cacheKey) {
+      await ns.set(cacheKey, serializeFaviconResponse(fresh));
+    }
+    return fresh;
+  })();
 
-  const filesByName = {
-    ...Object.fromEntries(images.map((image) => [image.name, image.contents])),
-    ...Object.fromEntries(files.map((file) => [file.name, file.contents])),
-  };
+  // If nobody ever consumes the promise (e.g. plugin attached but never
+  // queried), surface the rejection rather than leaking an unhandled promise.
+  responsePromise.catch((err) => {
+    console.error("[faviconPlugin] background favicon work failed:", err);
+  });
 
   const attachToExpress = (app: Express) => {
-    app.use(`/${mountPointFragments.join("/")}`, (req, res, next) => {
-      const pathFragments = req.path.split("/");
+    app.use(
+      `/${mountPointFragments.join("/")}`,
+      async (req, res, next) => {
+        const pathFragments = req.path.split("/");
 
-      if (pathFragments.length !== 2 || pathFragments[0] !== "") {
-        next();
-        return;
-      }
+        if (pathFragments.length !== 2 || pathFragments[0] !== "") {
+          next();
+          return;
+        }
 
-      const filename = pathFragments[1]!; // `!` is okay because we checked the length
-      const content = filesByName[filename];
+        const filename = pathFragments[1]!; // `!` is okay because we checked the length
+        const { images, files } = await responsePromise;
+        const filesByName = {
+          ...Object.fromEntries(
+            images.map((image) => [image.name, image.contents]),
+          ),
+          ...Object.fromEntries(
+            files.map((file) => [file.name, file.contents]),
+          ),
+        };
+        const content = filesByName[filename];
 
-      if (content === undefined) {
-        next();
-        return;
-      }
+        if (content === undefined) {
+          next();
+          return;
+        }
 
-      res.status(200).contentType(filename).end(content);
-    });
+        res.status(200).contentType(filename).end(content);
+      },
+    );
   };
 
   const buildPre: PluginBuildPreFunction<FaviconPluginBuildPreResult> = async ({
     baseOutputFolder,
     emitStaticPathname,
   }) => {
+    const { images, files } = await responsePromise;
     const cacheBustingMap: Record<string, string> = {};
     const toPathname = (filename: string) =>
       `/${[...mountPointFragments, filename].join("/")}`;
@@ -244,8 +260,9 @@ export const faviconPlugin = async ({
 
   const getInjectable: PluginGetInjectableFunction<
     FaviconPluginBuildPreResult
-  > = (options) =>
-    html.map((htmlTag) => {
+  > = async (options) => {
+    const { html } = await responsePromise;
+    return html.map((htmlTag) => {
       let cacheBustedHtmlTag = htmlTag;
       if (options.isBuild) {
         const cacheBustingMap = options.buildPreResult.cacheBustingMap;
@@ -260,6 +277,7 @@ export const faviconPlugin = async ({
 
       return parseHtmlTag(cacheBustedHtmlTag);
     });
+  };
 
   return () => ({
     attachToExpress,

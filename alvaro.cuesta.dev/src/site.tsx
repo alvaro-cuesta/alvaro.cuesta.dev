@@ -329,7 +329,7 @@ export async function makeSite(): Promise<
     ],
   });
 
-  const favicon = await faviconPlugin({
+  const favicon = faviconPlugin({
     inputFilepath: path.join(import.meta.dirname, "favicon.svg"),
     cache,
     faviconOptions: {
