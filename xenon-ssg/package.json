@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@types/express": "catalog:",
-    "@types/node": "^20.14.11",
+    "@types/node": "^25.6.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "type-fest": "catalog:",
