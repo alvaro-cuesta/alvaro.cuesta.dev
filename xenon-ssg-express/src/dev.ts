@@ -10,15 +10,25 @@ export const DEFAULT_DEV_PORT = 31337;
 /**
  * Create an Express app that serves a Xenon site in development mode.
  *
- * This is async because plugins may return a `Promise` from their
- * `getInjectable` — letting them defer expensive work (e.g. image generation,
- * remote metadata fetches) until they're asked for their tags rather than
- * forcing it into their factory. Plugins that return tags synchronously keep
- * working unchanged; the `Promise.all` below resolves them all in parallel.
+ * Stays **sync**: nothing in dev-time setup is actually blocking — plugin
+ * factories and `attachToExpress` all run sync, and the one place that could
+ * have been async (gathering `injectableRaw` from plugins' `getInjectable`)
+ * is deferred into the per-request render wrapper below.
+ *
+ * The middleware deliberately does **not** memoize `injectableRaw` across
+ * requests. Each render re-calls every plugin's `getInjectable` so a plugin
+ * reflecting source-file changes (e.g. favicon's `fs.watch` on the SVG, or a
+ * future hot-reloading plugin) can surface updated tags on the very next
+ * request. See the contract on `PluginGetInjectableFunction` in
+ * `plugins/plugins.tsx` — plugins with expensive init MUST memoize
+ * internally and return a stable Promise/array reference between changes.
+ * The per-request cost when everything is memoized is sub-millisecond:
+ * a microtask tick, an `Array.flat()`, and ~N React element creations for
+ * the injected tag list.
  */
-export async function makeXenonDevExpressApp<
-  PageMetadata extends UnknownRecord,
->(site: XenonExpressSite<PageMetadata>): Promise<Express> {
+export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
+  site: XenonExpressSite<PageMetadata>,
+): Express {
   const app = express();
 
   app.use(morgan("dev"));
@@ -34,28 +44,27 @@ export async function makeXenonDevExpressApp<
     plugin.attachToExpress?.(app);
   }
 
-  const injectableRawArrays = await Promise.all(
-    plugins.map(
-      async (runnablePlugin) =>
-        (await runnablePlugin.getInjectable?.({
-          isBuild: false,
-          siteMeta,
-        })) ?? [],
-    ),
-  );
-  const injectableRaw = injectableRawArrays.flat();
-
-  const { injectable, injectableCritical } =
-    getTagsFromInjectableRaw(injectableRaw);
-
-  const render = (pathname: string) =>
-    site.render({
+  const render = async (pathname: string) => {
+    const injectableRawArrays = await Promise.all(
+      plugins.map(
+        async (runnablePlugin) =>
+          (await runnablePlugin.getInjectable?.({
+            isBuild: false,
+            siteMeta,
+          })) ?? [],
+      ),
+    );
+    const injectableRaw = injectableRawArrays.flat();
+    const { injectable, injectableCritical } =
+      getTagsFromInjectableRaw(injectableRaw);
+    return site.render({
       ...siteMeta,
       pathname,
       injectableRaw,
       injectable,
       injectableCritical,
     });
+  };
 
   app.use(makeXenonMiddleware(render, site.renderToStreamOptions));
 
@@ -65,10 +74,10 @@ export async function makeXenonDevExpressApp<
 /**
  * Convenience function if you just want to quickly start a dev server.
  */
-export async function startXenonExpressDevApp<
-  PageMetadata extends UnknownRecord,
->(site: XenonExpressSite<PageMetadata>): Promise<Express> {
-  const app = await makeXenonDevExpressApp(site);
+export function startXenonExpressDevApp<PageMetadata extends UnknownRecord>(
+  site: XenonExpressSite<PageMetadata>,
+): Express {
+  const app = makeXenonDevExpressApp(site);
   const port = site.devPort ?? DEFAULT_DEV_PORT;
 
   app.listen(port, "127.0.0.1", () => {

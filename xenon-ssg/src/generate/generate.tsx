@@ -131,7 +131,7 @@ export async function generateStaticSite<PageMetadata extends UnknownRecord>(
       pendingRenderPathnames.add(linkPathname);
     };
 
-    const { reactNode, metadata } = renderFn(pathname);
+    const { reactNode, metadata } = await renderFn(pathname);
 
     await renderToFileAtomic(
       fullFilePath,

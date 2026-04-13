@@ -221,7 +221,6 @@ const indexCss = singleLightningCssPlugin({
   outputFilename: "index.min.css",
   mountPointFragments: ["css"],
   critical: true,
-  cache,
 });
 
 const STARRY_NIGHT_FILE = "both";
@@ -233,7 +232,6 @@ const starryNightCss = singleLightningCssPlugin({
   outputFilename: `${STARRY_NIGHT_FILE}.css`,
   mountPointFragments: ["css", "starry-night"],
   critical: true,
-  cache,
 });
 
 const blogFeeds = feedsPlugin({

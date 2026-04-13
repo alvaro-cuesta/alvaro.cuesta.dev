@@ -85,6 +85,35 @@ export type PluginGetInjectableFunctionOptions<BuildPreResult> = {
     }
 );
 
+/**
+ * Returns the `<link>` / `<meta>` / `<style>` tags this plugin contributes to
+ * every rendered page's `<head>`.
+ *
+ * **Lifecycle contract:**
+ *
+ * - **Dev mode**: called by `makeXenonDevExpressApp`'s render wrapper on
+ *   *every* request. Returning a `Promise` is allowed — the middleware
+ *   awaits before rendering. Returning a different array (by reference or
+ *   by content) on different calls is also allowed: that's how a plugin
+ *   reflects updated source files (e.g. favicon's `fs.watch` on the SVG)
+ *   without forcing a process restart.
+ *
+ * - **Build mode**: called by `buildXenonExpressSite` exactly once per
+ *   plugin per build, after `buildPre` has produced its `buildPreResult`.
+ *
+ * **Performance contract for plugins:** because dev-mode invocation is
+ * per-request, plugins that do non-trivial work to produce their tags MUST
+ * memoize internally — typically with a `cachedPromise` over the heavy
+ * compute, plus an `fs.watch`-driven `reset()` for invalidation. Returning
+ * a stable reference until the underlying source changes makes the
+ * per-request call effectively free (one microtask tick to await an
+ * already-resolved promise) while still letting the middleware see fresh
+ * data the moment the source file is edited.
+ *
+ * Plugins that produce trivially cheap tags (e.g. a single `<link
+ * rel="stylesheet">`) don't need to memoize — constructing the array each
+ * call is sub-microsecond.
+ */
 export type PluginGetInjectableFunction<BuildPreResult> = (
   options: PluginGetInjectableFunctionOptions<BuildPreResult>,
 ) =>

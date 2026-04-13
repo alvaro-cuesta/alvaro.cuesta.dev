@@ -11,8 +11,6 @@ import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
 } from "../cache-busting";
-import { getContentHash } from "../crypto";
-import type { XenonCache } from "../cache";
 
 type SingleLightningCssPluginOptions = {
   inputFilepath: string;
@@ -25,15 +23,6 @@ type SingleLightningCssPluginOptions = {
    */
   cacheBustingFragment?: string | false | undefined;
   critical?: boolean;
-  /**
-   * Optional shared cache from `createXenonCache(...)`. When provided, the
-   * compiled (minified) CSS bytes get memoized to disk under
-   * `<siteRoot>/node_modules/.cache/xenon-ssg-express/single-lightningcss/`,
-   * keyed by a hash of the source CSS. Every dev restart *and* every browser
-   * refresh after the first one serves the cached bytes instead of re-running
-   * lightningcss. Pass `null` (or omit) to disable caching.
-   */
-  cache?: XenonCache | null;
 };
 
 type SingleLightningCssPluginBuildPreResult = { cacheBustedPathname: string };
@@ -45,25 +34,14 @@ export const singleLightningCssPlugin =
     mountPointFragments = [],
     cacheBustingFragment,
     critical,
-    cache,
   }: SingleLightningCssPluginOptions): Plugin<SingleLightningCssPluginBuildPreResult> =>
   () => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
-    const ns = cache?.namespace("single-lightningcss") ?? null;
 
-    // TODO: This is currently never 304 unlike express.static
-    const compileCss = async (): Promise<Buffer> => {
-      const code = await fs.readFile(inputFilepath);
-
-      const cacheKey = ns ? `${await getContentHash(code, "hex")}.css` : null;
-      if (ns && cacheKey) {
-        const cached = await ns.get(cacheKey);
-        if (cached !== null) return cached;
-      }
-
+    const compileCss = async (sourceCode: Buffer): Promise<Buffer> => {
       const { code: outputCode, warnings } = transform({
         filename: path.basename(inputFilepath),
-        code,
+        code: sourceCode,
         minify: true,
         sourceMap: false,
       });
@@ -72,17 +50,29 @@ export const singleLightningCssPlugin =
         console.warn(warnings);
       }
 
-      const outputBuffer = Buffer.from(outputCode);
-      if (ns && cacheKey) {
-        await ns.set(cacheKey, outputBuffer);
-      }
-      return outputBuffer;
+      return Buffer.from(outputCode);
     };
 
     const attachToExpress: PluginAttachToExpressFunction = (app) => {
-      app.get(pathname, async (_req, res) => {
-        const code = await compileCss();
-        res.status(200).contentType("css").end(code);
+      app.get(pathname, async (req, res) => {
+        // Weak ETag from `size + mtime`, matching the `express.static`
+        // convention. A single `fs.stat` (~0.05 ms regardless of file
+        // size) lets us short-circuit before touching the source file at
+        // all on a fresh client request. lightningcss's `transform` is
+        // pure source-to-source (it does NOT inline `@import` — that's
+        // `bundle` / `bundleAsync`, which we don't use), so the one input
+        // file is the only thing that affects the output.
+        const stat = await fs.stat(inputFilepath);
+        const etag = `W/"${stat.size.toString(16)}-${stat.mtimeMs.toString(16)}"`;
+        res.setHeader("ETag", etag);
+        res.contentType("css");
+        if (req.fresh) {
+          res.status(304).end();
+          return;
+        }
+        const sourceCode = await fs.readFile(inputFilepath);
+        const code = await compileCss(sourceCode);
+        res.status(200).end(code);
       });
     };
 
@@ -99,7 +89,8 @@ export const singleLightningCssPlugin =
       const outputFolder = path.join(baseOutputFolder, ...mountPointFragments);
       await fs.mkdir(outputFolder, { recursive: true });
 
-      const code = await compileCss();
+      const sourceCode = await fs.readFile(inputFilepath);
+      const code = await compileCss(sourceCode);
 
       let realOutputFilename;
       if (cacheBustingFragment === undefined) {

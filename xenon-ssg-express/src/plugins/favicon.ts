@@ -13,6 +13,7 @@ import type {
 } from "./plugins";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { cachedPromise } from "xenon-ssg/src/promise";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
@@ -120,6 +121,16 @@ const getFaviconCacheKey = async (
   return getContentHash(payload, "hex");
 };
 
+type FaviconDerivedState = {
+  response: FaviconResponse;
+  /** Merged images + files lookup, precomputed once per reset. */
+  filesByName: Record<string, Buffer | string>;
+  /** Parsed `<link>` / `<meta>` tags for dev-mode injection. Build mode has
+   * to rewrite hrefs against the cacheBustingMap per invocation and so
+   * reparses from `response.html` itself. */
+  parsedHtmlDev: PluginInjectableTag[];
+};
+
 export const faviconPlugin = ({
   inputFilepath,
   faviconOptions,
@@ -127,35 +138,73 @@ export const faviconPlugin = ({
   cacheBustingFragment,
   cache,
 }: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
-  // Kick off the expensive `favicons()` work (or cache read) in the background
-  // immediately. The factory itself stays synchronous so `makeSite` doesn't
-  // block on it; consumers (`getInjectable`, `attachToExpress` request
-  // handlers, `buildPre`) all `await` this shared promise.
-  const responsePromise = (async (): Promise<FaviconResponse> => {
+  const resolveState = async (): Promise<FaviconDerivedState> => {
     const ns = cache?.namespace("favicon") ?? null;
     const cacheKey = ns
       ? `${await getFaviconCacheKey(inputFilepath, faviconOptions)}.json`
       : null;
 
+    let response: FaviconResponse | null = null;
     if (ns && cacheKey) {
       const cached = await ns.get(cacheKey);
       if (cached !== null) {
-        return deserializeFaviconResponse(cached);
+        response = deserializeFaviconResponse(cached);
+      }
+    }
+    if (response === null) {
+      response = await favicons(inputFilepath, faviconOptions);
+      if (ns && cacheKey) {
+        await ns.set(cacheKey, serializeFaviconResponse(response));
       }
     }
 
-    const fresh = await favicons(inputFilepath, faviconOptions);
-    if (ns && cacheKey) {
-      await ns.set(cacheKey, serializeFaviconResponse(fresh));
-    }
-    return fresh;
-  })();
+    const filesByName: Record<string, Buffer | string> = {
+      ...Object.fromEntries(
+        response.images.map((image) => [image.name, image.contents]),
+      ),
+      ...Object.fromEntries(
+        response.files.map((file) => [file.name, file.contents]),
+      ),
+    };
+    const parsedHtmlDev = response.html.map(parseHtmlTag);
+    return { response, filesByName, parsedHtmlDev };
+  };
 
-  // If nobody ever consumes the promise (e.g. plugin attached but never
-  // queried), surface the rejection rather than leaking an unhandled promise.
-  responsePromise.catch((err) => {
+  // In-memory memoization of `favicons()` + all the derived shapes
+  // (`filesByName`, parsed html). `state.get()` returns the same Promise
+  // instance until `state.reset()` is called — so `getInjectable` doesn't
+  // re-parse the html list, the request handler doesn't rebuild
+  // `filesByName`, and `buildPre` doesn't have to redo either. In dev, the
+  // `fs.watch` below resets the cache when the SVG changes; in build we
+  // never reset.
+  const state = cachedPromise(resolveState, { lazy: true });
+
+  // Surface background-work errors so a failing `favicons()` call doesn't
+  // become an unhandled rejection if nothing awaits the promise.
+  void state.get().catch((err) => {
     console.error("[faviconPlugin] background favicon work failed:", err);
   });
+
+  if (process.env["NODE_ENV"] === "development") {
+    void (async () => {
+      try {
+        for await (const _event of fs.watch(inputFilepath)) {
+          state.reset();
+          void state.get().catch((err) => {
+            console.error(
+              "[faviconPlugin] background favicon work failed:",
+              err,
+            );
+          });
+        }
+      } catch (err) {
+        console.warn(
+          `[faviconPlugin] watch on ${inputFilepath} aborted:`,
+          err,
+        );
+      }
+    })();
+  }
 
   const attachToExpress = (app: Express) => {
     app.use(
@@ -169,15 +218,7 @@ export const faviconPlugin = ({
         }
 
         const filename = pathFragments[1]!; // `!` is okay because we checked the length
-        const { images, files } = await responsePromise;
-        const filesByName = {
-          ...Object.fromEntries(
-            images.map((image) => [image.name, image.contents]),
-          ),
-          ...Object.fromEntries(
-            files.map((file) => [file.name, file.contents]),
-          ),
-        };
+        const { filesByName } = await state.get();
         const content = filesByName[filename];
 
         if (content === undefined) {
@@ -194,7 +235,9 @@ export const faviconPlugin = ({
     baseOutputFolder,
     emitStaticPathname,
   }) => {
-    const { images, files } = await responsePromise;
+    const {
+      response: { images, files },
+    } = await state.get();
     const cacheBustingMap: Record<string, string> = {};
     const toPathname = (filename: string) =>
       `/${[...mountPointFragments, filename].join("/")}`;
@@ -261,20 +304,24 @@ export const faviconPlugin = ({
   const getInjectable: PluginGetInjectableFunction<
     FaviconPluginBuildPreResult
   > = async (options) => {
-    const { html } = await responsePromise;
-    return html.map((htmlTag) => {
+    const { response, parsedHtmlDev } = await state.get();
+    // Dev: reuse the memoized parsed tag array — stable reference until the
+    // SVG source changes and the watcher resets the cache.
+    if (!options.isBuild) {
+      return parsedHtmlDev;
+    }
+    // Build: inject the per-build `cacheBustingMap` into every href before
+    // parsing. Runs exactly once per build, so memoization isn't worth the
+    // indirection.
+    const cacheBustingMap = options.buildPreResult.cacheBustingMap;
+    return response.html.map((htmlTag) => {
       let cacheBustedHtmlTag = htmlTag;
-      if (options.isBuild) {
-        const cacheBustingMap = options.buildPreResult.cacheBustingMap;
-
-        for (const [name, cacheBustedName] of Object.entries(cacheBustingMap)) {
-          cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
-            name,
-            cacheBustedName,
-          );
-        }
+      for (const [name, cacheBustedName] of Object.entries(cacheBustingMap)) {
+        cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
+          name,
+          cacheBustedName,
+        );
       }
-
       return parseHtmlTag(cacheBustedHtmlTag);
     });
   };

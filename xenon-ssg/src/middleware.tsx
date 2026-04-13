@@ -12,17 +12,18 @@ export function makeXenonMiddleware<PageMetadata extends UnknownRecord>(
   render: XenonRenderFunction<PageMetadata>,
   options?: RenderToStreamOptions,
 ) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const { pathname } = canonicalizeHref(req.path);
 
     let renderedStream;
     try {
+      const { reactNode } = await render(pathname);
       renderedStream = renderToStream(
         <Root
           // We don't have to crawl links in middleware mode since we're not pre-rendering anything
           addLink={doNothing}
         >
-          {render(pathname).reactNode}
+          {reactNode}
         </Root>,
         options,
       );
