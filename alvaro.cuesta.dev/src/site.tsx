@@ -67,7 +67,7 @@ type XenonExpressRenderFunctionInput = {
 };
 
 // TODO: changing the type here won't make the other fail
-const render =
+const makeRender =
   (
     input: XenonExpressRenderFunctionInput,
   ): XenonExpressRenderFunction<SitemapPluginMetadata> =>
@@ -213,146 +213,144 @@ export const staticFolder = staticFolderPlugin({
   inputFolder: STATIC_FOLDER,
 });
 
+const cache = await createXenonCache({ callerUrl: import.meta.url });
+
 const INDEX_CSS_PATH = path.join(import.meta.dirname, "index.css");
+const indexCss = singleLightningCssPlugin({
+  inputFilepath: INDEX_CSS_PATH,
+  outputFilename: "index.min.css",
+  mountPointFragments: ["css"],
+  critical: true,
+  cache,
+});
 
 const STARRY_NIGHT_FILE = "both";
 const STARRY_NIGHT_FILE_PATH = url.fileURLToPath(
   import.meta.resolve(`@wooorm/starry-night/style/${STARRY_NIGHT_FILE}`),
 );
+const starryNightCss = singleLightningCssPlugin({
+  inputFilepath: STARRY_NIGHT_FILE_PATH,
+  outputFilename: `${STARRY_NIGHT_FILE}.css`,
+  mountPointFragments: ["css", "starry-night"],
+  critical: true,
+  cache,
+});
 
-export async function makeSite(): Promise<
-  XenonExpressSite<SitemapPluginMetadata>
-> {
-  const cache = await createXenonCache({ callerUrl: import.meta.url });
-
-  const indexCss = singleLightningCssPlugin({
-    inputFilepath: INDEX_CSS_PATH,
-    outputFilename: "index.min.css",
-    mountPointFragments: ["css"],
-    critical: true,
-    cache,
-  });
-
-  const starryNightCss = singleLightningCssPlugin({
-    inputFilepath: STARRY_NIGHT_FILE_PATH,
-    outputFilename: `${STARRY_NIGHT_FILE}.css`,
-    mountPointFragments: ["css", "starry-night"],
-    critical: true,
-    cache,
-  });
-
-  const blogFeeds = feedsPlugin({
-    getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
-    homePagePathname: routeBlogArticleList.build({ page: null }),
-    mountPointFragments: ["blog"],
-    title: makeTitle(["Blog"], { disableReverse: true }),
-    description: BLOG_BLURB_DESCRIPTION,
-    authors: ({ baseUrl }) => [
-      {
-        name: MY_NAME,
-        url: baseUrl,
-      },
-    ],
-    content: {
-      html: "full",
-      text: "none",
+const blogFeeds = feedsPlugin({
+  getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
+  homePagePathname: routeBlogArticleList.build({ page: null }),
+  mountPointFragments: ["blog"],
+  title: makeTitle(["Blog"], { disableReverse: true }),
+  description: BLOG_BLURB_DESCRIPTION,
+  authors: ({ baseUrl }) => [
+    {
+      name: MY_NAME,
+      url: baseUrl,
     },
-    linkRelFormats: ["atom"],
-    sitemapFormats: ["atom"],
-  });
+  ],
+  content: {
+    html: "full",
+    text: "none",
+  },
+  linkRelFormats: ["atom"],
+  sitemapFormats: ["atom"],
+});
 
-  const timelineFeeds = feedsPlugin({
-    getItems: ({ baseUrl }) => getTimelineFeedSourceItems(baseUrl),
-    homePagePathname: routeTimelineList.build({ page: null }),
-    mountPointFragments: ["timeline"],
-    title: makeTitle(["Timeline"], { disableReverse: true }),
-    description: TIMELINE_BLURB_DESCRIPTION,
-    authors: ({ baseUrl }) => [
-      {
-        name: MY_NAME,
-        url: baseUrl,
-      },
-    ],
-    content: {
-      html: "full",
-      text: "full",
+const timelineFeeds = feedsPlugin({
+  getItems: ({ baseUrl }) => getTimelineFeedSourceItems(baseUrl),
+  homePagePathname: routeTimelineList.build({ page: null }),
+  mountPointFragments: ["timeline"],
+  title: makeTitle(["Timeline"], { disableReverse: true }),
+  description: TIMELINE_BLURB_DESCRIPTION,
+  authors: ({ baseUrl }) => [
+    {
+      name: MY_NAME,
+      url: baseUrl,
     },
-    linkRelFormats: ["atom"],
-    sitemapFormats: ["atom"],
-  });
+  ],
+  content: {
+    html: "full",
+    text: "full",
+  },
+  linkRelFormats: ["atom"],
+  sitemapFormats: ["atom"],
+});
 
-  const allFeeds = feedsPlugin({
-    getItems: async ({ baseUrl }) => {
-      const [blogItems, timelineItems] = await Promise.all([
-        getBlogFeedSourceItems(baseUrl),
-        getTimelineFeedSourceItems(baseUrl),
-      ]);
+const allFeeds = feedsPlugin({
+  getItems: async ({ baseUrl }) => {
+    const [blogItems, timelineItems] = await Promise.all([
+      getBlogFeedSourceItems(baseUrl),
+      getTimelineFeedSourceItems(baseUrl),
+    ]);
 
-      // Exclude implicit (blog-generated) timeline items from the aggregate
-      // feed since the blog posts are already included directly
-      const nonImplicitTimelineItems = timelineItems.filter(
-        (item) => !item.metadata?.implicit,
-      );
+    // Exclude implicit (blog-generated) timeline items from the aggregate
+    // feed since the blog posts are already included directly
+    const nonImplicitTimelineItems = timelineItems.filter(
+      (item) => !item.metadata?.implicit,
+    );
 
-      return [...blogItems, ...nonImplicitTimelineItems].sort((a, b) =>
-        compareInstants(b.datePublished, a.datePublished),
-      );
+    return [...blogItems, ...nonImplicitTimelineItems].sort((a, b) =>
+      compareInstants(b.datePublished, a.datePublished),
+    );
+  },
+  homePagePathname: routeHome.build({}),
+  mountPointFragments: [],
+  title: makeTitle(["All"], { disableReverse: true }),
+  description: SITE_SHORT_DESCRIPTION,
+  authors: ({ baseUrl }) => [
+    {
+      name: MY_NAME,
+      url: baseUrl,
     },
-    homePagePathname: routeHome.build({}),
-    mountPointFragments: [],
-    title: makeTitle(["All"], { disableReverse: true }),
-    description: SITE_SHORT_DESCRIPTION,
-    authors: ({ baseUrl }) => [
-      {
-        name: MY_NAME,
-        url: baseUrl,
-      },
-    ],
-    content: {
-      html: "full",
-      text: "none",
-    },
-    linkRelFormats: ["atom"],
-    sitemapFormats: ["atom"],
-  });
+  ],
+  content: {
+    html: "full",
+    text: "none",
+  },
+  linkRelFormats: ["atom"],
+  sitemapFormats: ["atom"],
+});
 
-  const sitemap = sitemapPlugin({
-    robotsTxtContent: await fs.readFile(
-      path.join(import.meta.dirname, "robots.txt"),
-      "utf-8",
-    ),
-    outputFilename: "sitemap.xml",
-    additionalPathnames: async () => [
-      ...(await allFeeds.getFeedSitemapPathnames()),
-      ...(await blogFeeds.getFeedSitemapPathnames()),
-      ...(await timelineFeeds.getFeedSitemapPathnames()),
-    ],
-  });
+const sitemap = sitemapPlugin({
+  robotsTxtContent: await fs.readFile(
+    path.join(import.meta.dirname, "robots.txt"),
+    "utf-8",
+  ),
+  outputFilename: "sitemap.xml",
+  additionalPathnames: async () => [
+    ...(await allFeeds.getFeedSitemapPathnames()),
+    ...(await blogFeeds.getFeedSitemapPathnames()),
+    ...(await timelineFeeds.getFeedSitemapPathnames()),
+  ],
+});
 
-  const favicon = faviconPlugin({
-    inputFilepath: path.join(import.meta.dirname, "favicon.svg"),
-    cache,
-    faviconOptions: {
-      appName: SITE_TITLE,
-      appShortName: SITE_TITLE,
-      appDescription: SITE_SHORT_DESCRIPTION,
-      developerName: MY_NAME,
-      developerURL: "https://alvaro.cuesta.dev",
-      background: "#13171f", // --pico-background-color
-      theme_color: "#8999f9", // --pico-color
-      display: "browser",
-      version,
-    },
-  });
+const favicon = faviconPlugin({
+  inputFilepath: path.join(import.meta.dirname, "favicon.svg"),
+  cache,
+  faviconOptions: {
+    appName: SITE_TITLE,
+    appShortName: SITE_TITLE,
+    appDescription: SITE_SHORT_DESCRIPTION,
+    developerName: MY_NAME,
+    developerURL: "https://alvaro.cuesta.dev",
+    background: "#13171f", // --pico-background-color
+    theme_color: "#8999f9", // --pico-color
+    display: "browser",
+    version,
+  },
+});
 
+const render = makeRender({
+  feedUrls: {
+    all: allFeeds.relativeUrls.atom,
+    blog: blogFeeds.relativeUrls.atom,
+    timeline: timelineFeeds.relativeUrls.atom,
+  },
+});
+
+export function makeSite(): XenonExpressSite<SitemapPluginMetadata> {
   return {
-    render: render({
-      feedUrls: {
-        all: allFeeds.relativeUrls.atom,
-        blog: blogFeeds.relativeUrls.atom,
-        timeline: timelineFeeds.relativeUrls.atom,
-      },
-    }),
+    render,
     renderToStreamOptions: RENDER_TO_STREAM_OPTIONS,
     plugins: [
       favicon,
