@@ -364,7 +364,12 @@ export function feedsPlugin<
               try {
                 const page = req.params["page"];
 
-                if (page === undefined) {
+                // Express 5 types `req.params[key]` as `string | string[]`
+                // (path-to-regexp v8 can return arrays for repeated match
+                // groups). This specific route has a single `:page` param
+                // so arrays are impossible in practice, but we narrow the
+                // type here to satisfy TypeScript and avoid a cast.
+                if (typeof page !== "string") {
                   next();
                   return;
                 }

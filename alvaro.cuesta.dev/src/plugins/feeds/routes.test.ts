@@ -36,9 +36,9 @@ describe("getFeedSitemapPathnames", () => {
 });
 
 describe("getPaginatedFeedFormatRoutePath", () => {
-  it("builds an explicit numeric page param route", () => {
+  it("builds a page param route", () => {
     expect(getPaginatedFeedFormatRoutePath(["blog"], "atom")).toEqual(
-      "/blog/atom-page:page(\\d+).xml",
+      "/blog/atom-page:page.xml",
     );
   });
 });
