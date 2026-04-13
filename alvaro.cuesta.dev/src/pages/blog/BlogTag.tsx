@@ -1,13 +1,13 @@
 import { BlogLayout } from "./components/BlogLayout";
-import { Template } from "../../Template";
-import { getBlogItems } from "../../../blog/promise";
+import { Template } from "../../components/Template";
+import { getBlogItems } from "../../blog/promise";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
-import type { SiteRenderMeta } from "../../../site";
-import { makeTitle } from "../../../utils/meta";
+import type { SiteRenderMeta } from "../../site";
+import { makeTitle } from "../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../../config";
+} from "../../../config";
 
 type BlogTagProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -36,11 +36,7 @@ export async function BlogTag({ siteRenderMeta, tag }: BlogTagProps) {
         openGraph: { type: "website" },
       }}
     >
-      <BlogLayout
-        blogItems={blogItems}
-        currentTags={[tag]}
-        isTagListCurrent
-      >
+      <BlogLayout blogItems={blogItems} currentTags={[tag]} isTagListCurrent>
         <h2>Blog tag "{tag}"</h2>
 
         <article>

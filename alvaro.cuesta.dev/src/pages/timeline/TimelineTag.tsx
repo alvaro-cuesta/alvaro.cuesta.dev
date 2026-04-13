@@ -1,16 +1,16 @@
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
-import { Template } from "../../Template";
-import { getTimelineItems } from "../../../timeline/promise";
-import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineTag } from "../../../routes";
-import { makeTitle } from "../../../utils/meta";
+import { Template } from "../../components/Template";
+import { getTimelineItems } from "../../timeline/promise";
+import type { SiteRenderMeta } from "../../site";
+import { routeTimelineTag } from "../../routes";
+import { makeTitle } from "../../utils/meta";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
-} from "../../../../config";
-import { Pagination } from "../../atoms/Pagination";
-import { paginateItems } from "../../../utils/pagination";
+} from "../../../config";
+import { Pagination } from "../../components/atoms/Pagination";
+import { paginateItems } from "../../utils/pagination";
 
 type TimelineTagProps = {
   siteRenderMeta: SiteRenderMeta;

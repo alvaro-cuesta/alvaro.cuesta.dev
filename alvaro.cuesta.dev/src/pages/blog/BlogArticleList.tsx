@@ -1,20 +1,20 @@
-import { Template } from "../../Template";
-import { Pagination } from "../../atoms/Pagination";
+import { Template } from "../../components/Template";
+import { Pagination } from "../../components/atoms/Pagination";
 import { BlogLayout } from "./components/BlogLayout";
-import { getBlogItems } from "../../../blog/promise";
+import { getBlogItems } from "../../blog/promise";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
-import type { SiteRenderMeta } from "../../../site";
+import type { SiteRenderMeta } from "../../site";
 import {
   routeBlogArticleList,
   routeTimelineList,
   routeNow,
-} from "../../../routes";
-import { makeTitle } from "../../../utils/meta";
+} from "../../routes";
+import { makeTitle } from "../../utils/meta";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../../config";
-import { Link } from "../../atoms/Link";
+} from "../../../config";
+import { Link } from "../../components/atoms/Link";
 
 type BlogArticleListProps = {
   siteRenderMeta: SiteRenderMeta;

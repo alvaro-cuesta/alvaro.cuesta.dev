@@ -20,7 +20,7 @@ import url from "node:url";
 import { faviconPlugin } from "xenon-ssg-express/src/plugins/favicon";
 import { version } from "../package.json" with { type: "json" };
 import type { PluginInjectableLink } from "xenon-ssg-express/src/plugins/plugins";
-import { Root } from "./components/Root";
+import { Root } from "./Root";
 import {
   sitemapPlugin,
   sitemapPluginKey,
@@ -120,18 +120,14 @@ const render =
       blogArticleListMatch.page > 1;
 
     // Timeline
-    const timelineListMatch = routeTimelineList.match(
-      siteRenderMeta.pathname,
-    );
+    const timelineListMatch = routeTimelineList.match(siteRenderMeta.pathname);
 
     const isTimelinePost = routeTimelinePost.match(siteRenderMeta.pathname);
     const isTimelineFrontpage =
       timelineListMatch !== null &&
       (timelineListMatch.page === null || timelineListMatch.page === 1);
     const timelineTagMatch = routeTimelineTag.match(siteRenderMeta.pathname);
-    const timelineYearMatch = routeTimelineYear.match(
-      siteRenderMeta.pathname,
-    );
+    const timelineYearMatch = routeTimelineYear.match(siteRenderMeta.pathname);
     const isTimelineGenericRoute =
       routeTimelineTagList.match(siteRenderMeta.pathname) ||
       (timelineTagMatch &&

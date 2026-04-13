@@ -1,14 +1,14 @@
-import { getTimelineItems } from "../../../timeline/promise";
-import { Template } from "../../Template";
+import { getTimelineItems } from "../../timeline/promise";
+import { Template } from "../../components/Template";
 import { TimelineLayout } from "./components/TimelineLayout";
-import { Link } from "../../atoms/Link";
-import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineYear } from "../../../routes";
+import { Link } from "../../components/atoms/Link";
+import type { SiteRenderMeta } from "../../site";
+import { routeTimelineYear } from "../../routes";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
-} from "../../../../config";
-import { makeTitle } from "../../../utils/meta";
+} from "../../../config";
+import { makeTitle } from "../../utils/meta";
 
 type TimelineYearListProps = {
   siteRenderMeta: SiteRenderMeta;

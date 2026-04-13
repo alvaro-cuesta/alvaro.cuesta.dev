@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
-import { ContentSidebar } from "../../../molecules/ContentSidebar";
-import type { AnalyzedItems } from "../../../../utils/analyze";
-import type { TimelineItemModuleParsed } from "../../../../timeline/item-module";
+import { ContentSidebar } from "../../../components/molecules/ContentSidebar";
+import type { AnalyzedItems } from "../../../utils/analyze";
+import type { TimelineItemModuleParsed } from "../../../timeline/item-module";
 import {
   routeTimelineTag,
   routeTimelineTagList,
   routeTimelineYear,
   routeTimelineYearList,
-} from "../../../../routes";
-import { ContentLayout } from "../../../molecules/ContentLayout";
+} from "../../../routes";
+import { ContentLayout } from "../../../components/molecules/ContentLayout";
 
 type TimelineLayoutProps = {
   timelineItems: AnalyzedItems<TimelineItemModuleParsed>;

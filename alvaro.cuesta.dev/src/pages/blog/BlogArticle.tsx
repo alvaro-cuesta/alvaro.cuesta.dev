@@ -1,19 +1,19 @@
-import { Template } from "../../Template";
-import { Link } from "../../atoms/Link";
+import { Template } from "../../components/Template";
+import { Link } from "../../components/atoms/Link";
 import { BlogLayout } from "./components/BlogLayout";
-import { getBlogItems } from "../../../blog/promise";
+import { getBlogItems } from "../../blog/promise";
 import React from "react";
 import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
   getBlogItemDateYear,
-} from "../../../utils/item-dates";
-import type { SiteRenderMeta } from "../../../site";
-import { BlogDateTime } from "../../atoms/BlogDateTime";
-import { Icon } from "../../atoms/Icon";
-import { routeBlogArticle, routeBlogTag } from "../../../routes";
-import { makeTitle } from "../../../utils/meta";
-import { MDX_DEFAULT_COMPONENTS } from "../../../mdx/mdx";
+} from "../../utils/item-dates";
+import type { SiteRenderMeta } from "../../site";
+import { BlogDateTime } from "../../components/atoms/BlogDateTime";
+import { Icon } from "../../components/atoms/Icon";
+import { routeBlogArticle, routeBlogTag } from "../../routes";
+import { makeTitle } from "../../utils/meta";
+import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;

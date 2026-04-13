@@ -1,16 +1,16 @@
-import { getTimelineItems } from "../../../timeline/promise";
-import { Template } from "../../Template";
+import { getTimelineItems } from "../../timeline/promise";
+import { Template } from "../../components/Template";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
-import type { SiteRenderMeta } from "../../../site";
-import { routeTimelineYear } from "../../../routes";
+import type { SiteRenderMeta } from "../../site";
+import { routeTimelineYear } from "../../routes";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
-} from "../../../../config";
-import { makeTitle } from "../../../utils/meta";
-import { Pagination } from "../../atoms/Pagination";
-import { paginateItems } from "../../../utils/pagination";
+} from "../../../config";
+import { makeTitle } from "../../utils/meta";
+import { Pagination } from "../../components/atoms/Pagination";
+import { paginateItems } from "../../utils/pagination";
 
 type TimelineYearProps = {
   siteRenderMeta: SiteRenderMeta;

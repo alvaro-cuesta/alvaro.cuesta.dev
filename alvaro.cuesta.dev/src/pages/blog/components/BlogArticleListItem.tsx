@@ -1,8 +1,8 @@
-import type { Item } from "../../../../utils/analyze";
-import type { BlogItemModuleParsed } from "../../../../blog/item-module";
-import { Link } from "../../../atoms/Link";
-import { BlogDateTime } from "../../../atoms/BlogDateTime";
-import { routeBlogArticle } from "../../../../routes";
+import type { Item } from "../../../utils/analyze";
+import type { BlogItemModuleParsed } from "../../../blog/item-module";
+import { Link } from "../../../components/atoms/Link";
+import { BlogDateTime } from "../../../components/atoms/BlogDateTime";
+import { routeBlogArticle } from "../../../routes";
 
 type BlogArticleListItemProps = {
   item: Item<BlogItemModuleParsed>;

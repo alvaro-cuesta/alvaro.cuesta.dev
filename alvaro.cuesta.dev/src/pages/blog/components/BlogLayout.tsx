@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
-import { ContentSidebar } from "../../../molecules/ContentSidebar";
-import type { AnalyzedItems } from "../../../../utils/analyze";
-import type { BlogItemModuleParsed } from "../../../../blog/item-module";
+import { ContentSidebar } from "../../../components/molecules/ContentSidebar";
+import type { AnalyzedItems } from "../../../utils/analyze";
+import type { BlogItemModuleParsed } from "../../../blog/item-module";
 import {
   routeBlogTag,
   routeBlogTagList,
   routeBlogYear,
   routeBlogYearList,
-} from "../../../../routes";
-import { ContentLayout } from "../../../molecules/ContentLayout";
+} from "../../../routes";
+import { ContentLayout } from "../../../components/molecules/ContentLayout";
 
 type BlogLayoutProps = {
   blogItems: AnalyzedItems<BlogItemModuleParsed>;

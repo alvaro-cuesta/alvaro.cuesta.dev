@@ -1,4 +1,4 @@
-import type { SiteRenderMeta } from "../site";
+import type { SiteRenderMeta } from "./site";
 import {
   route404,
   routeBlogArticle,
@@ -16,7 +16,7 @@ import {
   routeTimelineYearList,
   routeNow,
   routeBookmarks,
-} from "../routes";
+} from "./routes";
 import { BlogArticle } from "./pages/blog/BlogArticle";
 import { BlogArticleList } from "./pages/blog/BlogArticleList";
 import { BlogTag } from "./pages/blog/BlogTag";
@@ -31,7 +31,7 @@ import { TimelineTagList } from "./pages/timeline/TimelineTagList";
 import { TimelineYear } from "./pages/timeline/TimelineYear";
 import { TimelineYearList } from "./pages/timeline/TimelineYearList";
 import { NotFound } from "./pages/NotFound";
-import { makeMdxPage } from "./molecules/MdxPage";
+import { makeMdxPage } from "./components/molecules/MdxPage";
 
 const Now = makeMdxPage(import.meta.resolve("./pages/Now.mdx"));
 const Bookmarks = makeMdxPage(import.meta.resolve("./pages/Bookmarks.mdx"));

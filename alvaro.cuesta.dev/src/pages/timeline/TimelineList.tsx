@@ -1,20 +1,20 @@
-import { Template } from "../../Template";
-import { Pagination } from "../../atoms/Pagination";
-import { getTimelineItems } from "../../../timeline/promise";
-import type { SiteRenderMeta } from "../../../site";
+import { Template } from "../../components/Template";
+import { Pagination } from "../../components/atoms/Pagination";
+import { getTimelineItems } from "../../timeline/promise";
+import type { SiteRenderMeta } from "../../site";
 import {
   routeBlogArticleList,
   routeTimelineList,
   routeNow,
-} from "../../../routes";
-import { makeTitle } from "../../../utils/meta";
+} from "../../routes";
+import { makeTitle } from "../../utils/meta";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
-} from "../../../../config";
+} from "../../../config";
 import { TimelineLayout } from "./components/TimelineLayout";
 import { TimelinePostItem } from "./components/TimelinePostItem";
-import { Link } from "../../atoms/Link";
+import { Link } from "../../components/atoms/Link";
 
 type TimelineListProps = {
   siteRenderMeta: SiteRenderMeta;

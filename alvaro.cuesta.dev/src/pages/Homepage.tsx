@@ -1,14 +1,14 @@
 import { type ReactNode } from "react";
-import { Link } from "../atoms/Link";
-import { Icon } from "../atoms/Icon";
-import { Template } from "../Template";
-import type { SiteRenderMeta } from "../../site";
-import { makeTitle } from "../../utils/meta";
-import { routeNow } from "../../routes";
+import { Link } from "../components/atoms/Link";
+import { Icon } from "../components/atoms/Icon";
+import { Template } from "../components/Template";
+import type { SiteRenderMeta } from "../site";
+import { makeTitle } from "../utils/meta";
+import { routeNow } from "../routes";
 import {
   HOMEPAGE_BLURB_DESCRIPTION,
   HOMEPAGE_BLURB_SOCIAL_DESCRIPTION,
-} from "../../../config";
+} from "../../config";
 
 const WEB_PROGRAMMING_START_YEAR = 2009;
 

@@ -1,9 +1,9 @@
-import type { Item } from "../../../../utils/analyze";
-import type { TimelineItemModuleParsed } from "../../../../timeline/item-module";
-import { BlogDateTime } from "../../../atoms/BlogDateTime";
-import { Link } from "../../../atoms/Link";
-import { makeMdxDefaultComponents } from "../../../../mdx/mdx";
-import { routeTimelinePost } from "../../../../routes";
+import type { Item } from "../../../utils/analyze";
+import type { TimelineItemModuleParsed } from "../../../timeline/item-module";
+import { BlogDateTime } from "../../../components/atoms/BlogDateTime";
+import { Link } from "../../../components/atoms/Link";
+import { makeMdxDefaultComponents } from "../../../mdx/mdx";
+import { routeTimelinePost } from "../../../routes";
 
 const TIMELINE_MDX_COMPONENTS = makeMdxDefaultComponents({
   showDomain: true,

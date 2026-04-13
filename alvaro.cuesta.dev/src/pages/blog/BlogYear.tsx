@@ -1,14 +1,14 @@
-import { getBlogItems } from "../../../blog/promise";
-import { Template } from "../../Template";
+import { getBlogItems } from "../../blog/promise";
+import { Template } from "../../components/Template";
 import { BlogLayout } from "./components/BlogLayout";
 import { BlogArticleListItem } from "./components/BlogArticleListItem";
-import { type BlogItemMonth } from "../../../utils/item-dates";
-import type { SiteRenderMeta } from "../../../site";
+import { type BlogItemMonth } from "../../utils/item-dates";
+import type { SiteRenderMeta } from "../../site";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../../config";
-import { makeTitle } from "../../../utils/meta";
+} from "../../../config";
+import { makeTitle } from "../../utils/meta";
 
 type BlogYearProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -67,11 +67,7 @@ export async function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
         openGraph: { type: "website" },
       }}
     >
-      <BlogLayout
-        blogItems={blogItems}
-        currentYear={year}
-        isYearListCurrent
-      >
+      <BlogLayout blogItems={blogItems} currentYear={year} isYearListCurrent>
         <h2>Blog year {year}</h2>
 
         <article>
