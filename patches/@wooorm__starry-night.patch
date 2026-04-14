@@ -1,0 +1,14 @@
+diff --git a/index.js b/index.js
+index 25071de15c83df58cc0d6880a4aa61cf4413ff47..f2f62ebfe3097d8044c0e299a46431fb778422dc 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,8 @@
+ // Note: types exposed from `index.d.ts`.
+-export {grammars as all} from './lib/all.js'
++// Patched: the upstream `export {grammars as all} from './lib/all.js'` line
++// was removed because ESM re-exports are eager — merely importing anything
++// from this module evaluates `./lib/all.js` and pulls in hundreds of
++// grammar files (~630ms cold-boot cost). Consumers that need `all` must
++// import from a subpath instead.
+ export {grammars as common} from './lib/common.js'
+ export {createStarryNight} from './lib/index.js'

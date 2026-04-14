@@ -3,9 +3,16 @@ import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import rehypeStarryNight from "rehype-starry-night";
+// Explicit grammar composition: `common` (~34 grammars, includes `source.js`
+// which handles JSX) plus `source.tsx` for TypeScript+JSX code blocks.
+// Importing from the package root would normally also eager-evaluate
+// `./lib/all.js` (hundreds of unused grammars, ~630ms cold-boot cost), but
+// we ship a pnpm patch that strips that re-export — see
+// `patches/@wooorm__starry-night*.patch`.
+import { common as starryNightCommon } from "@wooorm/starry-night";
+import sourceTsx from "@wooorm/starry-night/source.tsx";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
-import { all } from "@wooorm/starry-night";
 import recmaPluginInjectisMDXComponent from "recma-mdx-is-mdx-component";
 import recmaInjectTocProp from "./recmaInjectTocProp.mts";
 import rehypeShiftHeading from "rehype-shift-heading";
@@ -22,7 +29,7 @@ const hooks = createLoader({
   },
   rehypePlugins: [
     rehypeKatex,
-    [rehypeStarryNight, { grammars: all }],
+    [rehypeStarryNight, { grammars: [...starryNightCommon, sourceTsx] }],
     [rehypeShiftHeading, { shift: 2 }],
     rehypeSlug,
     [
