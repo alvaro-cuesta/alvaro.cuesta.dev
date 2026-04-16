@@ -1,17 +1,17 @@
 import type { MDXContent } from "mdx/types";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
-import { parseTimelineItemFilename } from "./item-filename";
+import { parseTimelineItemFilename } from "./item-filename.ts";
 import {
   type BlogItemDate,
   type ItemModuleDate,
   blogItemDateToPlainDateTime,
   itemModuleDateToBlogItemDate,
   resolveLastModificationDate,
-} from "../utils/item-dates";
+} from "../utils/item-dates.ts";
 import {
   assertIsContentItemModule,
   assertOptionalStringArray,
-} from "../utils/item-module-assertions";
+} from "../utils/item-module-assertions.ts";
 
 type TimelineItemModule = NodeModule & {
   default: MDXContent;

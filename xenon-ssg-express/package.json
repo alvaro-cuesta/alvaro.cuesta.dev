@@ -4,7 +4,58 @@
   "type": "module",
   "version": "0.0.1",
   "description": "Express layer for Xenon SSG — a dead simple React Static-Site Generator.",
-  "main": "index.js",
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./build": {
+      "source": "./src/build.ts",
+      "default": "./dist/build.js",
+      "types": "./dist/build.d.ts"
+    },
+    "./cache": {
+      "source": "./src/cache.ts",
+      "default": "./dist/cache.js",
+      "types": "./dist/cache.d.ts"
+    },
+    "./dev": {
+      "source": "./src/dev.ts",
+      "default": "./dist/dev.js",
+      "types": "./dist/dev.d.ts"
+    },
+    "./plugins/favicon": {
+      "source": "./src/plugins/favicon.ts",
+      "default": "./dist/plugins/favicon.js",
+      "types": "./dist/plugins/favicon.d.ts"
+    },
+    "./plugins/plugins": {
+      "source": "./src/plugins/plugins.tsx",
+      "default": "./dist/plugins/plugins.js",
+      "types": "./dist/plugins/plugins.d.ts"
+    },
+    "./plugins/sitemap": {
+      "source": "./src/plugins/sitemap.ts",
+      "default": "./dist/plugins/sitemap.js",
+      "types": "./dist/plugins/sitemap.d.ts"
+    },
+    "./plugins/single-lightningcss": {
+      "source": "./src/plugins/single-lightningcss.ts",
+      "default": "./dist/plugins/single-lightningcss.js",
+      "types": "./dist/plugins/single-lightningcss.d.ts"
+    },
+    "./plugins/static-file": {
+      "source": "./src/plugins/static-file.ts",
+      "default": "./dist/plugins/static-file.js",
+      "types": "./dist/plugins/static-file.d.ts"
+    },
+    "./plugins/static-folder": {
+      "source": "./src/plugins/static-folder.ts",
+      "default": "./dist/plugins/static-folder.js",
+      "types": "./dist/plugins/static-folder.d.ts"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -39,6 +90,7 @@
     "@types/express": "catalog:",
     "@types/mock-fs": "^4.13.4",
     "@types/morgan": "^1.9.9",
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "mock-fs": "^5.5.0",
     "type-fest": "catalog:",

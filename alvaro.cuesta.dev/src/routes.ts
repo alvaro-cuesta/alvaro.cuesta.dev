@@ -1,4 +1,4 @@
-import { makeRoute } from "./utils/routes";
+import { makeRoute } from "./utils/routes.ts";
 
 // META PAGES
 export const route404 = makeRoute<{}>("/404.html");

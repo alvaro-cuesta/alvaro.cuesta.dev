@@ -1,9 +1,9 @@
-import { type RenderToStreamOptions, renderToStream } from "./render";
-import { canonicalizeHref } from "./url";
-import { Root } from "./Root";
+import { type RenderToStreamOptions, renderToStream } from "./render.ts";
+import { canonicalizeHref } from "./url.ts";
+import { Root } from "./Root.tsx";
 // TODO: Make this a generic middleware and not Express-specific (if such a thing exists)
 import type { Request, Response, NextFunction } from "express";
-import type { XenonRenderFunction } from ".";
+import type { XenonRenderFunction } from "./index.ts";
 import type { UnknownRecord } from "type-fest";
 
 const doNothing = () => {};

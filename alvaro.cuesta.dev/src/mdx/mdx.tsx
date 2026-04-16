@@ -1,15 +1,15 @@
 import type { MDXComponents } from "mdx/types";
-import { Link } from "../components/atoms/Link";
+import { Link } from "../components/atoms/Link.tsx";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import { BlogDateTime } from "../components/atoms/BlogDateTime";
+import { BlogDateTime } from "../components/atoms/BlogDateTime.tsx";
 import {
   TableOfContents,
   type TableOfContentsProps,
-} from "../components/molecules/TableOfContents";
-import { getBlogItems } from "../blog/promise";
-import { getTimelineItems } from "../timeline/promise";
-import { rewriteCustomProtocolHref } from "../utils/href";
-import { canonicalizeHref } from "xenon-ssg/src/url";
+} from "../components/molecules/TableOfContents.tsx";
+import { getBlogItems } from "../blog/promise.ts";
+import { getTimelineItems } from "../timeline/promise.ts";
+import { rewriteCustomProtocolHref } from "../utils/href.ts";
+import { canonicalizeHref } from "xenon-ssg/url";
 
 type MdxAnchorProps = ComponentPropsWithoutRef<"a">;
 

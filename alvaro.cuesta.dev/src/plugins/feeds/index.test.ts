@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { feedsPlugin } from "./index";
+import { feedsPlugin } from "./index.ts";
 
 describe("getFeedSitemapPathnames", () => {
   beforeEach(() => {

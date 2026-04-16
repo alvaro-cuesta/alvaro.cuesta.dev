@@ -1,14 +1,14 @@
-import { getBlogItems } from "../../blog/promise";
-import { Template } from "../../components/Template";
-import { BlogLayout } from "./components/BlogLayout";
-import { Link } from "../../components/atoms/Link";
-import type { SiteRenderMeta } from "../../site";
-import { routeBlogYear } from "../../routes";
+import { getBlogItems } from "../../blog/promise.ts";
+import { Template } from "../../components/Template.tsx";
+import { BlogLayout } from "./components/BlogLayout.tsx";
+import { Link } from "../../components/atoms/Link.tsx";
+import type { SiteRenderMeta } from "../../site.tsx";
+import { routeBlogYear } from "../../routes.ts";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
-import { makeTitle } from "../../utils/meta";
+} from "../../../config.ts";
+import { makeTitle } from "../../utils/meta.ts";
 
 type BlogYearListProps = {
   siteRenderMeta: SiteRenderMeta;

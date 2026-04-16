@@ -4,7 +4,7 @@ import {
   getBlogItemDateYear,
   type BlogItemDate,
   type BlogItemMonth,
-} from "./item-dates";
+} from "./item-dates.ts";
 
 export type Item<TModuleParsed> = {
   filename: string;

@@ -1,7 +1,7 @@
 import { create } from "xmlbuilder2";
-import { instantToUtcIso8601 } from "./dates";
-import { FEED_FORMATS, getRouteUrl } from "./routes";
-import type { FeedAuthor, FeedItem, FeedPage } from "./types";
+import { instantToUtcIso8601 } from "./dates.ts";
+import { FEED_FORMATS, getRouteUrl } from "./routes.ts";
+import type { FeedAuthor, FeedItem, FeedPage } from "./types.ts";
 
 type AtomTextType = "text" | "html" | "xhtml";
 

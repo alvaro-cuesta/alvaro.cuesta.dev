@@ -1,8 +1,8 @@
-import type { RenderToStreamOptions } from "xenon-ssg/src/render";
-import type { PluginInjectableTag, Plugin } from "./plugins/plugins";
+import type { RenderToStreamOptions } from "xenon-ssg/render";
+import type { PluginInjectableTag, Plugin } from "./plugins/plugins.tsx";
 import type { ReactNode } from "react";
-import { DEFAULT_DEV_PORT } from "./dev";
-import type { XenonRenderFunction } from "xenon-ssg/src";
+import { DEFAULT_DEV_PORT } from "./dev.ts";
+import type { XenonRenderFunction } from "xenon-ssg";
 import type { UnknownRecord } from "type-fest";
 
 export type XenonExpressSiteMeta = {

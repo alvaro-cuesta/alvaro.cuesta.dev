@@ -1,5 +1,5 @@
-import { Icon } from "./Icon";
-import { Link } from "./Link";
+import { Icon } from "./Icon.tsx";
+import { Link } from "./Link.tsx";
 
 type PaginationProps = {
   prevPageLink: string | null;

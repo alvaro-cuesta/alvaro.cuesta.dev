@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getGitLastModifiedDate, getGitWatchPaths } from "./git";
-import { cachedPromise } from "xenon-ssg/src/promise";
-import { watchInDev } from "xenon-ssg/src/watch";
+import { getGitLastModifiedDate, getGitWatchPaths } from "./git.ts";
+import { cachedPromise } from "xenon-ssg/promise";
+import { watchInDev } from "xenon-ssg/watch";
 import {
   analyzeItems,
   type AnalyzedItems,
   type AnalyzeItemsOptions,
-} from "./analyze";
-import type { ItemModuleDate } from "./item-dates";
+} from "./analyze.ts";
+import type { ItemModuleDate } from "./item-dates.ts";
 
 type InferredMetadata = {
   lastModificationDate: ItemModuleDate | null;

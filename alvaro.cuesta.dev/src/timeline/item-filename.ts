@@ -1,5 +1,5 @@
 import { Temporal } from "temporal-polyfill";
-import type { BlogItemDate } from "../utils/item-dates";
+import type { BlogItemDate } from "../utils/item-dates.ts";
 
 const FILENAME_REGEX =
   /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})_(?<hour>\d{2})-(?<minute>\d{2})\.mdx?$/;

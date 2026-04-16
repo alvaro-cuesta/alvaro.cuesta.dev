@@ -10,17 +10,17 @@ import type {
   Plugin,
   PluginGetInjectableFunction,
   PluginBuildPreFunction,
-} from "./plugins";
+} from "./plugins.tsx";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { cachedPromise } from "xenon-ssg/src/promise";
-import { watchInDev } from "xenon-ssg/src/watch";
+import { cachedPromise } from "xenon-ssg/promise";
+import { watchInDev } from "xenon-ssg/watch";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
-} from "../cache-busting";
-import { getContentHash } from "../crypto";
-import type { XenonCache } from "../cache";
+} from "../cache-busting.ts";
+import { getContentHash } from "../crypto.ts";
+import type { XenonCache } from "../cache.ts";
 
 const LINK_REGEX =
   /<link\s+rel="(?<rel>.+?)"\s+(?:type="(?<type>.+?)"\s+)?(?:sizes="(?<sizes>.+?)"\s+)?(?:media="(?<media>.+?)"\s+)?href="(?<href>.+?)">/;

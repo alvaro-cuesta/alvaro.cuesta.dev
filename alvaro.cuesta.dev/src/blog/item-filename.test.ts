@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Temporal } from "temporal-polyfill";
-import { parseBlogItemFilename } from "./item-filename";
+import { parseBlogItemFilename } from "./item-filename.ts";
 
 const MEANINGLESS_DATE_STRING = "2000-01-01-00-00-00";
 

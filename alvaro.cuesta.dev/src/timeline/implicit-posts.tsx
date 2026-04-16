@@ -1,11 +1,11 @@
 import type { ElementType } from "react";
 import type { MDXContent } from "mdx/types";
-import type { Item } from "../utils/analyze";
-import type { BlogItemModuleParsed } from "../blog/item-module";
+import type { Item } from "../utils/analyze.ts";
+import type { BlogItemModuleParsed } from "../blog/item-module.ts";
 import {
   type TimelineItemModuleParsed,
   timelineSlugFromDate,
-} from "./item-module";
+} from "./item-module.ts";
 
 const PREFIXES = [
   "New blog post!",

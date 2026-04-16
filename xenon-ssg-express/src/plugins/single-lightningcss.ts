@@ -6,11 +6,11 @@ import type {
   PluginAttachToExpressFunction,
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
-} from "./plugins";
+} from "./plugins.tsx";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
-} from "../cache-busting";
+} from "../cache-busting.ts";
 
 type SingleLightningCssPluginOptions = {
   inputFilepath: string;

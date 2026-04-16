@@ -1,20 +1,20 @@
-import { Template } from "../../components/Template";
-import { Pagination } from "../../components/atoms/Pagination";
-import { BlogLayout } from "./components/BlogLayout";
-import { getBlogItems } from "../../blog/promise";
-import { BlogArticleListItem } from "./components/BlogArticleListItem";
-import type { SiteRenderMeta } from "../../site";
+import { Template } from "../../components/Template.tsx";
+import { Pagination } from "../../components/atoms/Pagination.tsx";
+import { BlogLayout } from "./components/BlogLayout.tsx";
+import { getBlogItems } from "../../blog/promise.ts";
+import { BlogArticleListItem } from "./components/BlogArticleListItem.tsx";
+import type { SiteRenderMeta } from "../../site.tsx";
 import {
   routeBlogArticleList,
   routeTimelineList,
   routeNow,
-} from "../../routes";
-import { makeTitle } from "../../utils/meta";
+} from "../../routes.ts";
+import { makeTitle } from "../../utils/meta.ts";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
-import { Link } from "../../components/atoms/Link";
+} from "../../../config.ts";
+import { Link } from "../../components/atoms/Link.tsx";
 
 type BlogArticleListProps = {
   siteRenderMeta: SiteRenderMeta;

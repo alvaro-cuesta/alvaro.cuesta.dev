@@ -1,7 +1,7 @@
 import type { Express } from "express";
-import type { XenonExpressSiteMeta } from "..";
+import type { XenonExpressSiteMeta } from "../index.tsx";
 import type { ReactNode } from "react";
-import type { XenonGeneratedPage } from "xenon-ssg/src/generate/generate";
+import type { XenonGeneratedPage } from "xenon-ssg/generate/generate";
 import type { UnknownRecord } from "type-fest";
 
 export type PluginAttachToExpressFunction = (app: Express) => void;

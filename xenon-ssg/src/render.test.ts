@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { StripReactComments } from "./render";
+import { StripReactComments } from "./render.ts";
 
 const strip = async (chunks: string[]): Promise<string> => {
   const input = Readable.from(chunks);

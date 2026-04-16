@@ -1,14 +1,14 @@
-import { getBlogItems } from "../../blog/promise";
-import { BlogLayout } from "./components/BlogLayout";
-import { Template } from "../../components/Template";
-import { Link } from "../../components/atoms/Link";
-import type { SiteRenderMeta } from "../../site";
-import { routeBlogTag } from "../../routes";
-import { makeTitle } from "../../utils/meta";
+import { getBlogItems } from "../../blog/promise.ts";
+import { BlogLayout } from "./components/BlogLayout.tsx";
+import { Template } from "../../components/Template.tsx";
+import { Link } from "../../components/atoms/Link.tsx";
+import type { SiteRenderMeta } from "../../site.tsx";
+import { routeBlogTag } from "../../routes.ts";
+import { makeTitle } from "../../utils/meta.ts";
 import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
-} from "../../../config";
+} from "../../../config.ts";
 
 type BlogTagListProps = {
   siteRenderMeta: SiteRenderMeta;

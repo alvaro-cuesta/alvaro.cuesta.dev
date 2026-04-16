@@ -4,7 +4,48 @@
   "type": "module",
   "version": "0.0.1",
   "description": "A dead simple React Static-Site Generator.",
-  "main": "index.js",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./render": {
+      "source": "./src/render.ts",
+      "default": "./dist/render.js",
+      "types": "./dist/render.d.ts"
+    },
+    "./url": {
+      "source": "./src/url.ts",
+      "default": "./dist/url.js",
+      "types": "./dist/url.d.ts"
+    },
+    "./promise": {
+      "source": "./src/promise.ts",
+      "default": "./dist/promise.js",
+      "types": "./dist/promise.d.ts"
+    },
+    "./watch": {
+      "source": "./src/watch.ts",
+      "default": "./dist/watch.js",
+      "types": "./dist/watch.d.ts"
+    },
+    "./middleware": {
+      "source": "./src/middleware.tsx",
+      "default": "./dist/middleware.js",
+      "types": "./dist/middleware.d.ts"
+    },
+    "./generate/Link": {
+      "source": "./src/generate/Link.tsx",
+      "default": "./dist/generate/Link.js",
+      "types": "./dist/generate/Link.d.ts"
+    },
+    "./generate/generate": {
+      "source": "./src/generate/generate.tsx",
+      "default": "./dist/generate/generate.js",
+      "types": "./dist/generate/generate.d.ts"
+    }
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest"
@@ -32,7 +73,7 @@
   },
   "devDependencies": {
     "@types/express": "catalog:",
-    "@types/node": "^25.6.0",
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "type-fest": "catalog:",

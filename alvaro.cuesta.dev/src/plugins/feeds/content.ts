@@ -1,6 +1,6 @@
-import { htmlToPlainText } from "../../utils/html";
-import { compareInstants } from "./dates";
-import { getFeedFormatRoute, toAbsoluteUrl } from "./routes";
+import { htmlToPlainText } from "../../utils/html.ts";
+import { compareInstants } from "./dates.ts";
+import { getFeedFormatRoute, toAbsoluteUrl } from "./routes.ts";
 import type {
   FeedAuthor,
   FeedContentOptions,
@@ -8,7 +8,7 @@ import type {
   FeedPage,
   FeedPageRoutes,
   FeedSourceItem,
-} from "./types";
+} from "./types.ts";
 
 const chunk = <T>(items: T[], size: number): T[][] => {
   const pages: T[][] = [];

@@ -1,4 +1,4 @@
-import { getContentHash, getFileHash } from "./crypto";
+import { getContentHash, getFileHash } from "./crypto.ts";
 
 const CACHE_BUSTING_FRAGMENT_ENCODING = "base64url";
 const CACHE_BUSTING_FRAGMENT_LENGTH = 8;

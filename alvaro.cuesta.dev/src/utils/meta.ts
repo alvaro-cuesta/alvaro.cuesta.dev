@@ -1,4 +1,4 @@
-import { SITE_TITLE } from "../../config";
+import { SITE_TITLE } from "../../config.ts";
 
 const SEPARATOR = " | ";
 

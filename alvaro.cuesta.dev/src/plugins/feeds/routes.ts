@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { FeedFormat, FeedFormatRoute } from "./types";
+import type { FeedFormat, FeedFormatRoute } from "./types.ts";
 
 export const DEFAULT_MOUNT_POINT_FRAGMENTS: string[] = [];
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getFeedSitemapPathnames,
   getPaginatedFeedFormatRoutePath,
-} from "./routes";
+} from "./routes.ts";
 
 describe("getFeedSitemapPathnames", () => {
   it("includes discoverable formats for every feed archive page", () => {

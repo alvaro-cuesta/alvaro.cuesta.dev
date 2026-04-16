@@ -1,19 +1,19 @@
-import { Template } from "../../components/Template";
-import { Link } from "../../components/atoms/Link";
-import { BlogLayout } from "./components/BlogLayout";
-import { getBlogItems } from "../../blog/promise";
+import { Template } from "../../components/Template.tsx";
+import { Link } from "../../components/atoms/Link.tsx";
+import { BlogLayout } from "./components/BlogLayout.tsx";
+import { getBlogItems } from "../../blog/promise.ts";
 import React from "react";
 import {
   blogItemDateToUTCISO8601Z,
   equalsBlogItemDates,
   getBlogItemDateYear,
-} from "../../utils/item-dates";
-import type { SiteRenderMeta } from "../../site";
-import { BlogDateTime } from "../../components/atoms/BlogDateTime";
-import { Icon } from "../../components/atoms/Icon";
-import { routeBlogArticle, routeBlogTag } from "../../routes";
-import { makeTitle } from "../../utils/meta";
-import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
+} from "../../utils/item-dates.ts";
+import type { SiteRenderMeta } from "../../site.tsx";
+import { BlogDateTime } from "../../components/atoms/BlogDateTime.tsx";
+import { Icon } from "../../components/atoms/Icon.tsx";
+import { routeBlogArticle, routeBlogTag } from "../../routes.ts";
+import { makeTitle } from "../../utils/meta.ts";
+import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;

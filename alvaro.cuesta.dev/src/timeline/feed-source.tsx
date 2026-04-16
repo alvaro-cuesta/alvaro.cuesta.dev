@@ -1,11 +1,11 @@
-import { getTimelineItems } from "./promise";
-import { routeTimelinePost } from "../routes";
-import { htmlToPlainText } from "../utils/html";
+import { getTimelineItems } from "./promise.ts";
+import { routeTimelinePost } from "../routes.ts";
+import { htmlToPlainText } from "../utils/html.ts";
 import {
   renderContentItemHtml,
   buildFeedSourceItem,
   createFeedSource,
-} from "../utils/feed-source";
+} from "../utils/feed-source.tsx";
 
 const EXCERPT_LENGTH = 40;
 

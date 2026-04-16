@@ -5,11 +5,11 @@ import type {
   Plugin,
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
-} from "./plugins";
+} from "./plugins.tsx";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentFile,
-} from "../cache-busting";
+} from "../cache-busting.ts";
 
 type StaticFilePluginOptions = {
   inputFilepath: string;

@@ -1,10 +1,10 @@
-import { Template } from "../components/Template";
-import type { SiteRenderMeta } from "../site";
-import { makeTitle } from "../utils/meta";
+import { Template } from "../components/Template.tsx";
+import type { SiteRenderMeta } from "../site.tsx";
+import { makeTitle } from "../utils/meta.ts";
 import {
   HOMEPAGE_BLURB_DESCRIPTION,
   HOMEPAGE_BLURB_SOCIAL_DESCRIPTION,
-} from "../../config";
+} from "../../config.ts";
 
 type NotFoundProps = {
   siteRenderMeta: SiteRenderMeta;

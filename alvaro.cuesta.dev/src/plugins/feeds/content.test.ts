@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Temporal } from "temporal-polyfill";
-import { compileFeedPageModels } from "./content";
+import { compileFeedPageModels } from "./content.ts";
 
 describe("compileFeedPageModels", () => {
   it("skips rendering when full content is disabled", async () => {

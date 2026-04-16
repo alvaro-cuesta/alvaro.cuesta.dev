@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { Temporal } from "temporal-polyfill";
-import { serializeAtomDocument } from "./atom";
-import { serializeJsonDocuments } from "./jsonfeed";
-import { serializeRssDocument } from "./rss";
-import type { FeedPage } from "./types";
+import { serializeAtomDocument } from "./atom.ts";
+import { serializeJsonDocuments } from "./jsonfeed.ts";
+import { serializeRssDocument } from "./rss.ts";
+import type { FeedPage } from "./types.ts";
 
 const routes = {
   jsonfeed: {

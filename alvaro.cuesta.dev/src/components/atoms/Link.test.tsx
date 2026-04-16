@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractText, isLinkTextRedundant } from "./Link";
+import { extractText, isLinkTextRedundant } from "./Link.tsx";
 
 describe("extractText", () => {
   it("returns empty string for null, undefined, and booleans", () => {

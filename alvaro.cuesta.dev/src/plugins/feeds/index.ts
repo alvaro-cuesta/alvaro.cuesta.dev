@@ -8,10 +8,10 @@ import type {
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
   PluginInjectableTag,
-} from "xenon-ssg-express/src/plugins/plugins";
-import { serializeAtomDocument } from "./atom";
-import { compileFeedPageModels } from "./content";
-import { serializeJsonDocuments } from "./jsonfeed";
+} from "xenon-ssg-express/plugins/plugins";
+import { serializeAtomDocument } from "./atom.ts";
+import { compileFeedPageModels } from "./content.ts";
+import { serializeJsonDocuments } from "./jsonfeed.ts";
 import {
   ALL_FEED_FORMATS,
   DEFAULT_MOUNT_POINT_FRAGMENTS,
@@ -20,15 +20,15 @@ import {
   getPaginatedFeedFormatRoutePath,
   getFeedSitemapPathnames as getFeedSitemapPathnamesForTotalPages,
   toAbsoluteUrl,
-} from "./routes";
-import { serializeRssDocument } from "./rss";
+} from "./routes.ts";
+import { serializeRssDocument } from "./rss.ts";
 import type {
   FeedFormat,
   FeedPage,
   FeedContentOptions,
   FeedAuthor,
   FeedSourceItem,
-} from "./types";
+} from "./types.ts";
 
 const DEFAULT_LANGUAGE = "en";
 const DEFAULT_ITEMS_PER_PAGE = 10;

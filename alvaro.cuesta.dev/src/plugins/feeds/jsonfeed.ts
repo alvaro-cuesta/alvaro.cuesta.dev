@@ -1,6 +1,6 @@
-import { getRouteUrl } from "./routes";
-import { instantToUtcIso8601 } from "./dates";
-import type { FeedFormatRoute, FeedItem, FeedPage } from "./types";
+import { getRouteUrl } from "./routes.ts";
+import { instantToUtcIso8601 } from "./dates.ts";
+import type { FeedFormatRoute, FeedItem, FeedPage } from "./types.ts";
 
 type JsonFeedExtensionMap = {
   [k in `_${string}`]?: unknown;

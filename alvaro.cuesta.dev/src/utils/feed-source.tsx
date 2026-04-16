@@ -1,10 +1,10 @@
 import React from "react";
-import { makeMdxDefaultComponents } from "../mdx/mdx";
-import { blogItemDateToTemporalInstant, type BlogItemDate } from "./item-dates";
-import type { FeedSourceItem } from "../plugins/feeds/types";
-import { renderToString } from "xenon-ssg/src/render";
+import { makeMdxDefaultComponents } from "../mdx/mdx.tsx";
+import { blogItemDateToTemporalInstant, type BlogItemDate } from "./item-dates.ts";
+import type { FeedSourceItem } from "../plugins/feeds/types.ts";
+import { renderToString } from "xenon-ssg/render";
 import type { MDXContent } from "mdx/types";
-import type { AnalyzedItems, Item } from "./analyze";
+import type { AnalyzedItems, Item } from "./analyze.ts";
 
 type RenderContentItemHtmlOptions = {
   baseUrl: string;

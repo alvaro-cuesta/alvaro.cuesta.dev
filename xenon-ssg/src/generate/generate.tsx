@@ -1,10 +1,10 @@
-import { type RenderToStreamOptions, renderToFileAtomic } from "../render";
+import { type RenderToStreamOptions, renderToFileAtomic } from "../render.ts";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { mapIter } from "../iter";
-import { canonicalizeHref } from "../url";
-import { Root } from "../Root";
-import type { XenonRenderFunction } from "..";
+import { mapIter } from "../iter.ts";
+import { canonicalizeHref } from "../url.ts";
+import { Root } from "../Root.tsx";
+import type { XenonRenderFunction } from "../index.ts";
 import type { UnknownRecord } from "type-fest";
 
 const FAKE_BASE_URL =

@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { LinkProvider, type LinkProviderProps } from "./generate/LinkContext";
+import { LinkProvider, type LinkProviderProps } from "./generate/LinkContext.tsx";
 
 type RootProps = {
   children: ReactNode;

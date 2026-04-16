@@ -1,8 +1,8 @@
 import express, { type Express } from "express";
-import { makeXenonMiddleware } from "xenon-ssg/src/middleware";
+import { makeXenonMiddleware } from "xenon-ssg/middleware";
 import morgan from "morgan";
-import { type XenonExpressSite, getSiteMeta } from ".";
-import { getTagsFromInjectableRaw } from "./plugins/plugins";
+import { type XenonExpressSite, getSiteMeta } from "./index.tsx";
+import { getTagsFromInjectableRaw } from "./plugins/plugins.tsx";
 import type { UnknownRecord } from "type-fest";
 
 export const DEFAULT_DEV_PORT = 31337;

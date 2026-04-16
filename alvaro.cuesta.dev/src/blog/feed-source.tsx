@@ -1,10 +1,10 @@
-import { getBlogItems } from "./promise";
-import { routeBlogArticle } from "../routes";
+import { getBlogItems } from "./promise.ts";
+import { routeBlogArticle } from "../routes.ts";
 import {
   renderContentItemHtml,
   buildFeedSourceItem,
   createFeedSource,
-} from "../utils/feed-source";
+} from "../utils/feed-source.tsx";
 
 export const getBlogFeedSourceItems = createFeedSource(
   getBlogItems,

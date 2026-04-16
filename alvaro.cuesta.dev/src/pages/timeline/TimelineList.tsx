@@ -1,20 +1,20 @@
-import { Template } from "../../components/Template";
-import { Pagination } from "../../components/atoms/Pagination";
-import { getTimelineItems } from "../../timeline/promise";
-import type { SiteRenderMeta } from "../../site";
+import { Template } from "../../components/Template.tsx";
+import { Pagination } from "../../components/atoms/Pagination.tsx";
+import { getTimelineItems } from "../../timeline/promise.ts";
+import type { SiteRenderMeta } from "../../site.tsx";
 import {
   routeBlogArticleList,
   routeTimelineList,
   routeNow,
-} from "../../routes";
-import { makeTitle } from "../../utils/meta";
+} from "../../routes.ts";
+import { makeTitle } from "../../utils/meta.ts";
 import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
-} from "../../../config";
-import { TimelineLayout } from "./components/TimelineLayout";
-import { TimelinePostItem } from "./components/TimelinePostItem";
-import { Link } from "../../components/atoms/Link";
+} from "../../../config.ts";
+import { TimelineLayout } from "./components/TimelineLayout.tsx";
+import { TimelinePostItem } from "./components/TimelinePostItem.tsx";
+import { Link } from "../../components/atoms/Link.tsx";
 
 type TimelineListProps = {
   siteRenderMeta: SiteRenderMeta;

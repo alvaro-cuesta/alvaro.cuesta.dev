@@ -3,13 +3,13 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
-import { Link as XenonLink } from "xenon-ssg/src/generate/Link";
-import { canonicalizeHref } from "xenon-ssg/src/url";
+import { Link as XenonLink } from "xenon-ssg/generate/Link";
+import { canonicalizeHref } from "xenon-ssg/url";
 import { getDomain, parse } from "tldts";
-import { Icon } from "./Icon";
-import { getBlogItems } from "../../blog/promise";
-import { getTimelineItems } from "../../timeline/promise";
-import { rewriteCustomProtocolHref } from "../../utils/href";
+import { Icon } from "./Icon.tsx";
+import { getBlogItems } from "../../blog/promise.ts";
+import { getTimelineItems } from "../../timeline/promise.ts";
+import { rewriteCustomProtocolHref } from "../../utils/href.ts";
 
 export function extractText(node: ReactNode): string {
   if (node === null || node === undefined || typeof node === "boolean") {

@@ -5,7 +5,7 @@ import type {
   Plugin,
   PluginAttachToExpressFunction,
   PluginBuildPreFunction,
-} from "./plugins";
+} from "./plugins.tsx";
 
 type StaticFolderPluginOptions = {
   inputFolder: string;

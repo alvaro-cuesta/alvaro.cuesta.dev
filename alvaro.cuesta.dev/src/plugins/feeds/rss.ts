@@ -1,7 +1,7 @@
 import { create } from "xmlbuilder2";
-import { instantToRfc822 } from "./dates";
-import { FEED_FORMATS, getRouteUrl } from "./routes";
-import type { FeedItem, FeedPage } from "./types";
+import { instantToRfc822 } from "./dates.ts";
+import { FEED_FORMATS, getRouteUrl } from "./routes.ts";
+import type { FeedItem, FeedPage } from "./types.ts";
 
 type RssAtomLink = {
   href: string;

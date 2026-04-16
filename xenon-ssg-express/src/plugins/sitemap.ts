@@ -7,7 +7,7 @@ import type {
   PluginBuildPreFunction,
   PluginBuildPostFunction,
   PluginGetInjectableFunction,
-} from "./plugins";
+} from "./plugins.tsx";
 import type { Temporal } from "temporal-polyfill";
 
 type SitemapPluginOptions = {

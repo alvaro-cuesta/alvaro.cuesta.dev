@@ -7,7 +7,7 @@ import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
-} from "./sitemap";
+} from "./sitemap.ts";
 
 describe("sitemapPlugin", () => {
   afterEach(() => {

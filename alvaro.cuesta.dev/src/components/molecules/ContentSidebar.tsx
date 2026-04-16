@@ -1,6 +1,6 @@
 import cx from "classnames";
-import { Link } from "../atoms/Link";
-import { CANONICAL_TAGS } from "../../../config";
+import { Link } from "../atoms/Link.tsx";
+import { CANONICAL_TAGS } from "../../../config.ts";
 
 type ContentSidebarProps = {
   className: string;

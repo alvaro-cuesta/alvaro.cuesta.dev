@@ -1,19 +1,19 @@
 import type { MDXContent } from "mdx/types";
-import { parseBlogItemFilename } from "./item-filename";
+import { parseBlogItemFilename } from "./item-filename.ts";
 import {
   type BlogItemDate,
   type ItemModuleDate,
   itemModuleDateToBlogItemDate,
   resolveLastModificationDate,
-} from "../utils/item-dates";
-import { CANONICAL_TAGS } from "../../config";
+} from "../utils/item-dates.ts";
+import { CANONICAL_TAGS } from "../../config.ts";
 import {
   assertIsContentItemModule,
   assertOptionalString,
   assertOptionalStringArray,
-} from "../utils/item-module-assertions";
+} from "../utils/item-module-assertions.ts";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
-import { VALID_SLUG_REGEX } from "../utils/slug";
+import { VALID_SLUG_REGEX } from "../utils/slug.ts";
 
 type BlogItemModule = NodeModule & {
   // The default export of the MDX file

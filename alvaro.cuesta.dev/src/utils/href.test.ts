@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { AnalyzedItems } from "./analyze";
-import type { BlogItemModuleParsed } from "../blog/item-module";
-import type { TimelineItemModuleParsed } from "../timeline/item-module";
-import { rewriteCustomProtocolHref } from "./href";
+import type { AnalyzedItems } from "./analyze.ts";
+import type { BlogItemModuleParsed } from "../blog/item-module.ts";
+import type { TimelineItemModuleParsed } from "../timeline/item-module.ts";
+import { rewriteCustomProtocolHref } from "./href.ts";
 
 const blogItems: AnalyzedItems<BlogItemModuleParsed> = {
   all: [],

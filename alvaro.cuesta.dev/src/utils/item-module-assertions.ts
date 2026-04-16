@@ -1,5 +1,5 @@
 import type { MDXContent } from "mdx/types";
-import { isItemModuleDate, type ItemModuleDate } from "./item-dates";
+import { isItemModuleDate, type ItemModuleDate } from "./item-dates.ts";
 
 const getField = (module: NodeModule, field: string): unknown =>
   (module as unknown as Record<string, unknown>)[field];

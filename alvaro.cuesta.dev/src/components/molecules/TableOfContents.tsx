@@ -1,6 +1,6 @@
 import cx from "classnames";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
-import { Link } from "../atoms/Link";
+import { Link } from "../atoms/Link.tsx";
 
 type TableOfContentsWrapperProps = {
   className: string;
