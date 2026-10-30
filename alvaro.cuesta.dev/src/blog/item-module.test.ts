@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, expect, it } from "vitest";
-import type { MDXContent } from "mdx/types";
+import type { MDXContent } from "mdx/types.js";
 import { Temporal } from "temporal-polyfill";
 import { dateToBlogItemDate } from "../utils/item-dates.ts";
 import { parseBlogItemModuleFromImportModule } from "./item-module.ts";

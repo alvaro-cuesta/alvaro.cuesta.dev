@@ -1,5 +1,5 @@
 import type { ElementType } from "react";
-import type { MDXContent } from "mdx/types";
+import type { MDXContent } from "mdx/types.js";
 import type { Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
 import {

@@ -1,5 +1,5 @@
 import url from "node:url";
-import type { MDXContent } from "mdx/types";
+import type { MDXContent } from "mdx/types.js";
 import { Template } from "../Template.tsx";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { makeTitle } from "../../utils/meta.ts";

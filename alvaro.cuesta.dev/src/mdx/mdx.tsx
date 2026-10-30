@@ -1,4 +1,4 @@
-import type { MDXComponents } from "mdx/types";
+import type { MDXComponents } from "mdx/types.js";
 import { Link } from "../components/atoms/Link.tsx";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import { BlogDateTime } from "../components/atoms/BlogDateTime.tsx";

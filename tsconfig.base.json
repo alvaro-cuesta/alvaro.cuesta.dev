@@ -12,12 +12,6 @@
     /* Modules */
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    // `@types/mdx` ships no `exports` field, so under `nodenext` the
-    // `mdx/types` subpath import can't be resolved. Map it to the real
-    // file; `${configDir}` makes it resolve per-project under pnpm.
-    "paths": {
-      "mdx/types": ["${configDir}/node_modules/@types/mdx/types.d.ts"]
-    },
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,

@@ -1,6 +1,6 @@
 declare module "*.mdx" {
   import React from "react";
-  import type { MDXComponents } from "mdx/types";
+  import type { MDXComponents } from "mdx/types.js";
 
   type MDXComponentProps = {
     components?: MDXComponents;
