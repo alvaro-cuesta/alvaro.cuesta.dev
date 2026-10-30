@@ -282,8 +282,9 @@ blockquote {
   padding: 0 var(--pico-spacing);
 }
 
-/* Pico's card look (its `article` rule). Keep in sync with Pico. */
-.series {
+/* Pico's card look (its `article` rule), for boxes that aren't articles, like asides. Keep in
+ * sync with Pico. */
+.card {
   margin-bottom: var(--pico-block-spacing-vertical);
   padding: var(--pico-block-spacing-vertical)
     var(--pico-block-spacing-horizontal);
@@ -410,7 +411,7 @@ figure:has(> pre) {
 
 @media (max-width: 575.99999px) {
   article,
-  .series {
+  .card {
     margin: 0 calc(var(--pico-block-spacing-horizontal) * -1)
       var(--pico-block-spacing-vertical);
   }

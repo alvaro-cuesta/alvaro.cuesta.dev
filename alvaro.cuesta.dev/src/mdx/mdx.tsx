@@ -1,11 +1,6 @@
 import type { MDXComponents } from "mdx/types.js";
 import { Link } from "../components/atoms/Link.tsx";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import { BlogDateTime } from "../components/atoms/BlogDateTime.tsx";
-import {
-  TableOfContents,
-  type TableOfContentsProps,
-} from "../components/molecules/TableOfContents.tsx";
 import { getBlogItems } from "../blog/promise.ts";
 import { getTimelineItems } from "../timeline/promise.ts";
 import { rewriteCustomProtocolHref } from "../utils/href.ts";
@@ -18,8 +13,6 @@ export type HashtagProps = {
   href?: string | undefined;
   children: React.ReactNode;
 };
-
-const DEFAULT_TOC_PERMALINK_ID = "toc";
 
 type MakeMdxDefaultComponentsOptions = {
   /**
@@ -34,18 +27,12 @@ type MakeMdxDefaultComponentsOptions = {
   showDomain?: boolean;
   renderAnchor?: (props: MdxAnchorProps) => ReactElement;
   renderHashtag?: (props: HashtagProps) => ReactElement;
-  /**
-   * When true, the `TableOfContents` MDX component renders nothing.
-   * The TOC data is auto-injected by the `recmaInjectTocProp` plugin.
-   */
-  suppressTableOfContents?: boolean;
 };
 
 export const makeMdxDefaultComponents = ({
   canonicalizeBaseUrl,
   showDomain,
   renderAnchor = (props) => <Link showDomain={showDomain} {...props} />,
-  suppressTableOfContents = false,
   renderHashtag = ({ tag, children }) => {
     const tagName =
       tag ?? (typeof children === "string" ? children : undefined);
@@ -103,14 +90,6 @@ export const makeMdxDefaultComponents = ({
     : function MdxHashtag(props: HashtagProps) {
         return renderHashtag(props);
       },
-  BlogDateTime(props: ComponentPropsWithoutRef<typeof BlogDateTime>) {
-    return <BlogDateTime {...props} />;
-  },
-  TableOfContents: suppressTableOfContents
-    ? () => null
-    : (props: TableOfContentsProps) => (
-        <TableOfContents id={DEFAULT_TOC_PERMALINK_ID} {...props} />
-      ),
 });
 
 export const MDX_DEFAULT_COMPONENTS = makeMdxDefaultComponents();

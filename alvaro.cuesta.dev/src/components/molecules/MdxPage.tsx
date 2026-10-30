@@ -1,9 +1,11 @@
 import url from "node:url";
 import type { MDXContent } from "mdx/types.js";
+import type { Toc } from "@stefanprobst/rehype-extract-toc";
 import { Template } from "../Template.tsx";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
+import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { getGitFileDates } from "../../utils/git.ts";
 import { cachedPromise } from "xenon-ssg/promise";
 import { watchInDev } from "xenon-ssg/watch";
@@ -15,6 +17,7 @@ type MdxPageModule = {
   default: MDXContent;
   title: string | undefined;
   description: string | undefined;
+  tableOfContents: Toc;
 };
 
 type MdxPageProps = {
@@ -56,7 +59,12 @@ export function makeMdxPage(contentFileUrl: string) {
 
   return async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const {
-      module: { default: Content, title, description },
+      module: {
+        default: Content,
+        title,
+        description,
+        tableOfContents,
+      },
       gitDates,
     } = await page.get();
 
@@ -89,10 +97,17 @@ export function makeMdxPage(contentFileUrl: string) {
       >
         <h2>{title}</h2>
         <section>
-          <Content
-            components={MDX_DEFAULT_COMPONENTS}
-            lastModified={instantToBlogItemDate(lastUpdated)}
-          />
+          <MdxRenderContext
+            value={{
+              pathname: siteRenderMeta.pathname,
+              tableOfContents,
+            }}
+          >
+            <Content
+              components={MDX_DEFAULT_COMPONENTS}
+              lastModified={instantToBlogItemDate(lastUpdated)}
+            />
+          </MdxRenderContext>
         </section>
       </Template>
     );

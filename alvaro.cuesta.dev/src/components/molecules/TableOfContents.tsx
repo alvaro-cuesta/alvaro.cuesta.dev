@@ -1,6 +1,10 @@
+import { use } from "react";
 import cx from "classnames";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
 import { Link } from "../atoms/Link.tsx";
+import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
+
+const DEFAULT_PERMALINK_ID = "toc";
 
 type TableOfContentsWrapperProps = {
   className: string;
@@ -8,20 +12,42 @@ type TableOfContentsWrapperProps = {
 };
 
 export type TableOfContentsProps = {
-  tableOfContents: Toc;
   id?: string | undefined;
   maxDepth?: number | undefined;
-  Wrapper: React.ElementType<TableOfContentsWrapperProps>;
+  Wrapper?: React.ElementType<TableOfContentsWrapperProps>;
 };
 
+/**
+ * Table of contents of the MDX content it's rendered in, taken from
+ * `MdxRenderContext`. Renders nothing where there is none (e.g. in feeds).
+ *
+ * Meant to be imported from MDX:
+ *
+ * ```mdx
+ * import { TableOfContents } from "#components/molecules/TableOfContents";
+ *
+ * <TableOfContents maxDepth={1} />
+ * ```
+ */
 export function TableOfContents({
-  tableOfContents,
-  id,
+  id = DEFAULT_PERMALINK_ID,
   maxDepth,
-  Wrapper = "article",
+  Wrapper = "aside",
 }: TableOfContentsProps) {
+  const renderContext = use(MdxRenderContext);
+
+  if (!renderContext) {
+    throw new Error("`<TableOfContents>` must be rendered inside MDX content");
+  }
+
+  const { tableOfContents } = renderContext;
+
+  if (tableOfContents === undefined) {
+    return null;
+  }
+
   return (
-    <Wrapper className={cx("toc-section")}>
+    <Wrapper className={cx("card", "toc-section")}>
       {/* Make sure this matches `rehypeAutolinkHeadings` */}
       <h3 id={id} className="autolink-heading">
         Table of contents

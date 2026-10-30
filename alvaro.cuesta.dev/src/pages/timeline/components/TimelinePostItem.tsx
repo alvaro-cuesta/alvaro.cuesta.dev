@@ -4,6 +4,7 @@ import { BlogDateTime } from "../../../components/atoms/BlogDateTime.tsx";
 import { Link } from "../../../components/atoms/Link.tsx";
 import { makeMdxDefaultComponents } from "../../../mdx/mdx.tsx";
 import { routeTimelinePost } from "../../../routes.ts";
+import { MdxRenderContext } from "../../../mdx/MdxRenderContext.tsx";
 
 const TIMELINE_MDX_COMPONENTS = makeMdxDefaultComponents({
   showDomain: true,
@@ -15,14 +16,26 @@ type TimelinePostItemProps = {
 
 export function TimelinePostItem({
   item: {
-    module: { Component, slug, publicationDate, lastModificationDate, draft },
+    module: {
+      Component,
+      slug,
+      publicationDate,
+      lastModificationDate,
+      draft,
+      tableOfContents,
+    },
   },
 }: TimelinePostItemProps) {
   const permalink = routeTimelinePost.build({ slug });
 
   return (
     <article className="timeline-post-item">
-      <Component components={TIMELINE_MDX_COMPONENTS} />
+      <MdxRenderContext value={{
+        pathname: permalink,
+        tableOfContents,
+      }}>
+        <Component components={TIMELINE_MDX_COMPONENTS} />
+      </MdxRenderContext>
       <footer className="flex-space-between">
         <small>
           <Link href={permalink}>

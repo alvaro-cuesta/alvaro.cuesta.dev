@@ -138,7 +138,12 @@ export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
           </header>
 
           <section>
-            <MdxRenderContext value={{ pathname: articlePath }}>
+            <MdxRenderContext
+              value={{
+                pathname: articlePath,
+                tableOfContents: article.module.tableOfContents,
+              }}
+            >
               <article.module.Component components={MDX_DEFAULT_COMPONENTS} />
             </MdxRenderContext>
           </section>

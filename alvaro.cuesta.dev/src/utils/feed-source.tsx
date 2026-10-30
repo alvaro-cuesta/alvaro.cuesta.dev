@@ -27,7 +27,6 @@ export function renderContentItemHtml({
       <Component
         components={makeMdxDefaultComponents({
           canonicalizeBaseUrl: url,
-          suppressTableOfContents: true,
           renderAnchor: (props) => <a {...props} />,
           renderHashtag: ({ href, children }) => <a href={href}>#{children}</a>,
         })}

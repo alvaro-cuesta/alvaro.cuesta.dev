@@ -84,7 +84,7 @@ async function SeriesInner({
     );
 
   return (
-    <aside className="series">
+    <aside className="card">
       <p>
         <Icon name="layer-group" aria-hidden />{" "}
         <strong>
