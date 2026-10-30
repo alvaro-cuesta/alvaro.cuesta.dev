@@ -12,7 +12,7 @@ import {
   oComplete,
   cBetween,
   cMany,
-} from "../utils/parsers.mjs";
+} from "../utils/parsers.mts";
 import type { Code } from "mdast";
 
 // Parsers for meta

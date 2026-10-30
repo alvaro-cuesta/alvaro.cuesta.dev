@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseMeta } from "./remarkParseCodeMeta.mjs";
+import { parseMeta } from "./remarkParseCodeMeta.mts";
 
 describe("parseMeta", () => {
   it("parses simple key-value pairs", () => {
