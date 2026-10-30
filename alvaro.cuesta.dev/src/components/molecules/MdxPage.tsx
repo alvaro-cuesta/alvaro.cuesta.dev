@@ -4,7 +4,7 @@ import { Template } from "../Template.tsx";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
-import { getGitLastModifiedDate } from "../../utils/git.ts";
+import { getGitFileDates } from "../../utils/git.ts";
 import { cachedPromise } from "xenon-ssg/promise";
 import { watchInDev } from "xenon-ssg/watch";
 import { Temporal } from "temporal-polyfill";
@@ -37,12 +37,12 @@ export function makeMdxPage(contentFileUrl: string) {
       const importUrl = isDev
         ? `${contentFileUrl}?${Date.now()}`
         : contentFileUrl;
-      const [module, lastModified] = await Promise.all([
+      const [module, gitDates] = await Promise.all([
         import(importUrl) as Promise<MdxPageModule>,
-        getGitLastModifiedDate(SITE_ROOT_FOLDER, filePath),
+        getGitFileDates(SITE_ROOT_FOLDER, filePath),
       ]);
 
-      return { module, lastModified };
+      return { module, gitDates };
     },
     {
       lazy: true,
@@ -57,7 +57,7 @@ export function makeMdxPage(contentFileUrl: string) {
   return async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const {
       module: { default: Content, title, description },
-      lastModified,
+      gitDates,
     } = await page.get();
 
     if (title === undefined) {
@@ -71,7 +71,10 @@ export function makeMdxPage(contentFileUrl: string) {
       );
     }
 
-    const effectiveLastModified = lastModified ?? Temporal.Now.instant();
+    // A page that was never edited was last updated when it was created. No git history means it isn't committed
+    // yet, i.e. it's being written right now.
+    const lastUpdated =
+      gitDates?.lastModifiedAt ?? gitDates?.createdAt ?? Temporal.Now.instant();
 
     return (
       <Template
@@ -88,7 +91,7 @@ export function makeMdxPage(contentFileUrl: string) {
         <section>
           <Content
             components={MDX_DEFAULT_COMPONENTS}
-            lastModified={instantToBlogItemDate(effectiveLastModified)}
+            lastModified={instantToBlogItemDate(lastUpdated)}
           />
         </section>
       </Template>

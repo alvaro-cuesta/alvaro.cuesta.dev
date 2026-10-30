@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Temporal } from "temporal-polyfill";
-import { getGitLastModifiedDate } from "./git.ts";
+import { getGitFileDates, getGitLastModifiedDate } from "./git.ts";
 
 let repo: string;
 
@@ -41,16 +41,45 @@ const commit = async (
 
 const CONTENT = "line\n".repeat(20);
 
+beforeEach(async () => {
+  repo = await fs.mkdtemp(path.join(os.tmpdir(), "git-dates-"));
+  git(["init", "--quiet"], "2026-01-01T00:00:00Z");
+});
+
+afterEach(async () => {
+  await fs.rm(repo, { recursive: true, force: true });
+});
+
+describe("getGitFileDates", () => {
+  it("returns the creation date of a file that was only added", async () => {
+    await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
+
+    expect(await getGitFileDates(repo, "a.mdx")).toEqual({
+      createdAt: Temporal.Instant.from("2026-01-01T00:00:00Z"),
+      lastModifiedAt: null,
+    });
+  });
+
+  it("follows renames back to the creation date", async () => {
+    await commit("2026-01-01T00:00:00Z", { "old/a.mdx": CONTENT });
+    await commit("2026-01-02T00:00:00Z", { "old/a.mdx": CONTENT + "edit\n" });
+    await commit("2026-01-03T00:00:00Z", {}, [["old/a.mdx", "new/a.mdx"]]);
+
+    expect(await getGitFileDates(repo, "new/a.mdx")).toEqual({
+      createdAt: Temporal.Instant.from("2026-01-01T00:00:00Z"),
+      lastModifiedAt: Temporal.Instant.from("2026-01-02T00:00:00Z"),
+    });
+  });
+
+  it("returns null for an untracked file", async () => {
+    await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
+    await fs.writeFile(path.join(repo, "new.mdx"), CONTENT);
+
+    expect(await getGitFileDates(repo, "new.mdx")).toBeNull();
+  });
+});
+
 describe("getGitLastModifiedDate", () => {
-  beforeEach(async () => {
-    repo = await fs.mkdtemp(path.join(os.tmpdir(), "git-last-modified-"));
-    git(["init", "--quiet"], "2026-01-01T00:00:00Z");
-  });
-
-  afterEach(async () => {
-    await fs.rm(repo, { recursive: true, force: true });
-  });
-
   it("returns null for a file that was only added", async () => {
     await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
 

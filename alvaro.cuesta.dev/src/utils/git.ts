@@ -20,14 +20,28 @@ const runGitCommand = async (
 
 const COMMIT_LINE_PREFIX = "commit ";
 
+const parseGitDate = (iso8601: string): Temporal.Instant | null =>
+  Number.isNaN(new Date(iso8601).getTime())
+    ? null
+    : Temporal.Instant.from(iso8601);
+
+export type GitFileDates = {
+  /** Date of the oldest commit touching the file, following renames. */
+  createdAt: Temporal.Instant;
+  /**
+   * Date of the most recent commit that changed the file's content, or `null` if it was never modified after being
+   * added. Pure renames (`R100`) don't count as modifications.
+   */
+  lastModifiedAt: Temporal.Instant | null;
+};
+
 /**
- * Date of the most recent commit that changed the file's content, following renames. Returns `null` if the file was
- * never modified after being added. Pure renames (`R100`) don't count as modifications.
+ * Returns `null` if the file has no git history (e.g. it isn't committed yet).
  */
-export const getGitLastModifiedDate = async (
+export const getGitFileDates = async (
   repoRootPath: string,
   repoRelativeFilePath: string,
-): Promise<Temporal.Instant | null> => {
+): Promise<GitFileDates | null> => {
   // Newest first. Each commit prints `commit <date>` followed by a tab-separated `--name-status` line such as
   // `M <path>` or `R100 <old> <new>`. Merge commits print no status line.
   const log = await runGitCommand(
@@ -47,6 +61,7 @@ export const getGitLastModifiedDate = async (
   }
 
   let commitDate: string | null = null;
+  let lastModifiedDate: string | null = null;
   for (const line of log.split("\n")) {
     if (line.startsWith(COMMIT_LINE_PREFIX)) {
       commitDate = line.slice(COMMIT_LINE_PREFIX.length);
@@ -54,18 +69,35 @@ export const getGitLastModifiedDate = async (
     }
 
     const status = line.split("\t")[0];
-    if (!status || commitDate === null || status === "A" || status === "R100") {
-      continue;
+    if (
+      lastModifiedDate === null &&
+      status &&
+      status !== "A" &&
+      status !== "R100"
+    ) {
+      lastModifiedDate = commitDate;
     }
-
-    const date = new Date(commitDate);
-    return Number.isNaN(date.getTime())
-      ? null
-      : Temporal.Instant.from(commitDate);
   }
 
-  return null;
+  // After the loop `commitDate` holds the oldest commit.
+  const createdAt = commitDate === null ? null : parseGitDate(commitDate);
+  if (createdAt === null) {
+    return null;
+  }
+
+  return {
+    createdAt,
+    lastModifiedAt:
+      lastModifiedDate === null ? null : parseGitDate(lastModifiedDate),
+  };
 };
+
+export const getGitLastModifiedDate = async (
+  repoRootPath: string,
+  repoRelativeFilePath: string,
+): Promise<Temporal.Instant | null> =>
+  (await getGitFileDates(repoRootPath, repoRelativeFilePath))?.lastModifiedAt ??
+  null;
 
 export const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
   const headPath = await runGitCommand(
