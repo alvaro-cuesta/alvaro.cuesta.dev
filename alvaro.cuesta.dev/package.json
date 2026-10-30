@@ -68,7 +68,7 @@
     "@types/unist": "^3.0.3",
     "cross-env": "^10.1.0",
     "serve": "^14.2.4",
-    "tsx": "^4.21.0",
+    "tsx": "^4.23.15",
     "vitest": "catalog:"
   }
 }
