@@ -1,14 +1,14 @@
 import url from "node:url";
 import type { MDXContent } from "mdx/types";
-import { Template } from "../Template";
-import type { SiteRenderMeta } from "../../site";
-import { makeTitle } from "../../utils/meta";
-import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
-import { getGitLastModifiedDate } from "../../utils/git";
+import { Template } from "../Template.tsx";
+import type { SiteRenderMeta } from "../../site.tsx";
+import { makeTitle } from "../../utils/meta.ts";
+import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
+import { getGitLastModifiedDate } from "../../utils/git.ts";
 import { cachedPromise } from "xenon-ssg/promise";
 import { watchInDev } from "xenon-ssg/watch";
 import { Temporal } from "temporal-polyfill";
-import { instantToBlogItemDate } from "../../utils/item-dates";
+import { instantToBlogItemDate } from "../../utils/item-dates.ts";
 
 type MdxPageModule = {
   default: MDXContent;

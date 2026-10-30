@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { version as packageVersion } from "../../../package.json" with { type: "json" };
+import pkg from "../../../package.json" with { type: "json" };
+const packageVersion = pkg.version;
 import type {
   Plugin,
   PluginAttachToExpressFunction,

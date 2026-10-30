@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import mock from "mock-fs";
 import { afterEach, describe, expect, it } from "vitest";
-import type { XenonExpressSiteMeta } from "..";
+import type { XenonExpressSiteMeta } from "../index.tsx";
 import {
   sitemapPlugin,
   sitemapPluginKey,

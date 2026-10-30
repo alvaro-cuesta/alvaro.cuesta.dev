@@ -11,7 +11,7 @@
     "dev": "cross-env NODE_ENV=development NODE_OPTIONS=--conditions=source tsx watch --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint:tsc": "tsc --noEmit"
+    "lint:tsc": "tsc -b ../tsconfig.json"
   },
   "repository": {
     "type": "git",

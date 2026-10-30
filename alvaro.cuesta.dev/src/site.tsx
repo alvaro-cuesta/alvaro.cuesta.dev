@@ -11,7 +11,7 @@ import {
   RENDER_TO_STREAM_OPTIONS,
   SITE_SHORT_DESCRIPTION,
   SITE_TITLE,
-} from "../config";
+} from "../config.ts";
 import { staticFilePlugin } from "xenon-ssg-express/plugins/static-file";
 import { staticFolderPlugin } from "xenon-ssg-express/plugins/static-folder";
 import { singleLightningCssPlugin } from "xenon-ssg-express/plugins/single-lightningcss";
@@ -19,9 +19,10 @@ import path from "node:path";
 import url from "node:url";
 import { faviconPlugin } from "xenon-ssg-express/plugins/favicon";
 import { createXenonCache } from "xenon-ssg-express/cache";
-import { version } from "../package.json" with { type: "json" };
+import pkg from "../package.json" with { type: "json" };
+const version = pkg.version;
 import type { PluginInjectableLink } from "xenon-ssg-express/plugins/plugins";
-import { Root } from "./Root";
+import { Root } from "./Root.tsx";
 import {
   sitemapPlugin,
   sitemapPluginKey,
@@ -43,12 +44,12 @@ import {
   routeTimelineYear,
   routeTimelineYearList,
   routeNow,
-} from "./routes";
-import { feedsPlugin } from "./plugins/feeds";
-import { compareInstants } from "./plugins/feeds/dates";
-import { getBlogFeedSourceItems } from "./blog/feed-source";
-import { getTimelineFeedSourceItems } from "./timeline/feed-source";
-import { makeTitle } from "./utils/meta";
+} from "./routes.ts";
+import { feedsPlugin } from "./plugins/feeds/index.ts";
+import { compareInstants } from "./plugins/feeds/dates.ts";
+import { getBlogFeedSourceItems } from "./blog/feed-source.tsx";
+import { getTimelineFeedSourceItems } from "./timeline/feed-source.tsx";
+import { makeTitle } from "./utils/meta.ts";
 
 export type SiteFeedUrls = {
   all: string;

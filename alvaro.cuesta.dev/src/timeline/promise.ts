@@ -1,11 +1,11 @@
 import path from "node:path";
-import { parseTimelineItemModuleFromImportModule } from "./item-module";
-import type { TimelineItemModuleParsed } from "./item-module";
-import { createContentLoader } from "../utils/content-loader";
-import { getBlogItems } from "../blog/promise";
-import { blogItemToImplicitTimelineItem } from "./implicit-posts";
-import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze";
-import type { BlogItemModuleParsed } from "../blog/item-module";
+import { parseTimelineItemModuleFromImportModule } from "./item-module.ts";
+import type { TimelineItemModuleParsed } from "./item-module.ts";
+import { createContentLoader } from "../utils/content-loader.ts";
+import { getBlogItems } from "../blog/promise.ts";
+import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
+import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
+import type { BlogItemModuleParsed } from "../blog/item-module.ts";
 
 const getRawTimelineItems = createContentLoader({
   siteRootPath: path.join(import.meta.dirname, "..", ".."),

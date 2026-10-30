@@ -1,6 +1,6 @@
 import path from "node:path";
-import { parseBlogItemModuleFromImportModule } from "./item-module";
-import { createContentLoader } from "../utils/content-loader";
+import { parseBlogItemModuleFromImportModule } from "./item-module.ts";
+import { createContentLoader } from "../utils/content-loader.ts";
 
 const UNCATEGORIZED_TAG = "uncategorized";
 

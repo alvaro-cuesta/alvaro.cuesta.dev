@@ -1,4 +1,4 @@
-import type { SiteRenderMeta } from "./site";
+import type { SiteRenderMeta } from "./site.tsx";
 import {
   route404,
   routeBlogArticle,
@@ -16,22 +16,22 @@ import {
   routeTimelineYearList,
   routeNow,
   routeBookmarks,
-} from "./routes";
-import { BlogArticle } from "./pages/blog/BlogArticle";
-import { BlogArticleList } from "./pages/blog/BlogArticleList";
-import { BlogTag } from "./pages/blog/BlogTag";
-import { BlogTagList } from "./pages/blog/BlogTagsList";
-import { BlogYear } from "./pages/blog/BlogYear";
-import { BlogYearList } from "./pages/blog/BlogYearList";
-import { Homepage } from "./pages/Homepage";
-import { TimelinePostPage } from "./pages/timeline/TimelinePost";
-import { TimelineList } from "./pages/timeline/TimelineList";
-import { TimelineTag } from "./pages/timeline/TimelineTag";
-import { TimelineTagList } from "./pages/timeline/TimelineTagList";
-import { TimelineYear } from "./pages/timeline/TimelineYear";
-import { TimelineYearList } from "./pages/timeline/TimelineYearList";
-import { NotFound } from "./pages/NotFound";
-import { makeMdxPage } from "./components/molecules/MdxPage";
+} from "./routes.ts";
+import { BlogArticle } from "./pages/blog/BlogArticle.tsx";
+import { BlogArticleList } from "./pages/blog/BlogArticleList.tsx";
+import { BlogTag } from "./pages/blog/BlogTag.tsx";
+import { BlogTagList } from "./pages/blog/BlogTagsList.tsx";
+import { BlogYear } from "./pages/blog/BlogYear.tsx";
+import { BlogYearList } from "./pages/blog/BlogYearList.tsx";
+import { Homepage } from "./pages/Homepage.tsx";
+import { TimelinePostPage } from "./pages/timeline/TimelinePost.tsx";
+import { TimelineList } from "./pages/timeline/TimelineList.tsx";
+import { TimelineTag } from "./pages/timeline/TimelineTag.tsx";
+import { TimelineTagList } from "./pages/timeline/TimelineTagList.tsx";
+import { TimelineYear } from "./pages/timeline/TimelineYear.tsx";
+import { TimelineYearList } from "./pages/timeline/TimelineYearList.tsx";
+import { NotFound } from "./pages/NotFound.tsx";
+import { makeMdxPage } from "./components/molecules/MdxPage.tsx";
 
 const Now = makeMdxPage(import.meta.resolve("./pages/Now.mdx"));
 const Bookmarks = makeMdxPage(import.meta.resolve("./pages/Bookmarks.mdx"));
