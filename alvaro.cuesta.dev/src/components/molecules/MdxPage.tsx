@@ -9,6 +9,7 @@ import { cachedPromise } from "xenon-ssg/promise";
 import { watchInDev } from "xenon-ssg/watch";
 import { Temporal } from "temporal-polyfill";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
+import { SITE_ROOT_FOLDER } from "../../../config.ts";
 
 type MdxPageModule = {
   default: MDXContent;
@@ -38,10 +39,7 @@ export function makeMdxPage(contentFileUrl: string) {
         : contentFileUrl;
       const [module, lastModified] = await Promise.all([
         import(importUrl) as Promise<MdxPageModule>,
-        getGitLastModifiedDate(
-          url.fileURLToPath(import.meta.resolve("../../")),
-          filePath,
-        ),
+        getGitLastModifiedDate(SITE_ROOT_FOLDER, filePath),
       ]);
 
       return { module, lastModified };

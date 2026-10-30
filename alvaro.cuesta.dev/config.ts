@@ -1,7 +1,10 @@
 import type { RenderToStreamOptions } from "xenon-ssg/render";
 import path from "node:path";
 
-export const OUTPUT_FOLDER = path.join(import.meta.dirname, "dist");
+/** Root folder of the site package. Resolve site files (content, assets) from here. */
+export const SITE_ROOT_FOLDER = import.meta.dirname;
+
+export const OUTPUT_FOLDER = path.join(SITE_ROOT_FOLDER, "dist");
 
 export const DEV_PORT = 3000;
 

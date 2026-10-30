@@ -1,16 +1,20 @@
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { parseTimelineItemModuleFromImportModule } from "./item-module.ts";
 import type { TimelineItemModuleParsed } from "./item-module.ts";
 import { createContentLoader } from "../utils/content-loader.ts";
+import { SITE_ROOT_FOLDER } from "../../config.ts";
 import { getBlogItems } from "../blog/promise.ts";
 import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
 
+const TIMELINE_FOLDER = path.join(SITE_ROOT_FOLDER, "timeline");
+
 const getRawTimelineItems = createContentLoader({
-  siteRootPath: path.join(import.meta.dirname, "..", ".."),
-  contentFolderPath: path.join(import.meta.dirname, "..", "..", "timeline"),
-  contentFolderUrl: new URL("../../timeline/", import.meta.url),
+  siteRootPath: SITE_ROOT_FOLDER,
+  contentFolderPath: TIMELINE_FOLDER,
+  contentFolderUrl: pathToFileURL(TIMELINE_FOLDER + path.sep),
   parseModule: parseTimelineItemModuleFromImportModule,
   analyzeOptions: {
     getSlug: (item) => item.module.slug,
