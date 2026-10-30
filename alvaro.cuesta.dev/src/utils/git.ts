@@ -18,34 +18,53 @@ const runGitCommand = async (
   });
 };
 
+const COMMIT_LINE_PREFIX = "commit ";
+
+/**
+ * Date of the most recent commit that changed the file's content, following renames. Returns `null` if the file was
+ * never modified after being added. Pure renames (`R100`) don't count as modifications.
+ */
 export const getGitLastModifiedDate = async (
   repoRootPath: string,
   repoRelativeFilePath: string,
 ): Promise<Temporal.Instant | null> => {
-  const commitCount = await runGitCommand(
-    ["rev-list", "--count", "HEAD", "--", repoRelativeFilePath],
+  // Newest first. Each commit prints `commit <date>` followed by a tab-separated `--name-status` line such as
+  // `M <path>` or `R100 <old> <new>`. Merge commits print no status line.
+  const log = await runGitCommand(
+    [
+      "log",
+      "--follow",
+      "--name-status",
+      `--format=${COMMIT_LINE_PREFIX}%cI`,
+      "--",
+      repoRelativeFilePath,
+    ],
     repoRootPath,
   );
 
-  if (commitCount === null || parseInt(commitCount, 10) <= 1) {
+  if (log === null) {
     return null;
   }
 
-  const lastModifiedAtIso8601 = await runGitCommand(
-    ["log", "-1", "--follow", "--format=%cI", "--", repoRelativeFilePath],
-    repoRootPath,
-  );
+  let commitDate: string | null = null;
+  for (const line of log.split("\n")) {
+    if (line.startsWith(COMMIT_LINE_PREFIX)) {
+      commitDate = line.slice(COMMIT_LINE_PREFIX.length);
+      continue;
+    }
 
-  if (lastModifiedAtIso8601 === null) {
-    return null;
+    const status = line.split("\t")[0];
+    if (!status || commitDate === null || status === "A" || status === "R100") {
+      continue;
+    }
+
+    const date = new Date(commitDate);
+    return Number.isNaN(date.getTime())
+      ? null
+      : Temporal.Instant.from(commitDate);
   }
 
-  const date = new Date(lastModifiedAtIso8601);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return Temporal.Instant.from(lastModifiedAtIso8601);
+  return null;
 };
 
 export const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
