@@ -4,7 +4,6 @@
   "type": "module",
   "version": "1.0.0",
   "description": "Álvaro Cuesta's personal website.",
-  "main": "index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production NODE_OPTIONS=--conditions=source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/build.ts",
     "build:serve": "serve ./dist",
