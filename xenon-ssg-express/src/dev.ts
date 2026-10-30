@@ -1,11 +1,13 @@
 import express, { type Express } from "express";
 import { makeXenonMiddleware } from "xenon-ssg/middleware";
 import morgan from "morgan";
-import { type XenonExpressSite, getSiteMeta } from "./index.tsx";
+import {
+  type XenonExpressSite,
+  DEFAULT_DEV_PORT,
+  getSiteMeta,
+} from "./index.tsx";
 import { getTagsFromInjectableRaw } from "./plugins/plugins.tsx";
 import type { UnknownRecord } from "type-fest";
-
-export const DEFAULT_DEV_PORT = 31337;
 
 /**
  * Create an Express app that serves a Xenon site in development mode.
@@ -28,12 +30,13 @@ export const DEFAULT_DEV_PORT = 31337;
  */
 export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
   site: XenonExpressSite<PageMetadata>,
+  port: number = DEFAULT_DEV_PORT,
 ): Express {
   const app = express();
 
   app.use(morgan("dev"));
 
-  const siteMeta = getSiteMeta(site);
+  const siteMeta = getSiteMeta(port);
   const plugins = site.plugins
     .map((plugin) => plugin(siteMeta))
     .filter((x) => x !== undefined);
@@ -72,17 +75,54 @@ export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
 }
 
 /**
- * Convenience function if you just want to quickly start a dev server.
+ * Start a dev server for the site `loadSite` returns.
+ *
+ * Listens before the site loads: loading a site imports all its modules, which
+ * blocks the thread for a while, so `loadSite` only runs once the port is
+ * bound. Requests that arrive in the meantime wait for the site instead of
+ * failing to connect, and if it fails to load, every request responds with the
+ * error.
  */
-export function startXenonExpressDevApp<PageMetadata extends UnknownRecord>(
-  site: XenonExpressSite<PageMetadata>,
-): Express {
-  const app = makeXenonDevExpressApp(site);
-  const port = site.devPort ?? DEFAULT_DEV_PORT;
+export async function startXenonExpressDevApp<
+  PageMetadata extends UnknownRecord,
+>(
+  loadSite: () => Promise<XenonExpressSite<PageMetadata>>,
+  port: number = DEFAULT_DEV_PORT,
+): Promise<Express> {
+  const app = express();
+  const siteApp = Promise.withResolvers<Express>();
+  // Avoid an unhandled rejection: the error is logged below and reported to
+  // every request.
+  siteApp.promise.catch(() => {});
 
-  app.listen(port, "127.0.0.1", () => {
-    console.log(`Listening on http://localhost:${port}`);
+  app.use(async (req, res, next) => {
+    let resolvedSiteApp: Express;
+    try {
+      resolvedSiteApp = await siteApp.promise;
+    } catch (error) {
+      next(error);
+      return;
+    }
+    resolvedSiteApp(req, res, next);
   });
+
+  await new Promise<void>((resolve, reject) => {
+    app.listen(port, "127.0.0.1", (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      console.log(`Listening on http://localhost:${port}`);
+      resolve();
+    });
+  });
+
+  try {
+    siteApp.resolve(makeXenonDevExpressApp(await loadSite(), port));
+  } catch (error) {
+    console.error(error);
+    siteApp.reject(error);
+  }
 
   return app;
 }

@@ -25,7 +25,7 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
     force: true,
   });
 
-  const siteMeta = getSiteMeta(site);
+  const siteMeta = getSiteMeta();
   const plugins = site.plugins
     .map((plugin) => plugin(siteMeta))
     .filter((x) => x !== undefined);

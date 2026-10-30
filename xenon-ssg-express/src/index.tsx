@@ -1,9 +1,10 @@
 import type { RenderToStreamOptions } from "xenon-ssg/render";
 import type { PluginInjectableTag, Plugin } from "./plugins/plugins.tsx";
 import type { ReactNode } from "react";
-import { DEFAULT_DEV_PORT } from "./dev.ts";
 import type { XenonRenderFunction } from "xenon-ssg";
 import type { UnknownRecord } from "type-fest";
+
+export const DEFAULT_DEV_PORT = 31337;
 
 export type XenonExpressSiteMeta = {
   origin: string;
@@ -30,15 +31,16 @@ export type XenonExpressSite<
   render: XenonExpressRenderFunction<PageMetadata>;
   renderToStreamOptions: RenderToStreamOptions;
   plugins: Plugins;
-  devPort?: number;
 };
 
-export function getSiteMeta<PageMetadata extends UnknownRecord>(
-  site: XenonExpressSite<PageMetadata>,
+/**
+ * `port` is the dev server's, which makes the origin unless `XENON_ORIGIN` sets
+ * it.
+ */
+export function getSiteMeta(
+  port: number = DEFAULT_DEV_PORT,
 ): XenonExpressSiteMeta {
-  const origin =
-    process.env["XENON_ORIGIN"] ??
-    `http://localhost:${site.devPort ?? DEFAULT_DEV_PORT}`;
+  const origin = process.env["XENON_ORIGIN"] ?? `http://localhost:${port}`;
 
   const basepath = process.env["XENON_BASE_PATH"] ?? "";
 
