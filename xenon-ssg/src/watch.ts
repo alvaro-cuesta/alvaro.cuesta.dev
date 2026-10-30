@@ -1,8 +1,8 @@
-import fs from "node:fs/promises";
+import fs, { type FileChangeInfo } from "node:fs/promises";
 
 /**
  * In **development only**, fire-and-forget watch the given file or directory
- * and call `onChange` on every change event. Does nothing in production
+ * and call `onChange` with every change event. Does nothing in production
  * (`NODE_ENV !== "development"`).
  *
  * Errors from `fs.watch` itself (file deleted, permissions changed, etc.)
@@ -19,13 +19,13 @@ import fs from "node:fs/promises";
  */
 export function watchInDev(
   watchPath: string,
-  onChange: () => void,
+  onChange: (event: FileChangeInfo<string>) => void,
 ): void {
   if (process.env["NODE_ENV"] !== "development") return;
   void (async () => {
     try {
-      for await (const _ of fs.watch(watchPath)) {
-        onChange();
+      for await (const event of fs.watch(watchPath)) {
+        onChange(event);
       }
     } catch (err) {
       console.warn(`[watchInDev] watch on ${watchPath} aborted:`, err);

@@ -88,7 +88,14 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
     void (async () => {
       const gitWatchPaths = await getGitWatchPaths(options.siteRootPath);
       for (const gitWatchPath of gitWatchPaths) {
-        watchInDev(gitWatchPath, () => cache.reset());
+        // Git replaces these files by renaming a lock file over them, which
+        // ends a watch on the file itself, so watch its folder instead. But
+        // only react to the file: other files there (e.g. `.git/index`)
+        // change on every `git status`.
+        const fileName = path.basename(gitWatchPath);
+        watchInDev(path.dirname(gitWatchPath), ({ filename }) => {
+          if (filename === fileName) cache.reset();
+        });
       }
     })();
   }

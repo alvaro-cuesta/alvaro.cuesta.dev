@@ -99,6 +99,7 @@ export const getGitLastModifiedDate = async (
   (await getGitFileDates(repoRootPath, repoRelativeFilePath))?.lastModifiedAt ??
   null;
 
+/** Absolute paths of the files that change when `HEAD` moves: `HEAD` itself and the current branch's ref. */
 export const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
   const headPath = await runGitCommand(
     ["rev-parse", "--git-path", "HEAD"],
@@ -111,6 +112,6 @@ export const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
       : await runGitCommand(["rev-parse", "--git-path", headRef], cwd);
 
   return [...new Set([headPath, headRefPath].filter((x) => x !== null))].map(
-    (gitPath) => path.dirname(path.resolve(cwd, gitPath)),
+    (gitPath) => path.resolve(cwd, gitPath),
   );
 };
