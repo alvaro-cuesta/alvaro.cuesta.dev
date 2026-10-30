@@ -4,6 +4,9 @@
     "outDir": "./dist",
     "rootDir": "./",
     "types": ["node", "mdx"],
+    // Editor-only: TypeScript completion/diagnostics inside .mdx files (tsc
+    // ignores it). The VS Code MDX extension already registers it; listing it
+    // here pins its version and enables it in other TypeScript-based editors.
     "plugins": [{ "name": "@mdx-js/typescript-plugin" }]
   },
   "include": ["bin/**/*", "src/**/*", "config.ts", "package.json"],

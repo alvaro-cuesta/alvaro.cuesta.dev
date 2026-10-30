@@ -50,6 +50,7 @@
     "xmlbuilder2": "catalog:"
   },
   "devDependencies": {
+    "@mdx-js/typescript-plugin": "^0.1.4",
     "@types/estree": "^1.0.8",
     "@types/html-to-text": "^9.0.4",
     "@types/mdast": "^4.0.4",
