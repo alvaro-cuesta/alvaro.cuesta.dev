@@ -21,9 +21,7 @@ export type LinkProviderProps = {
  * @private Not meant to be used by end users. Will be automatically added by the renderer.
  */
 export function LinkProvider({ addLink, children }: LinkProviderProps) {
-  return (
-    <LinkContext.Provider value={addLink}>{children}</LinkContext.Provider>
-  );
+  return <LinkContext value={addLink}>{children}</LinkContext>;
 }
 
 /**
