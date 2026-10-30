@@ -20,6 +20,9 @@
     /* Interop Constraints */
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    // Node runs some files by just stripping their types (e.g. the MDX
+    // compiler's worker), which only works for syntax that has no runtime effect.
+    "erasableSyntaxOnly": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

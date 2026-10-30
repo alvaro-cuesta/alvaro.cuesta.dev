@@ -14,7 +14,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production NODE_OPTIONS=--conditions=source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/build.ts",
     "build:serve": "serve ./dist",
-    "dev": "cross-env NODE_ENV=development NODE_OPTIONS=--conditions=source tsx watch --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/dev.ts",
+    "dev": "cross-env NODE_ENV=development NODE_OPTIONS=--conditions=source tsx watch --include ./src/mdx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint:tsc": "tsc -b ../tsconfig.json"
