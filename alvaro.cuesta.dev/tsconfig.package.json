@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.package.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "types": ["node", "mdx"],
+    "plugins": [{ "name": "@mdx-js/typescript-plugin" }]
+  },
+  "include": ["bin/**/*", "src/**/*", "config.ts", "package.json"],
+  "references": [
+    { "path": "../xenon-ssg/tsconfig.package.json" },
+    { "path": "../xenon-ssg-express/tsconfig.package.json" }
+  ]
+}

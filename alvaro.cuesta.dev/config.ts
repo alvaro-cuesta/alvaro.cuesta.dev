@@ -1,4 +1,4 @@
-import type { RenderToStreamOptions } from "xenon-ssg/src/render";
+import type { RenderToStreamOptions } from "xenon-ssg/render";
 import path from "node:path";
 
 export const OUTPUT_FOLDER = path.join(import.meta.dirname, "dist");

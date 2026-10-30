@@ -2,7 +2,7 @@ import type {
   XenonExpressRenderFunction,
   XenonExpressRenderMeta,
   XenonExpressSite,
-} from "xenon-ssg-express/src";
+} from "xenon-ssg-express";
 import fs from "node:fs/promises";
 import {
   BLOG_BLURB_DESCRIPTION,
@@ -12,21 +12,21 @@ import {
   SITE_SHORT_DESCRIPTION,
   SITE_TITLE,
 } from "../config";
-import { staticFilePlugin } from "xenon-ssg-express/src/plugins/static-file";
-import { staticFolderPlugin } from "xenon-ssg-express/src/plugins/static-folder";
-import { singleLightningCssPlugin } from "xenon-ssg-express/src/plugins/single-lightningcss";
+import { staticFilePlugin } from "xenon-ssg-express/plugins/static-file";
+import { staticFolderPlugin } from "xenon-ssg-express/plugins/static-folder";
+import { singleLightningCssPlugin } from "xenon-ssg-express/plugins/single-lightningcss";
 import path from "node:path";
 import url from "node:url";
-import { faviconPlugin } from "xenon-ssg-express/src/plugins/favicon";
-import { createXenonCache } from "xenon-ssg-express/src/cache";
+import { faviconPlugin } from "xenon-ssg-express/plugins/favicon";
+import { createXenonCache } from "xenon-ssg-express/cache";
 import { version } from "../package.json" with { type: "json" };
-import type { PluginInjectableLink } from "xenon-ssg-express/src/plugins/plugins";
+import type { PluginInjectableLink } from "xenon-ssg-express/plugins/plugins";
 import { Root } from "./Root";
 import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
-} from "xenon-ssg-express/src/plugins/sitemap";
+} from "xenon-ssg-express/plugins/sitemap";
 import {
   routeBlogArticle,
   routeBlogArticleList,

@@ -5,8 +5,8 @@ import type { SiteRenderMeta } from "../../site";
 import { makeTitle } from "../../utils/meta";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx";
 import { getGitLastModifiedDate } from "../../utils/git";
-import { cachedPromise } from "xenon-ssg/src/promise";
-import { watchInDev } from "xenon-ssg/src/watch";
+import { cachedPromise } from "xenon-ssg/promise";
+import { watchInDev } from "xenon-ssg/watch";
 import { Temporal } from "temporal-polyfill";
 import { instantToBlogItemDate } from "../../utils/item-dates";
 
