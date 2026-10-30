@@ -4,6 +4,13 @@
   "type": "module",
   "version": "1.0.0",
   "description": "Álvaro Cuesta's personal website.",
+  "imports": {
+    "#components/*": {
+      "source": "./src/components/*.tsx",
+      "default": "./dist/src/components/*.js",
+      "types": "./dist/src/components/*.d.ts"
+    }
+  },
   "scripts": {
     "build": "cross-env NODE_ENV=production NODE_OPTIONS=--conditions=source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mjs ./bin/build.ts",
     "build:serve": "serve ./dist",

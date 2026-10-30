@@ -14,6 +14,7 @@ import { Icon } from "../../components/atoms/Icon.tsx";
 import { routeBlogArticle, routeBlogTag } from "../../routes.ts";
 import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
+import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -137,7 +138,9 @@ export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
           </header>
 
           <section>
-            <article.module.Component components={MDX_DEFAULT_COMPONENTS} />
+            <MdxRenderContext value={{ pathname: articlePath }}>
+              <article.module.Component components={MDX_DEFAULT_COMPONENTS} />
+            </MdxRenderContext>
           </section>
 
           {lastModificationDate ? (

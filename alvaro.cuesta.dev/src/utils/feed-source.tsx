@@ -1,5 +1,5 @@
-import React from "react";
 import { makeMdxDefaultComponents } from "../mdx/mdx.tsx";
+import { MdxRenderContext } from "../mdx/MdxRenderContext.tsx";
 import { blogItemDateToTemporalInstant, type BlogItemDate } from "./item-dates.ts";
 import type { FeedSourceItem } from "../plugins/feeds/types.ts";
 import { renderToString } from "xenon-ssg/render";
@@ -20,14 +20,19 @@ export function renderContentItemHtml({
   const url = new URL(pathname, baseUrl);
 
   return renderToString(
-    React.createElement(Component, {
-      components: makeMdxDefaultComponents({
-        canonicalizeBaseUrl: url,
-        suppressTableOfContents: true,
-        renderAnchor: (props) => <a {...props} />,
-        renderHashtag: ({ href, children }) => <a href={href}>#{children}</a>,
-      }),
-    }),
+    <MdxRenderContext value={{
+      pathname,
+      canonicalizeBaseUrl: url,
+    }}>
+      <Component
+        components={makeMdxDefaultComponents({
+          canonicalizeBaseUrl: url,
+          suppressTableOfContents: true,
+          renderAnchor: (props) => <a {...props} />,
+          renderHashtag: ({ href, children }) => <a href={href}>#{children}</a>,
+        })}
+      />
+    </MdxRenderContext>,
   );
 }
 

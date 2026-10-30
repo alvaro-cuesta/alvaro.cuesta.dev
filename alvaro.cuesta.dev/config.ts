@@ -52,9 +52,40 @@ export const makeTimelineBlurbSocialDescription = (
 
 /**
  * Maps non-canonical tag names to their canonical form.
+ *
  * E.g. `{ llms: "llm" }` means `#llms` will link to the `#llm` tag page.
+ *
  * The display text stays as the author wrote it.
  */
 export const CANONICAL_TAGS: Record<string, string> = {
   llms: "llm",
+};
+
+/**
+ * Information about a blog series.
+ */
+type SeriesInfo = {
+  /**
+   * The name of the series, in human-readable form.
+   */
+  name: string;
+  /**
+   * The number of the series' first post (e.g. 0 or 1).
+   */
+  firstPart: number;
+  /**
+   * A brief description of the series, starting in lowercase.
+   *
+   * This description will be used in the series blurb on the blog, as in
+   * `"Part N of <name>: <description>"`.
+   */
+  description?: string | undefined;
+};
+
+/**
+ * Blog tags that group posts into a series, and how to display each series.
+ *
+ * Every post with the tag is part of it, in publication order.
+ */
+export const SERIES_TAGS: Record<string, SeriesInfo> = {
 };
