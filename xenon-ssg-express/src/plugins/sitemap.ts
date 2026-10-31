@@ -22,7 +22,7 @@ export type SitemapPluginMetadata = {
   [sitemapPluginKey]?:
     | {
         exclude?: boolean;
-        lastModified?: Temporal.ZonedDateTime;
+        lastModified?: Temporal.Instant | undefined;
         changeFrequency?:
           | "always"
           | "hourly"

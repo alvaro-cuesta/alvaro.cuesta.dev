@@ -1,11 +1,9 @@
 import { Template } from "../../components/Template.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
 import { BlogLayout } from "./components/BlogLayout.tsx";
-import { getBlogItems } from "../../blog/promise.ts";
+import { getBlogItem, getBlogItems } from "../../blog/promise.ts";
 import React from "react";
 import {
-  blogItemDateToUTCISO8601Z,
-  equalsBlogItemDates,
   getBlogItemDateYear,
 } from "../../utils/item-dates.ts";
 import type { SiteRenderMeta } from "../../site.tsx";
@@ -18,24 +16,25 @@ import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;
-  slug: string;
+  article: ReturnType<typeof getBlogItem>;
 };
 
-export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
-  const blogItems = await getBlogItems();
-
-  const article = blogItems.bySlug.get(slug);
-
-  if (article === undefined) {
-    throw new Error(`Article ${slug} not found`);
-  }
+export async function BlogArticle({
+  siteRenderMeta,
+  article: articlePromise,
+}: BlogArticleProps) {
+  const [blogItems, article] = await Promise.all([
+    getBlogItems(),
+    articlePromise,
+  ]);
 
   const {
     module: {
+      slug,
       title: articleTitle,
       summary,
       publicationDate,
-      lastModificationDate: lastModificationDateRaw,
+      lastModificationDate,
       draft,
       tags: tagsRaw,
     },
@@ -43,16 +42,6 @@ export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
 
   const tagOriginals = tagsRaw.map((tag) => tag.original);
   const tagSlugs = tagsRaw.map((tag) => tag.slug);
-
-  const lastModificationDate =
-    lastModificationDateRaw &&
-    !equalsBlogItemDates(publicationDate, lastModificationDateRaw)
-      ? lastModificationDateRaw
-      : null;
-
-  const lastModificationDateISOZ = lastModificationDate
-    ? blogItemDateToUTCISO8601Z(lastModificationDate)
-    : null;
 
   const articlePath = routeBlogArticle.build({ slug });
 
@@ -79,26 +68,6 @@ export async function BlogArticle({ siteRenderMeta, slug }: BlogArticleProps) {
           authorProfileUrl: siteRenderMeta.baseUrl,
           tags: tagSlugs,
         },
-        additional: (
-          <>
-            <meta
-              property="article:published_time"
-              content={blogItemDateToUTCISO8601Z(publicationDate)}
-            />
-            {lastModificationDateISOZ !== null ? (
-              <>
-                <meta
-                  property="article:modified_time"
-                  content={lastModificationDateISOZ}
-                />
-                <meta
-                  property="og:updated_time"
-                  content={lastModificationDateISOZ}
-                />
-              </>
-            ) : null}
-          </>
-        ),
       }}
     >
       <BlogLayout

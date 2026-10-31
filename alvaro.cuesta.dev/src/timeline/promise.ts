@@ -101,3 +101,20 @@ export async function getTimelineItems(): Promise<
   ]);
   return mergeWithCache(raw, blog);
 }
+
+/**
+ * The post with that slug.
+ *
+ * Rejects when there's none.
+ */
+export async function getTimelineItem(
+  slug: string,
+): Promise<Item<TimelineItemModuleParsed>> {
+  const item = (await getTimelineItems()).bySlug.get(slug);
+
+  if (item === undefined) {
+    throw new Error(`Timeline post "${slug}" not found`);
+  }
+
+  return item;
+}

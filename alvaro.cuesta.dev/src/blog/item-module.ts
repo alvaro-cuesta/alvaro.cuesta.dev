@@ -25,6 +25,14 @@ type BlogItemModule = NodeModule & {
   creationDate?: ItemModuleDate | undefined;
   publicationDate?: ItemModuleDate | undefined;
   lastModificationDate?: ItemModuleDate | undefined;
+  /**
+   * Whether this is a draft, which only shows in development.
+   *
+   * A draft committed before being published counts the commit that publishes it as an edit.
+   *
+   * Set `publicationDate` when publishing it. Otherwise it defaults to the creation date, so the edits made while
+   * drafting count too.
+   */
   draft?: boolean | undefined;
   slug?: string | undefined;
   tags?: string[] | undefined;

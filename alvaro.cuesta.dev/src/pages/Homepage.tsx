@@ -5,6 +5,7 @@ import { Template } from "../components/Template.tsx";
 import type { SiteRenderMeta } from "../site.tsx";
 import { makeTitle } from "../utils/meta.ts";
 import { routeNow } from "../routes.ts";
+import { getCurrentYear } from "../utils/item-dates.ts";
 import {
   HOMEPAGE_BLURB_DESCRIPTION,
   HOMEPAGE_BLURB_SOCIAL_DESCRIPTION,
@@ -58,7 +59,7 @@ export type HomepageProps = {
 };
 
 export function Homepage({ siteRenderMeta }: HomepageProps) {
-  const year = new Date().getFullYear();
+  const year = getCurrentYear();
 
   const title = makeTitle(["Full-stack software engineer"], {
     disableReverse: true,

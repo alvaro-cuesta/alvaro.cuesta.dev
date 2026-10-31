@@ -212,27 +212,11 @@ export const dropTimeFromBlogItemDate = (
   }
 };
 
+/** The year at build time, in the same time zone as the content dates. */
+export const getCurrentYear = (): number =>
+  Temporal.Now.plainDateISO(DATETIME_INPUT_TZ).year;
+
 // #region From other types
-
-export const dateToBlogItemDate = (date: Date): BlogItemDate => {
-  const dateTime = Temporal.ZonedDateTime.from(
-    {
-      timeZone: DATETIME_INPUT_TZ,
-      year: date.getFullYear(),
-      month: date.getMonth() + 1,
-      day: date.getDate(),
-      hour: date.getHours(),
-      minute: date.getMinutes(),
-      second: date.getSeconds(),
-    },
-    { overflow: "reject" },
-  ).toPlainDateTime();
-
-  return {
-    type: "dateTimeNoSeconds",
-    dateTime,
-  };
-};
 
 export const instantToBlogItemDate = (
   instant: Temporal.Instant,
@@ -242,23 +226,12 @@ export const instantToBlogItemDate = (
     .toPlainDateTime();
 
   return {
-    type: "dateTimeNoSeconds",
+    type: "dateTimeWithSeconds",
     dateTime,
   };
 };
 
 // #region To machine strings
-
-export const blogItemDateToISO8601 = (blogItemDate: BlogItemDate): string =>
-  blogItemDateToPlainDateTime(blogItemDate)
-    .toZonedDateTime(DATETIME_INPUT_TZ)
-    .toString();
-
-export const blogItemDateToUTCISO8601 = (blogItemDate: BlogItemDate): string =>
-  blogItemDateToPlainDateTime(blogItemDate)
-    .toZonedDateTime(DATETIME_INPUT_TZ)
-    .withTimeZone("UTC")
-    .toString();
 
 export const blogItemDateToTemporalInstant = (
   blogItemDate: BlogItemDate,
@@ -267,10 +240,13 @@ export const blogItemDateToTemporalInstant = (
     .toZonedDateTime(DATETIME_INPUT_TZ)
     .toInstant();
 
+/**
+ * The date as an ISO 8601 UTC timestamp, e.g. `2026-10-31T07:54:00Z`.
+ *
+ * It ends in `Z`, not in a `[UTC]` time zone annotation, which most parsers don't understand.
+ */
 export const blogItemDateToUTCISO8601Z = (blogItemDate: BlogItemDate): string =>
-  blogItemDateToUTCISO8601(blogItemDate)
-    // I'm not sure if most machines would understand the '[UTC]' thingie even if it's ISO8601 so let's replace it
-    .replace("[UTC]", "Z");
+  blogItemDateToTemporalInstant(blogItemDate).toString();
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
@@ -287,7 +263,7 @@ export const blogItemDateToHtmlDateTime = (
       return blogItemDate.date.toString();
     case "dateTimeNoSeconds":
     case "dateTimeWithSeconds":
-      return blogItemDateToISO8601(blogItemDate);
+      return blogItemDateToUTCISO8601Z(blogItemDate);
     default:
       // @ts-expect-error This should never happen
       throw new Error(`Unexpected type: ${blogItemDate.type}`);
@@ -352,39 +328,42 @@ export const blogItemDateToShortTimeString = (
 };
 
 /**
+ * The Temporal types MDX files can export as dates.
+ *
+ * Both `ItemModuleDate` and `isItemModuleDate` come from this list, so the type and its runtime check can't
+ * disagree.
+ */
+const ITEM_MODULE_TEMPORAL_DATES = [
+  // Will imply "dateTimeWithSeconds" in `DATETIME_INPUT_TZ`
+  Temporal.Instant,
+  // Will imply "yearMonth"
+  Temporal.PlainYearMonth,
+  // Will imply "date"
+  Temporal.PlainDate,
+  // Will imply "dateTimeWithSeconds"
+  Temporal.PlainDateTime,
+] as const;
+
+/**
  * Union of date types accepted as module exports in MDX files.
  * Shared between blog and timeline item-module parsers.
  */
 export type ItemModuleDate =
-  // Will imply "dateTimeNoSeconds"
-  | Date
-  | Temporal.Instant
-  // Will imply "yearMonth"
-  | Temporal.PlainYearMonth
-  // Will imply "date"
-  | Temporal.PlainDate
-  // Will imply "dateTimeWithSeconds"
-  | Temporal.PlainDateTime
+  | InstanceType<(typeof ITEM_MODULE_TEMPORAL_DATES)[number]>
   // Our true value
   | BlogItemDate;
 
 export const isItemModuleDate = (x: unknown): x is ItemModuleDate => {
   return (
-    x instanceof Date ||
-    x instanceof Temporal.PlainYearMonth ||
-    x instanceof Temporal.PlainDate ||
-    x instanceof Temporal.PlainDateTime ||
-    isBlogItemDate(x)
+    ITEM_MODULE_TEMPORAL_DATES.some(
+      (TemporalDate) => x instanceof TemporalDate,
+    ) || isBlogItemDate(x)
   );
 };
 
 export const itemModuleDateToBlogItemDate = (
   x: ItemModuleDate,
 ): BlogItemDate => {
-  if (x instanceof Date) {
-    return dateToBlogItemDate(x);
-  }
-
   if (x instanceof Temporal.Instant) {
     return instantToBlogItemDate(x);
   }
@@ -410,12 +389,22 @@ export const itemModuleDateToBlogItemDate = (
     };
   }
 
+  // Only `BlogItemDate` is left, so a type added to `ITEM_MODULE_TEMPORAL_DATES` but not handled above fails here.
   return x;
 };
 
 /**
- * Resolves the lastModificationDate from explicit module export, inferred (git) date,
- * and publication date. Shared between blog and timeline.
+ * An item's last modification date, for both blog and timeline items.
+ *
+ * The explicit date wins over the inferred one. Either only counts when it's after the publication date.
+ *
+ * An inferred date before publication is an edit made while writing the item, so it doesn't count. An explicit one
+ * is a mistake, so it throws.
+ *
+ * @param explicit The module's `lastModificationDate` export, if any.
+ * @param inferred The item's last modification date according to git, or `null` if there's none.
+ * @param publicationDate The item's publication date.
+ * @returns The last modification date, or `null` if the item wasn't modified after its publication.
  */
 export const resolveLastModificationDate = (
   explicit: ItemModuleDate | undefined,
@@ -423,7 +412,15 @@ export const resolveLastModificationDate = (
   publicationDate: BlogItemDate,
 ): BlogItemDate | null => {
   if (explicit) {
-    return itemModuleDateToBlogItemDate(explicit);
+    const explicitConverted = itemModuleDateToBlogItemDate(explicit);
+    const comparison = compareBlogItemDates(explicitConverted, publicationDate);
+    if (comparison < 0) {
+      throw new Error(
+        `The \`lastModificationDate\` (${blogItemDateToShortString(explicitConverted)}) is before the \`publicationDate\` (${blogItemDateToShortString(publicationDate)})`,
+      );
+    }
+
+    return comparison > 0 ? explicitConverted : null;
   }
 
   if (inferred === null) {
@@ -431,7 +428,7 @@ export const resolveLastModificationDate = (
   }
 
   const inferredConverted = itemModuleDateToBlogItemDate(inferred);
-  return compareBlogItemDates(inferredConverted, publicationDate) >= 0
+  return compareBlogItemDates(inferredConverted, publicationDate) > 0
     ? inferredConverted
     : null;
 };

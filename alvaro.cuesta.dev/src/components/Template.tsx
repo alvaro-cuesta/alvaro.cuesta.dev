@@ -15,6 +15,7 @@ import {
 import { getTimelineItems } from "../timeline/promise.ts";
 import {
   blogItemDateToUTCISO8601Z,
+  getCurrentYear,
   type BlogItemDate,
 } from "../utils/item-dates.ts";
 
@@ -32,11 +33,8 @@ type TemplateMetaTags = {
   description?: string;
   socialTitle: string;
   socialDescription: string;
-  publishedTime?: BlogItemDate;
-  modifiedTime?: BlogItemDate | undefined;
   openGraph: TemplateMetaTagsOpenGraph;
   imageAbsoluteUrl?: string;
-  additional?: ReactNode;
 };
 
 type TemplateMetaTagsOpenGraph =
@@ -73,7 +71,10 @@ export async function Template({
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;
 
-  const year = new Date().getFullYear();
+  // Decided by the route, so the meta tags and the sitemap can't disagree.
+  const { published, modified } = await siteRenderMeta.pageDates;
+
+  const year = getCurrentYear();
 
   return (
     <html lang="en" prefix="og: http://ogp.me/ns#">
@@ -101,16 +102,19 @@ export async function Template({
         {metaTags.description ? (
           <meta name="description" content={metaTags.description} />
         ) : null}
-        {metaTags.publishedTime ? (
+        {siteRenderMeta.pageNoindex ? (
+          <meta name="robots" content="noindex" />
+        ) : null}
+        {published ? (
           <meta
             name="date"
-            content={blogItemDateToUTCISO8601Z(metaTags.publishedTime)}
+            content={blogItemDateToUTCISO8601Z(published)}
           />
         ) : null}
-        {metaTags.modifiedTime ? (
+        {modified ? (
           <meta
             name="last-modified"
-            content={blogItemDateToUTCISO8601Z(metaTags.modifiedTime)}
+            content={blogItemDateToUTCISO8601Z(modified)}
           />
         ) : null}
 
@@ -132,32 +136,32 @@ export async function Template({
         <meta property="og:type" content={metaTags.openGraph.type} />
 
         {/* OpenGraph - Not in spec */}
-        {metaTags.publishedTime ? (
+        {published ? (
           <meta
             property="og:published_time"
-            content={blogItemDateToUTCISO8601Z(metaTags.publishedTime)}
+            content={blogItemDateToUTCISO8601Z(published)}
           />
         ) : null}
-        {metaTags.modifiedTime ? (
+        {modified ? (
           <meta
             property="og:updated_time"
-            content={blogItemDateToUTCISO8601Z(metaTags.modifiedTime)}
+            content={blogItemDateToUTCISO8601Z(modified)}
           />
         ) : null}
 
-        {/* OpenGraph - Article*/}
+        {/* OpenGraph - Article (only for `og:type` article, unlike the date tags above) */}
         {metaTags.openGraph.type === "article" ? (
           <>
-            {metaTags.publishedTime ? (
+            {published ? (
               <meta
                 property="article:published_time"
-                content={blogItemDateToUTCISO8601Z(metaTags.publishedTime)}
+                content={blogItemDateToUTCISO8601Z(published)}
               />
             ) : null}
-            {metaTags.modifiedTime ? (
+            {modified ? (
               <meta
                 property="article:modified_time"
-                content={blogItemDateToUTCISO8601Z(metaTags.modifiedTime)}
+                content={blogItemDateToUTCISO8601Z(modified)}
               />
             ) : null}
             {metaTags.openGraph.authorProfileUrl ? (
@@ -221,8 +225,6 @@ export async function Template({
         <meta name="twitter:image" content={ogImage} />
 
         <link rel="canonical" href={canonicalUrl} />
-
-        {metaTags.additional}
 
         {siteRenderMeta.injectable}
       </head>

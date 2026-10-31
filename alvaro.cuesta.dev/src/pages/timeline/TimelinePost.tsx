@@ -1,6 +1,6 @@
 import { Template } from "../../components/Template.tsx";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { getTimelineItem, getTimelineItems } from "../../timeline/promise.ts";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { routeTimelinePost } from "../../routes.ts";
 import { makeTitle } from "../../utils/meta.ts";
@@ -18,22 +18,16 @@ import { Link } from "../../components/atoms/Link.tsx";
 
 type TimelinePostPageProps = {
   siteRenderMeta: SiteRenderMeta;
-  slug: string;
+  post: ReturnType<typeof getTimelineItem>;
 };
 
 export async function TimelinePostPage({
   siteRenderMeta,
-  slug,
+  post,
 }: TimelinePostPageProps) {
-  const timelineItems = await getTimelineItems();
+  const [timelineItems, item] = await Promise.all([getTimelineItems(), post]);
 
-  const item = timelineItems.bySlug.get(slug);
-
-  if (item === undefined) {
-    throw new Error(`Timeline post "${slug}" not found`);
-  }
-
-  const { publicationDate, lastModificationDate, tags } = item.module;
+  const { slug, publicationDate, tags } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);
 
   const postPath = routeTimelinePost.build({ slug });
@@ -57,8 +51,6 @@ export async function TimelinePostPage({
         description: TIMELINE_BLURB_DESCRIPTION,
         socialTitle: makeTitle(["Timeline"]),
         socialDescription: makeTimelineBlurbSocialDescription(dateStr),
-        publishedTime: publicationDate,
-        modifiedTime: lastModificationDate ?? undefined,
         openGraph: { type: "article" },
       }}
     >

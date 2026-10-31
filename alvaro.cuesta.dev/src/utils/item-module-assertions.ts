@@ -42,7 +42,9 @@ export function assertOptionalDate(
 ): void {
   const value = getField(module, field);
   if (field in module && value !== undefined && !isItemModuleDate(value)) {
-    throw new Error(`\`${field}\` in ${label} is not a valid date type.`);
+    throw new Error(
+      `\`${field}\` in ${label} is not a valid date type. Use a \`Temporal.Instant\`, \`Temporal.PlainDateTime\`, \`Temporal.PlainDate\` or \`Temporal.PlainYearMonth\`.`,
+    );
   }
 }
 

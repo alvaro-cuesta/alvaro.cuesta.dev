@@ -17,6 +17,12 @@ type MdxPageModule = {
   default: MDXContent;
   title: string | undefined;
   description: string | undefined;
+  /**
+   * The page's `og:type`.
+   *
+   * `"website"` (the default) or `"article"`.
+   */
+  openGraphType: string | undefined;
   tableOfContents: Toc;
 };
 
@@ -57,15 +63,24 @@ export function makeMdxPage(contentFileUrl: string) {
   // `content-loader.ts` uses for blog/timeline content.
   watchInDev(filePath, () => page.reset());
 
-  return async function MdxPage({ siteRenderMeta }: MdxPageProps) {
+  // A page that was never edited was last updated when it was created. No git history means it isn't committed yet,
+  // i.e. it's being written right now.
+  const getLastUpdated = async (): Promise<Temporal.Instant> => {
+    const { gitDates } = await page.get();
+    return (
+      gitDates?.lastModifiedAt ?? gitDates?.createdAt ?? Temporal.Now.instant()
+    );
+  };
+
+  async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const {
       module: {
         default: Content,
         title,
         description,
+        openGraphType = "website",
         tableOfContents,
       },
-      gitDates,
     } = await page.get();
 
     if (title === undefined) {
@@ -78,11 +93,13 @@ export function makeMdxPage(contentFileUrl: string) {
         `MdxPage module at ${contentFileUrl} is missing required \`description\` export.`,
       );
     }
+    if (openGraphType !== "website" && openGraphType !== "article") {
+      throw new Error(
+        `MdxPage module at ${contentFileUrl} has an unknown \`openGraphType\` export: ${openGraphType}.`,
+      );
+    }
 
-    // A page that was never edited was last updated when it was created. No git history means it isn't committed
-    // yet, i.e. it's being written right now.
-    const lastUpdated =
-      gitDates?.lastModifiedAt ?? gitDates?.createdAt ?? Temporal.Now.instant();
+    const lastUpdated = instantToBlogItemDate(await getLastUpdated());
 
     return (
       <Template
@@ -92,7 +109,10 @@ export function makeMdxPage(contentFileUrl: string) {
           description,
           socialTitle: title,
           socialDescription: description,
-          openGraph: { type: "website" },
+          openGraph:
+            openGraphType === "article"
+              ? { type: "article", authorProfileUrl: siteRenderMeta.baseUrl }
+              : { type: "website" },
         }}
       >
         <h2>{title}</h2>
@@ -105,11 +125,13 @@ export function makeMdxPage(contentFileUrl: string) {
           >
             <Content
               components={MDX_DEFAULT_COMPONENTS}
-              lastModified={instantToBlogItemDate(lastUpdated)}
+              lastModified={lastUpdated}
             />
           </MdxRenderContext>
         </section>
       </Template>
     );
-  };
+  }
+
+  return { Component: MdxPage, getLastUpdated };
 }

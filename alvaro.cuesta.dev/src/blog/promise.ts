@@ -24,3 +24,18 @@ export const getBlogItems = createContentLoader({
     },
   },
 });
+
+/**
+ * The article with that slug.
+ *
+ * Rejects when there's none.
+ */
+export async function getBlogItem(slug: string) {
+  const item = (await getBlogItems()).bySlug.get(slug);
+
+  if (item === undefined) {
+    throw new Error(`Article ${slug} not found`);
+  }
+
+  return item;
+}

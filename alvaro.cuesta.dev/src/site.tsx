@@ -22,34 +22,23 @@ import { createXenonCache } from "@xenon-ssg/express/cache";
 import pkg from "../package.json" with { type: "json" };
 const version = pkg.version;
 import type { PluginInjectableLink } from "@xenon-ssg/express/plugins/plugins";
-import { Root } from "./Root.tsx";
+import { resolvePage, type PageDates } from "./Root.tsx";
 import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
 } from "@xenon-ssg/express/plugins/sitemap";
 import {
-  routeBlogArticle,
   routeBlogArticleList,
-  routeBlogTag,
-  routeBlogTagList,
-  routeBlogYear,
-  routeBlogYearList,
-  route404,
   routeHome,
-  routeTimelinePost,
   routeTimelineList,
-  routeTimelineTag,
-  routeTimelineTagList,
-  routeTimelineYear,
-  routeTimelineYearList,
-  routeNow,
 } from "./routes.ts";
 import { feedsPlugin } from "./plugins/feeds/index.ts";
 import { compareInstants } from "./plugins/feeds/dates.ts";
 import { getBlogFeedSourceItems } from "./blog/feed-source.tsx";
 import { getTimelineFeedSourceItems } from "./timeline/feed-source.tsx";
 import { makeTitle } from "./utils/meta.ts";
+import { blogItemDateToTemporalInstant } from "./utils/item-dates.ts";
 
 export type SiteFeedUrls = {
   all: string;
@@ -61,6 +50,8 @@ export type SiteRenderMeta = XenonExpressRenderMeta & {
   defaultOgImage: string;
   woff2PreloadPaths: string[];
   feedUrls: SiteFeedUrls;
+  pageDates: Promise<PageDates>;
+  pageNoindex: boolean;
 };
 
 type XenonExpressRenderFunctionInput = {
@@ -72,7 +63,7 @@ const makeRender =
   (
     input: XenonExpressRenderFunctionInput,
   ): XenonExpressRenderFunction<SitemapPluginMetadata> =>
-  (renderMeta) => {
+  async (renderMeta) => {
     const defaultOgImageHref = renderMeta.injectableRaw?.find(
       (tag): tag is PluginInjectableLink =>
         tag.tagType === "link" &&
@@ -86,6 +77,13 @@ const makeRender =
       );
     }
 
+    const page = await resolvePage(renderMeta.pathname);
+
+    // Awaited by the meta tags and the sitemap. When they reject, so does the page's render,
+    // which reports it.
+    const pageDates = page.dates ?? Promise.resolve<PageDates>({});
+    pageDates.catch(() => {});
+
     const siteRenderMeta: SiteRenderMeta = {
       ...renderMeta,
       defaultOgImage: `${renderMeta.baseUrl}${defaultOgImageHref}`,
@@ -94,81 +92,27 @@ const makeRender =
         `${FONTAWESOME_MOUNT_POINT_PATH}/fa-brands-400.woff2`,
       ],
       feedUrls: input.feedUrls,
+      pageDates,
+      pageNoindex: page.noindex === true,
     };
 
-    const isHome = routeHome.match(siteRenderMeta.pathname);
-    const is404 = route404.match(siteRenderMeta.pathname);
-    const isNow = routeNow.match(siteRenderMeta.pathname);
-
-    const isHighSignalPage = isNow;
-
-    // Blog
-    const blogArticleListMatch = routeBlogArticleList.match(
-      siteRenderMeta.pathname,
-    );
-
-    const isBlogArticle = routeBlogArticle.match(siteRenderMeta.pathname);
-    const isBlogArticleFrontpage =
-      blogArticleListMatch !== null &&
-      (blogArticleListMatch.page === null || blogArticleListMatch.page === 1);
-    const isBlogGenericRoute =
-      routeBlogTagList.match(siteRenderMeta.pathname) ||
-      routeBlogTag.match(siteRenderMeta.pathname) ||
-      routeBlogYearList.match(siteRenderMeta.pathname) ||
-      routeBlogYear.match(siteRenderMeta.pathname);
-    const isBlogPagination =
-      blogArticleListMatch !== null &&
-      blogArticleListMatch.page &&
-      blogArticleListMatch.page > 1;
-
-    // Timeline
-    const timelineListMatch = routeTimelineList.match(siteRenderMeta.pathname);
-
-    const isTimelinePost = routeTimelinePost.match(siteRenderMeta.pathname);
-    const isTimelineFrontpage =
-      timelineListMatch !== null &&
-      (timelineListMatch.page === null || timelineListMatch.page === 1);
-    const timelineTagMatch = routeTimelineTag.match(siteRenderMeta.pathname);
-    const timelineYearMatch = routeTimelineYear.match(siteRenderMeta.pathname);
-    const isTimelineGenericRoute =
-      routeTimelineTagList.match(siteRenderMeta.pathname) ||
-      (timelineTagMatch &&
-        (!timelineTagMatch.page || timelineTagMatch.page <= 1)) ||
-      routeTimelineYearList.match(siteRenderMeta.pathname) ||
-      (timelineYearMatch &&
-        (!timelineYearMatch.page || timelineYearMatch.page <= 1));
-    const isTimelinePagination =
-      (timelineListMatch !== null &&
-        timelineListMatch.page &&
-        timelineListMatch.page > 1) ||
-      (timelineTagMatch &&
-        timelineTagMatch.page &&
-        timelineTagMatch.page > 1) ||
-      (timelineYearMatch &&
-        timelineYearMatch.page &&
-        timelineYearMatch.page > 1);
-
     return {
-      reactNode: <Root siteRenderMeta={siteRenderMeta} />,
-      metadata: {
-        [sitemapPluginKey]: is404
-          ? { exclude: true }
-          : isHome
-            ? { priority: 1.0 }
-            : isHighSignalPage
-              ? { priority: 0.9 }
-              : isBlogArticle
-                ? { priority: 0.85 }
-                : isTimelinePost
-                  ? { priority: 0.8 }
-                  : isBlogArticleFrontpage || isTimelineFrontpage
-                    ? { priority: 0.7 }
-                    : isBlogGenericRoute || isTimelineGenericRoute
-                      ? { priority: 0.3 }
-                      : isBlogPagination || isTimelinePagination
-                        ? { priority: 0.2 }
-                        : undefined,
-      },
+      reactNode: page.render(siteRenderMeta),
+      metadata: pageDates.then((dates) => {
+        const lastModified = dates.modified ?? dates.published;
+
+        return {
+          [sitemapPluginKey]: page.noindex
+            ? { exclude: true }
+            : {
+                ...page.sitemap,
+                lastModified:
+                  lastModified === undefined
+                    ? undefined
+                    : blogItemDateToTemporalInstant(lastModified),
+              },
+        };
+      }),
     };
   };
 
