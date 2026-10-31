@@ -14,7 +14,7 @@ import type {
 import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { cell, read } from "@xenon-ssg/thunks";
+import { cell, derived, read } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   getCacheBustedFilename,
@@ -109,11 +109,10 @@ const deserializeFaviconResponse = (raw: Buffer): FaviconResponse => {
   return { images, files, html: cached.html };
 };
 
-const getFaviconCacheKey = async (
-  inputFilepath: string,
+const getFaviconCacheKey = (
+  svgContents: Buffer,
   faviconOptions: FaviconPluginOptions["faviconOptions"],
-): Promise<string> => {
-  const svgContents = await fs.readFile(inputFilepath);
+): string => {
   const payload = Buffer.concat([
     svgContents,
     Buffer.from("\0"),
@@ -124,7 +123,7 @@ const getFaviconCacheKey = async (
 
 type FaviconDerivedState = {
   response: FaviconResponse;
-  /** Merged images + files lookup, precomputed once per reset. */
+  /** Merged images + files lookup, precomputed once per version of the SVG. */
   filesByName: Record<string, Buffer | string>;
   /** Parsed `<link>` / `<meta>` tags for dev-mode injection. Build mode has
    * to rewrite hrefs against the cacheBustingMap per invocation and so
@@ -139,10 +138,27 @@ export const faviconPlugin = ({
   cacheBustingFragment,
   cache,
 }: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
-  const resolveState = async (): Promise<FaviconDerivedState> => {
+  // The SVG's bytes. Both the cache key and the favicons are made from them, so
+  // they always come from the same version of the file.
+  const svg = cell(() => fs.readFile(inputFilepath));
+
+  // Editors may save by renaming over the file, which ends a watch on the file
+  // itself, so watch its folder instead, and only react to the file.
+  const inputFilename = path.basename(inputFilepath);
+  watchInDev(path.dirname(inputFilepath), ({ filename }) => {
+    if (filename === inputFilename) svg.invalidate();
+  });
+
+  // `favicons()` and everything made from its response, so `getInjectable`,
+  // the request handler and `buildPre` share them. They're made when something
+  // reads them, not when the SVG changes: a save can fire several change
+  // events, and the first may come while it's still being written, but they
+  // only invalidate the bytes, and the next read makes the favicons once.
+  const state = derived(async (get): Promise<FaviconDerivedState> => {
+    const svgContents = await get(svg);
     const ns = cache?.namespace("favicon") ?? null;
     const cacheKey = ns
-      ? `${await getFaviconCacheKey(inputFilepath, faviconOptions)}.json`
+      ? `${getFaviconCacheKey(svgContents, faviconOptions)}.json`
       : null;
 
     let response: FaviconResponse | null = null;
@@ -153,7 +169,7 @@ export const faviconPlugin = ({
       }
     }
     if (response === null) {
-      response = await favicons(inputFilepath, faviconOptions);
+      response = await favicons(svgContents, faviconOptions);
       if (ns && cacheKey) {
         await ns.set(cacheKey, serializeFaviconResponse(response));
       }
@@ -169,30 +185,6 @@ export const faviconPlugin = ({
     };
     const parsedHtmlDev = response.html.map(parseHtmlTag);
     return { response, filesByName, parsedHtmlDev };
-  };
-
-  // In-memory memoization of `favicons()` + all the derived shapes
-  // (`filesByName`, parsed html). Reading `state` gives the same Promise
-  // instance until `state.invalidate()` is called — so `getInjectable` doesn't
-  // re-parse the html list, the request handler doesn't rebuild
-  // `filesByName`, and `buildPre` doesn't have to redo either. In dev, the
-  // `watchInDev` below invalidates the cache when the SVG changes and eagerly
-  // re-fires the work so the next request hits an already-resolved state.
-  const state = cell(resolveState);
-
-  const surfaceErrors = () => {
-    void read(state).catch((err) => {
-      console.error("[faviconPlugin] background favicon work failed:", err);
-    });
-  };
-
-  // Eagerly start the work at plugin construction so by the time a request
-  // arrives the result is (most likely) already resolved.
-  surfaceErrors();
-
-  watchInDev(inputFilepath, () => {
-    state.invalidate();
-    surfaceErrors();
   });
 
   const attachToExpress = (app: Express) => {
