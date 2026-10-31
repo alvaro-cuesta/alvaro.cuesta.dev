@@ -1,7 +1,7 @@
 import type { Thunk } from "./thunk.ts";
 
 /**
- * Thunks made one per key: calling it with a key gives that key's thunk.
+ * Thunks made one per key: calling it with a key gives that key's thunk, without reading it.
  *
  * The same key always gives the same thunk, so reading it through `get` tracks one value, not a new one every time.
  *

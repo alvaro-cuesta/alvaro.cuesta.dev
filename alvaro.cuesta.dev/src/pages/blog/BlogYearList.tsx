@@ -9,13 +9,14 @@ import {
   makeBlogBlurbSocialDescription,
 } from "../../../config.ts";
 import { makeTitle } from "../../utils/meta.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type BlogYearListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
 export async function BlogYearList({ siteRenderMeta }: BlogYearListProps) {
-  const blogItems = await getBlogItems();
+  const blogItems = await read(getBlogItems);
 
   return (
     <Template

@@ -11,6 +11,7 @@ import {
 } from "../../../config.ts";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
 import { paginateItems } from "../../utils/pagination.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type TimelineTagProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -23,7 +24,7 @@ export async function TimelineTag({
   tag,
   page: rawPage,
 }: TimelineTagProps) {
-  const timelineItems = await getTimelineItems();
+  const timelineItems = await read(getTimelineItems);
 
   const allItemsInTag = timelineItems.byTag.get(tag);
 

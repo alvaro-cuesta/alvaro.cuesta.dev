@@ -1,25 +1,26 @@
 import { describe, expect, it, vi } from "vitest";
 import { cell } from "./cell.ts";
 import { derived, type Get } from "./derived.ts";
+import { read } from "./thunk.ts";
 
 describe("derived", () => {
-  it("doesn't run until it's called", () => {
+  it("doesn't run until it's read", () => {
     const make = vi.fn(() => Promise.resolve(1));
     derived(make);
 
     expect(make).not.toHaveBeenCalled();
   });
 
-  it("gives every call the same promise while what it read gives the same promises", async () => {
+  it("gives every read the same promise while what it read gives the same promises", async () => {
     const source = cell(() => Promise.resolve(1));
     const make = vi.fn(async (get: Get) => (await get(source)) * 2);
     const getValue = derived(make);
 
-    const first = getValue();
+    const first = read(getValue);
 
-    expect(getValue()).toBe(first);
+    expect(read(getValue)).toBe(first);
     expect(await first).toBe(2);
-    expect(getValue()).toBe(first);
+    expect(read(getValue)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
@@ -28,16 +29,16 @@ describe("derived", () => {
     const source = cell(() => Promise.resolve(value));
     const getValue = derived(async (get) => (await get(source)) * 2);
 
-    const first = getValue();
+    const first = read(getValue);
     expect(await first).toBe(2);
 
     value = 2;
     source.invalidate();
 
-    const second = getValue();
+    const second = read(getValue);
 
     expect(second).not.toBe(first);
-    expect(getValue()).toBe(second);
+    expect(read(getValue)).toBe(second);
     expect(await second).toBe(4);
     expect(await first).toBe(2);
   });
@@ -48,12 +49,12 @@ describe("derived", () => {
     const doubled = derived(async (get) => (await get(source)) * 2);
     const getValue = derived(async (get) => (await get(doubled)) + 1);
 
-    expect(await getValue()).toBe(3);
+    expect(await read(getValue)).toBe(3);
 
     value = 2;
     source.invalidate();
 
-    expect(await getValue()).toBe(5);
+    expect(await read(getValue)).toBe(5);
   });
 
   it("tracks reads made after an await", async () => {
@@ -64,12 +65,12 @@ describe("derived", () => {
       async (get) => (await get(first)) + (await get(second)),
     );
 
-    expect(await getValue()).toBe(2);
+    expect(await read(getValue)).toBe(2);
 
     value = 2;
     second.invalidate();
 
-    expect(await getValue()).toBe(3);
+    expect(await read(getValue)).toBe(3);
   });
 
   it("only tracks what the last run read", async () => {
@@ -82,20 +83,20 @@ describe("derived", () => {
     );
     const getValue = derived(make);
 
-    expect(await getValue()).toBe("a");
+    expect(await read(getValue)).toBe("a");
 
     b.invalidate();
-    getValue();
+    read(getValue);
 
     expect(make).toHaveBeenCalledOnce();
 
     useA = false;
     choice.invalidate();
 
-    expect(await getValue()).toBe("b");
+    expect(await read(getValue)).toBe("b");
 
     a.invalidate();
-    getValue();
+    read(getValue);
 
     expect(make).toHaveBeenCalledTimes(2);
   });
@@ -111,10 +112,10 @@ describe("derived", () => {
     });
     const getValue = derived(make);
 
-    expect(await getValue()).toBe(3);
+    expect(await read(getValue)).toBe(3);
 
     // The value used both promises, so it's out of date with either.
-    expect(await getValue()).toBe(4);
+    expect(await read(getValue)).toBe(4);
     expect(make).toHaveBeenCalledTimes(2);
   });
 
@@ -127,10 +128,10 @@ describe("derived", () => {
     });
     const getValue = derived(make);
 
-    await getValue();
+    await read(getValue);
     await lateGet?.(source);
     source.invalidate();
-    getValue();
+    read(getValue);
 
     expect(make).toHaveBeenCalledOnce();
   });
@@ -142,14 +143,14 @@ describe("derived", () => {
     );
     const getValue = derived(async (get) => (await get(source)) * 2);
 
-    const first = getValue();
+    const first = read(getValue);
 
     await expect(first).rejects.toThrow("nope");
-    expect(getValue()).toBe(first);
+    expect(read(getValue)).toBe(first);
 
     fails = false;
     source.invalidate();
 
-    expect(await getValue()).toBe(2);
+    expect(await read(getValue)).toBe(2);
   });
 });

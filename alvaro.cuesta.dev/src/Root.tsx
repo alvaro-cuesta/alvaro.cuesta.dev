@@ -40,6 +40,7 @@ import {
   instantToBlogItemDate,
   type BlogItemDate,
 } from "./utils/item-dates.ts";
+import { read } from "@xenon-ssg/thunks";
 
 const Now = makeMdxPage(import.meta.resolve("./pages/Now.mdx"));
 const Bookmarks = makeMdxPage(import.meta.resolve("./pages/Bookmarks.mdx"));
@@ -250,7 +251,7 @@ export async function resolvePage(pathname: string): Promise<ResolvedPage> {
 
   const routeTimelinePostMatch = routeTimelinePost.match(pathname);
   if (routeTimelinePostMatch) {
-    const post = getTimelineItem(routeTimelinePostMatch.slug)();
+    const post = read(getTimelineItem(routeTimelinePostMatch.slug));
 
     return {
       render: (siteRenderMeta) => (
@@ -325,7 +326,7 @@ export async function resolvePage(pathname: string): Promise<ResolvedPage> {
 
   const routeBlogArticleMatch = routeBlogArticle.match(pathname);
   if (routeBlogArticleMatch) {
-    const article = getBlogItem(routeBlogArticleMatch.slug)();
+    const article = read(getBlogItem(routeBlogArticleMatch.slug));
 
     return {
       render: (siteRenderMeta) => (

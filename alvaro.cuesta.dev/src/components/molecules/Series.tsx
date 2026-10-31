@@ -5,6 +5,7 @@ import { getBlogItems } from "../../blog/promise.ts";
 import { routeBlogArticle, routeBlogTag } from "../../routes.ts";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { SERIES_TAGS } from "../../../config.ts";
+import { read } from "@xenon-ssg/thunks";
 
 export type SeriesProps = {
   /** A tag from `SERIES_TAGS`. Every post with it is part of the series. */
@@ -58,7 +59,7 @@ async function SeriesInner({
     );
   }
 
-  const blogItems = await getBlogItems();
+  const blogItems = await read(getBlogItems);
 
   // `byTag` is sorted by descending date
   const parts = (blogItems.byTag.get(tag) ?? []).toReversed().map((item) => ({

@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { gitFileDates } from "./git.ts";
+import { read } from "@xenon-ssg/thunks";
 
 let repo: string;
 
@@ -42,7 +43,7 @@ const CONTENT = "line\n".repeat(20);
 
 // Each test has its own repository, so none of them share thunks.
 const getGitFileDates = (repoRootPath: string, file: string) =>
-  gitFileDates(path.resolve(repoRootPath, file))();
+  read(gitFileDates(path.resolve(repoRootPath, file)));
 
 const getLastModifiedAt = async (repoRootPath: string, file: string) =>
   (await getGitFileDates(repoRootPath, file))?.lastModifiedAt ?? null;

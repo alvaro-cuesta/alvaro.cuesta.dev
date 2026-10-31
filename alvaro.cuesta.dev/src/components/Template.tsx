@@ -18,6 +18,7 @@ import {
   getCurrentYear,
   type BlogItemDate,
 } from "../utils/item-dates.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type TemplateProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -65,8 +66,8 @@ export async function Template({
   children,
 }: TemplateProps) {
   const [blogItems, timelineItems] = await Promise.all([
-    getBlogItems(),
-    getTimelineItems(),
+    read(getBlogItems),
+    read(getTimelineItems),
   ]);
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;

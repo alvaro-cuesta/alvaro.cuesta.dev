@@ -15,6 +15,7 @@ import { routeBlogArticle, routeBlogTag } from "../../routes.ts";
 import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
+import { read } from "@xenon-ssg/thunks";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -26,7 +27,7 @@ export async function BlogArticle({
   article: articlePromise,
 }: BlogArticleProps) {
   const [blogItems, article] = await Promise.all([
-    getBlogItems(),
+    read(getBlogItems),
     articlePromise,
   ]);
 

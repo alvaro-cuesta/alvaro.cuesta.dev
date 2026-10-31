@@ -14,7 +14,7 @@ import type {
 import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { cell } from "@xenon-ssg/thunks";
+import { cell, read } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   getCacheBustedFilename,
@@ -172,7 +172,7 @@ export const faviconPlugin = ({
   };
 
   // In-memory memoization of `favicons()` + all the derived shapes
-  // (`filesByName`, parsed html). `state()` returns the same Promise
+  // (`filesByName`, parsed html). Reading `state` gives the same Promise
   // instance until `state.invalidate()` is called — so `getInjectable` doesn't
   // re-parse the html list, the request handler doesn't rebuild
   // `filesByName`, and `buildPre` doesn't have to redo either. In dev, the
@@ -181,7 +181,7 @@ export const faviconPlugin = ({
   const state = cell(resolveState);
 
   const surfaceErrors = () => {
-    void state().catch((err) => {
+    void read(state).catch((err) => {
       console.error("[faviconPlugin] background favicon work failed:", err);
     });
   };
@@ -207,7 +207,7 @@ export const faviconPlugin = ({
         }
 
         const filename = pathFragments[1]!; // `!` is okay because we checked the length
-        const { filesByName } = await state();
+        const { filesByName } = await read(state);
         const content = filesByName[filename];
 
         if (content === undefined) {
@@ -226,7 +226,7 @@ export const faviconPlugin = ({
   }) => {
     const {
       response: { images, files },
-    } = await state();
+    } = await read(state);
     const cacheBustingMap: Record<string, string> = {};
     const toPathname = (filename: string) =>
       `/${[...mountPointFragments, filename].join("/")}`;
@@ -293,7 +293,7 @@ export const faviconPlugin = ({
   const getInjectable: PluginGetInjectableFunction<
     FaviconPluginBuildPreResult
   > = async (options) => {
-    const { response, parsedHtmlDev } = await state();
+    const { response, parsedHtmlDev } = await read(state);
     // Dev: reuse the memoized parsed tag array — stable reference until the
     // SVG source changes and the watcher resets the cache.
     if (!options.isBuild) {

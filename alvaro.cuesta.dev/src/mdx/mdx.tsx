@@ -5,6 +5,7 @@ import { getBlogItems } from "../blog/promise.ts";
 import { getTimelineItems } from "../timeline/promise.ts";
 import { rewriteCustomProtocolHref } from "../utils/href.ts";
 import { canonicalizeHref } from "@xenon-ssg/core/url";
+import { read } from "@xenon-ssg/thunks";
 
 type MdxAnchorProps = ComponentPropsWithoutRef<"a">;
 
@@ -47,8 +48,8 @@ export const makeMdxDefaultComponents = ({
   a: canonicalizeBaseUrl
     ? async function MdxAnchorCanonicalized(props) {
         const [blogItems, timelineItems] = await Promise.all([
-          getBlogItems(),
-          getTimelineItems(),
+          read(getBlogItems),
+          read(getTimelineItems),
         ]);
 
         let href = rewriteCustomProtocolHref(props.href, {
@@ -74,8 +75,8 @@ export const makeMdxDefaultComponents = ({
         if (!tagName) return renderHashtag(props);
 
         const [blogItems, timelineItems] = await Promise.all([
-          getBlogItems(),
-          getTimelineItems(),
+          read(getBlogItems),
+          read(getTimelineItems),
         ]);
 
         let href: string | undefined = `timeline-tag:///${tagName}`;

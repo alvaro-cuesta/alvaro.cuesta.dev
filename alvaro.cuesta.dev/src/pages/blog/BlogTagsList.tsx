@@ -9,13 +9,14 @@ import {
   BLOG_BLURB_DESCRIPTION,
   makeBlogBlurbSocialDescription,
 } from "../../../config.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type BlogTagListProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
 export async function BlogTagList({ siteRenderMeta }: BlogTagListProps) {
-  const blogItems = await getBlogItems();
+  const blogItems = await read(getBlogItems);
 
   return (
     <Template

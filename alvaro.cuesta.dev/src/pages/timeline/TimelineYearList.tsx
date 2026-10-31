@@ -9,6 +9,7 @@ import {
   makeTimelineBlurbSocialDescription,
 } from "../../../config.ts";
 import { makeTitle } from "../../utils/meta.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type TimelineYearListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -17,7 +18,7 @@ type TimelineYearListProps = {
 export async function TimelineYearList({
   siteRenderMeta,
 }: TimelineYearListProps) {
-  const timelineItems = await getTimelineItems();
+  const timelineItems = await read(getTimelineItems);
 
   return (
     <Template

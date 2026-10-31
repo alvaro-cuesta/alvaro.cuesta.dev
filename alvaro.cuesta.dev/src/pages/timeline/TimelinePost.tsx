@@ -17,6 +17,7 @@ import {
 import { TimelineLayout } from "./components/TimelineLayout.tsx";
 import { TimelinePostItem } from "./components/TimelinePostItem.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
+import { read } from "@xenon-ssg/thunks";
 
 type TimelinePostPageProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -27,7 +28,10 @@ export async function TimelinePostPage({
   siteRenderMeta,
   post,
 }: TimelinePostPageProps) {
-  const [timelineItems, item] = await Promise.all([getTimelineItems(), post]);
+  const [timelineItems, item] = await Promise.all([
+    read(getTimelineItems),
+    post,
+  ]);
 
   const { slug, publicationDate, tags } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);

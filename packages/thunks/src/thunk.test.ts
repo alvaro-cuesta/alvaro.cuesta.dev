@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { thunk, type Thunk } from "./thunk.ts";
+import { read, thunk, type Thunk } from "./thunk.ts";
 
 describe("Thunk", () => {
   it("isn't any function that returns a promise", () => {
@@ -8,25 +8,33 @@ describe("Thunk", () => {
 
     expect(notAThunk).toBeTypeOf("function");
   });
+
+  it("can't be called, only read", async () => {
+    const value = thunk(async () => 1);
+
+    // @ts-expect-error Reads go through `get` or `read`, so each says whether it's tracked.
+    expect(() => value()).toThrow(TypeError);
+    expect(await read(value)).toBe(1);
+  });
 });
 
 describe("thunk", () => {
-  it("doesn't run until it's called", () => {
+  it("doesn't run until it's read", () => {
     const make = vi.fn(() => Promise.resolve(1));
     thunk(make);
 
     expect(make).not.toHaveBeenCalled();
   });
 
-  it("gives every call the same promise", async () => {
+  it("gives every read the same promise", async () => {
     const make = vi.fn(() => Promise.resolve(1));
     const getValue = thunk(make);
 
-    const first = getValue();
+    const first = read(getValue);
 
-    expect(getValue()).toBe(first);
+    expect(read(getValue)).toBe(first);
     expect(await first).toBe(1);
-    expect(getValue()).toBe(first);
+    expect(read(getValue)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
@@ -34,10 +42,10 @@ describe("thunk", () => {
     const make = vi.fn(() => Promise.reject(new Error("nope")));
     const getValue = thunk(make);
 
-    const first = getValue();
+    const first = read(getValue);
 
     await expect(first).rejects.toThrow("nope");
-    expect(getValue()).toBe(first);
+    expect(read(getValue)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 });

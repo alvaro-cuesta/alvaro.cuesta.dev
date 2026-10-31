@@ -10,6 +10,7 @@ import { Icon } from "./Icon.tsx";
 import { getBlogItems } from "../../blog/promise.ts";
 import { getTimelineItems } from "../../timeline/promise.ts";
 import { rewriteCustomProtocolHref } from "../../utils/href.ts";
+import { read } from "@xenon-ssg/thunks";
 
 export function extractText(node: ReactNode): string {
   if (node === null || node === undefined || typeof node === "boolean") {
@@ -72,8 +73,8 @@ export async function Link({
   ...props
 }: LinkProps) {
   const [blogItems, timelineItems] = await Promise.all([
-    getBlogItems(),
-    getTimelineItems(),
+    read(getBlogItems),
+    read(getTimelineItems),
   ]);
 
   const rewrittenHref = rewriteCustomProtocolHref(props.href, {

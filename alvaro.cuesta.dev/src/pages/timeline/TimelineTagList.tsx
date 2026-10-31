@@ -9,6 +9,7 @@ import {
   TIMELINE_BLURB_DESCRIPTION,
   makeTimelineBlurbSocialDescription,
 } from "../../../config.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type TimelineTagListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -17,7 +18,7 @@ type TimelineTagListProps = {
 export async function TimelineTagList({
   siteRenderMeta,
 }: TimelineTagListProps) {
-  const timelineItems = await getTimelineItems();
+  const timelineItems = await read(getTimelineItems);
 
   return (
     <Template

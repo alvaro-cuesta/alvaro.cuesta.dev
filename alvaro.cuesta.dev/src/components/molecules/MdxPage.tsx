@@ -7,6 +7,7 @@ import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { contentFile } from "../../utils/content-file.ts";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type MdxPageModule = {
   default: MDXContent;
@@ -31,7 +32,7 @@ export function makeMdxPage(contentFileUrl: string) {
   // A page that was never edited was last updated when it was created. No git history means it isn't committed yet,
   // i.e. it's being written right now.
   const getLastUpdated = async (): Promise<Temporal.Instant> => {
-    const { gitDates } = await page();
+    const { gitDates } = await read(page);
     return (
       gitDates?.lastModifiedAt ?? gitDates?.createdAt ?? Temporal.Now.instant()
     );
@@ -44,7 +45,7 @@ export function makeMdxPage(contentFileUrl: string) {
       description,
       openGraphType = "website",
       tableOfContents,
-    } = (await page()).module as MdxPageModule;
+    } = (await read(page)).module as MdxPageModule;
 
     if (title === undefined) {
       throw new Error(

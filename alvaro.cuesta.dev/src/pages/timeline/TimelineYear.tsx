@@ -11,6 +11,7 @@ import {
 import { makeTitle } from "../../utils/meta.ts";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
 import { paginateItems } from "../../utils/pagination.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type TimelineYearProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -23,7 +24,7 @@ export async function TimelineYear({
   year,
   page: rawPage,
 }: TimelineYearProps) {
-  const timelineItems = await getTimelineItems();
+  const timelineItems = await read(getTimelineItems);
 
   const yearInfo = timelineItems.byYear.get(year);
   if (yearInfo === undefined) {

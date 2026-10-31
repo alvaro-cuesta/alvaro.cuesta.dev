@@ -9,6 +9,7 @@ import {
   makeBlogBlurbSocialDescription,
 } from "../../../config.ts";
 import { makeTitle } from "../../utils/meta.ts";
+import { read } from "@xenon-ssg/thunks";
 
 type BlogYearProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -35,7 +36,7 @@ const MONTH_NUMBER_TO_NAME: {
 const NULL_MONTH_TO_NAME = "Other";
 
 export async function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
-  const blogItems = await getBlogItems();
+  const blogItems = await read(getBlogItems);
 
   const yearInfo = blogItems.byYear.get(year);
   if (yearInfo === undefined) {

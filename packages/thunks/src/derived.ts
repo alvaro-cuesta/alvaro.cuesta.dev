@@ -1,5 +1,5 @@
 import { cell } from "./cell.ts";
-import { brand, type Thunk } from "./thunk.ts";
+import { brand, read, type Thunk } from "./thunk.ts";
 
 /**
  * Reads a thunk from a derived thunk's `make`, so it runs again once that thunk gives a new
@@ -19,21 +19,21 @@ type Reads = Map<Thunk<unknown>, Promise<unknown>>;
 /**
  * A thunk whose value is made from other thunks' values, so it changes only when theirs do.
  *
- * It runs `make` the first time it's called, and again on the first call after any thunk `make`
- * read through `get` gives a new promise. Until then, every call gets the same promise, like a
+ * It runs `make` the first time it's read, and again on the first read after any thunk `make`
+ * read through `get` gives a new promise. Until then, every read gets the same promise, like a
  * {@link thunk}'s.
  *
- * It checks what it read when it's called, not when what it read changes: nothing runs until
+ * It checks what it read when it's read itself, not when what it read changes: nothing runs until
  * someone asks for the value.
  *
- * Running again only affects later calls: promises it already gave keep their value.
+ * Running again only affects later reads: promises it already gave keep their value.
  *
  * @param make Makes the promise from what it reads through `get`, the first time the thunk is
- *   called and again after something it read changed.
+ *   read and again after something it read changed.
  * @returns The thunk.
  */
 export function derived<T>(make: (get: Get) => Promise<T>): Thunk<T> {
-  // What the last run read. Nothing before the first run, so the first call just runs.
+  // What the last run read. Nothing before the first run, so the first read just runs.
   let reads: Reads = new Map();
 
   const value = cell(() => {
@@ -42,7 +42,7 @@ export function derived<T>(make: (get: Get) => Promise<T>): Thunk<T> {
     reads = runReads;
 
     const get: Get = (thunk) => {
-      const promise = thunk();
+      const promise = read(thunk);
       // Keep the first promise: if a later read got a new one, the value already used the old one.
       if (!settled && !runReads.has(thunk)) runReads.set(thunk, promise);
       return promise;
@@ -57,9 +57,9 @@ export function derived<T>(make: (get: Get) => Promise<T>): Thunk<T> {
   });
 
   return brand(() => {
-    if (![...reads].every(([thunk, promise]) => thunk() === promise)) {
+    if (![...reads].every(([thunk, promise]) => read(thunk) === promise)) {
       value.invalidate();
     }
-    return value();
+    return read(value);
   });
 }

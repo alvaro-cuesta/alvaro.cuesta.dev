@@ -15,6 +15,7 @@ import {
 import { TimelineLayout } from "./components/TimelineLayout.tsx";
 import { TimelinePostItem } from "./components/TimelinePostItem.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
+import { read } from "@xenon-ssg/thunks";
 
 type TimelineListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -26,7 +27,7 @@ export async function TimelineList({
   siteRenderMeta,
   page: rawPage,
 }: TimelineListProps) {
-  const timelineItems = await getTimelineItems();
+  const timelineItems = await read(getTimelineItems);
 
   const page = rawPage ?? 1;
 

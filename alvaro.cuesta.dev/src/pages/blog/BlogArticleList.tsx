@@ -15,6 +15,7 @@ import {
   makeBlogBlurbSocialDescription,
 } from "../../../config.ts";
 import { Link } from "../../components/atoms/Link.tsx";
+import { read } from "@xenon-ssg/thunks";
 
 type BlogArticleListProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -26,7 +27,7 @@ export async function BlogArticleList({
   siteRenderMeta,
   page: rawPage,
 }: BlogArticleListProps) {
-  const blogItems = await getBlogItems();
+  const blogItems = await read(getBlogItems);
 
   const page = rawPage ?? 1;
 

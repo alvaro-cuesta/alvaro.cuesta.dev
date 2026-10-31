@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { cell } from "./cell.ts";
 import { family } from "./family.ts";
-import { thunk } from "./thunk.ts";
+import { read, thunk } from "./thunk.ts";
 
 describe("family", () => {
   it("doesn't make anything until it's called", () => {
@@ -23,8 +23,8 @@ describe("family", () => {
     const getValue = family((key: string) => thunk(async () => key));
 
     expect(getValue("a")).not.toBe(getValue("b"));
-    expect(await getValue("a")()).toBe("a");
-    expect(await getValue("b")()).toBe("b");
+    expect(await read(getValue("a"))).toBe("a");
+    expect(await read(getValue("b"))).toBe("b");
   });
 
   it("makes a new thunk for a key it dropped", () => {

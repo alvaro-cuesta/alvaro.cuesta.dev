@@ -5,7 +5,7 @@ import type { FeedSourceItem } from "@xenon-ssg/express-plugin-feeds";
 import { renderToString } from "@xenon-ssg/core/render";
 import type { MDXContent } from "mdx/types.js";
 import type { AnalyzedItems, Item } from "./analyze.ts";
-import type { Thunk } from "@xenon-ssg/thunks";
+import { read, type Thunk } from "@xenon-ssg/thunks";
 
 type RenderContentItemHtmlOptions = {
   baseUrl: string;
@@ -84,7 +84,7 @@ export function createFeedSource<TModuleParsed, const TMetadata = unknown>(
   ) => FeedSourceItem<TMetadata> | Promise<FeedSourceItem<TMetadata>>,
 ): (baseUrl: string) => Promise<FeedSourceItem<TMetadata>[]> {
   return async (baseUrl: string): Promise<FeedSourceItem<TMetadata>[]> => {
-    const analyzed = await getAnalyzedItems();
+    const analyzed = await read(getAnalyzedItems);
     return Promise.all(
       analyzed.allSortedByDescendingDate.map((item) =>
         toFeedSourceItem(baseUrl, item),
