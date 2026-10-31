@@ -2,7 +2,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseBlogItemModuleFromImportModule } from "./item-module.ts";
 import { createContentLoader } from "../utils/content-loader.ts";
-import { derived, family } from "@xenon-ssg/thunks";
+import { derived } from "@xenon-ssg/thunks";
 import { SITE_ROOT_FOLDER } from "../../config.ts";
 
 const BLOG_FOLDER = path.join(SITE_ROOT_FOLDER, "blog");
@@ -25,19 +25,23 @@ export const getBlogItems = createContentLoader({
   },
 });
 
+// One thunk for all slugs, not one per slug: slugs come from requests, so
+// there'd be no end to them.
 /**
- * The article with that slug.
+ * Finds the article with a slug.
  *
- * Rejects when there's none.
+ * The function throws when there's none.
  */
-export const getBlogItem = family((slug: string) =>
-  derived(async (get) => {
-    const item = (await get(getBlogItems)).bySlug.get(slug);
+export const getBlogItem = derived(async (get) => {
+  const { bySlug } = await get(getBlogItems);
+
+  return (slug: string) => {
+    const item = bySlug.get(slug);
 
     if (item === undefined) {
       throw new Error(`Article ${slug} not found`);
     }
 
     return item;
-  }),
-);
+  };
+});

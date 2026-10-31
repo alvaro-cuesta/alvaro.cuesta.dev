@@ -8,7 +8,7 @@ import { getBlogItems } from "../blog/promise.ts";
 import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
-import { derived, family } from "@xenon-ssg/thunks";
+import { derived } from "@xenon-ssg/thunks";
 
 const TIMELINE_FOLDER = path.join(SITE_ROOT_FOLDER, "timeline");
 
@@ -83,19 +83,23 @@ export const getTimelineItems = derived(async (get) => {
   return mergeWithImplicitPosts(raw, blog);
 });
 
+// One thunk for all slugs, not one per slug: slugs come from requests, so
+// there'd be no end to them.
 /**
- * The post with that slug.
+ * Finds the post with a slug.
  *
- * Rejects when there's none.
+ * The function throws when there's none.
  */
-export const getTimelineItem = family((slug: string) =>
-  derived(async (get) => {
-    const item = (await get(getTimelineItems)).bySlug.get(slug);
+export const getTimelineItem = derived(async (get) => {
+  const { bySlug } = await get(getTimelineItems);
+
+  return (slug: string) => {
+    const item = bySlug.get(slug);
 
     if (item === undefined) {
       throw new Error(`Timeline post "${slug}" not found`);
     }
 
     return item;
-  }),
-);
+  };
+});
