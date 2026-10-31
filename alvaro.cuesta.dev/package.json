@@ -4,6 +4,7 @@
   "type": "module",
   "version": "1.0.0",
   "description": "Álvaro Cuesta's personal website.",
+  "sideEffects": true,
   "imports": {
     "#components/*": "./src/components/*.tsx"
   },
