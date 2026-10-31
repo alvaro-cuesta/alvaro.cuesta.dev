@@ -7,7 +7,7 @@ import type {
   PluginBuildPreFunction,
   PluginBuildPostFunction,
   PluginGetInjectableFunction,
-} from "./plugins.tsx";
+} from "@xenon-ssg/express/plugin";
 
 type SitemapPluginOptions = {
   robotsTxtContent?: string;

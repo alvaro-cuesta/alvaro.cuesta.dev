@@ -46,7 +46,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "scripts": {
     "build": "tsc -b tsconfig.package.json",
@@ -81,7 +81,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "@types/express": "catalog:",
-    "@types/node": ">=24",
+    "@types/node": ">=26",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:"
   },

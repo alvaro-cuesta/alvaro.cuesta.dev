@@ -1,5 +1,5 @@
 import type { RenderToStreamOptions } from "@xenon-ssg/core/render";
-import type { PluginInjectableTag, Plugin } from "./plugins/plugins.tsx";
+import type { PluginInjectableTag, Plugin } from "./plugin.tsx";
 import type { ReactNode } from "react";
 import type { XenonRenderFunction } from "@xenon-ssg/core";
 import type { UnknownRecord } from "type-fest";

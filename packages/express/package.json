@@ -21,40 +21,20 @@
       "types": "./dist/cache.d.ts",
       "default": "./dist/cache.js"
     },
+    "./cache-busting": {
+      "@xenon-ssg/source": "./src/cache-busting.ts",
+      "types": "./dist/cache-busting.d.ts",
+      "default": "./dist/cache-busting.js"
+    },
     "./dev": {
       "@xenon-ssg/source": "./src/dev.ts",
       "types": "./dist/dev.d.ts",
       "default": "./dist/dev.js"
     },
-    "./plugins/favicon": {
-      "@xenon-ssg/source": "./src/plugins/favicon.ts",
-      "types": "./dist/plugins/favicon.d.ts",
-      "default": "./dist/plugins/favicon.js"
-    },
-    "./plugins/plugins": {
-      "@xenon-ssg/source": "./src/plugins/plugins.tsx",
-      "types": "./dist/plugins/plugins.d.ts",
-      "default": "./dist/plugins/plugins.js"
-    },
-    "./plugins/sitemap": {
-      "@xenon-ssg/source": "./src/plugins/sitemap.ts",
-      "types": "./dist/plugins/sitemap.d.ts",
-      "default": "./dist/plugins/sitemap.js"
-    },
-    "./plugins/single-lightningcss": {
-      "@xenon-ssg/source": "./src/plugins/single-lightningcss.ts",
-      "types": "./dist/plugins/single-lightningcss.d.ts",
-      "default": "./dist/plugins/single-lightningcss.js"
-    },
-    "./plugins/static-file": {
-      "@xenon-ssg/source": "./src/plugins/static-file.ts",
-      "types": "./dist/plugins/static-file.d.ts",
-      "default": "./dist/plugins/static-file.js"
-    },
-    "./plugins/static-folder": {
-      "@xenon-ssg/source": "./src/plugins/static-folder.ts",
-      "types": "./dist/plugins/static-folder.d.ts",
-      "default": "./dist/plugins/static-folder.js"
+    "./plugin": {
+      "@xenon-ssg/source": "./src/plugin.tsx",
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
     }
   },
   "files": [
@@ -67,8 +47,6 @@
     "build": "tsc -b tsconfig.package.json",
     "clean": "tsc -b tsconfig.package.json --clean && node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "prepack": "pnpm run clean && tsc -b tsconfig.package.json --sourceMap false --declarationMap false",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "lint:tsc": "tsc -b"
   },
   "repository": {
@@ -92,13 +70,9 @@
   "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express#readme",
   "dependencies": {
     "@types/express": "catalog:",
-    "@xenon-ssg/thunks": "workspace:^",
-    "express": "^5.2.1",
-    "favicons": "^7.2.0",
-    "lightningcss": "^1.25.1",
+    "express": "catalog:",
     "morgan": "^1.10.0",
-    "type-fest": "catalog:",
-    "xmlbuilder2": "catalog:"
+    "type-fest": "catalog:"
   },
   "peerDependencies": {
     "@xenon-ssg/core": "workspace:^",
@@ -120,7 +94,6 @@
     "@types/react": "catalog:",
     "@xenon-ssg/core": "workspace:*",
     "react": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "typescript": "catalog:"
   }
 }

@@ -12,22 +12,22 @@ import {
   SITE_SHORT_DESCRIPTION,
   SITE_TITLE,
 } from "../config.ts";
-import { staticFilePlugin } from "@xenon-ssg/express/plugins/static-file";
-import { staticFolderPlugin } from "@xenon-ssg/express/plugins/static-folder";
-import { singleLightningCssPlugin } from "@xenon-ssg/express/plugins/single-lightningcss";
+import { staticFilePlugin } from "@xenon-ssg/express-plugin-static-file";
+import { staticFolderPlugin } from "@xenon-ssg/express-plugin-static-folder";
+import { singleLightningCssPlugin } from "@xenon-ssg/express-plugin-single-lightningcss";
 import path from "node:path";
 import url from "node:url";
-import { faviconPlugin } from "@xenon-ssg/express/plugins/favicon";
+import { faviconPlugin } from "@xenon-ssg/express-plugin-favicon";
 import { createXenonCache } from "@xenon-ssg/express/cache";
 import pkg from "../package.json" with { type: "json" };
 const version = pkg.version;
-import type { PluginInjectableLink } from "@xenon-ssg/express/plugins/plugins";
+import type { PluginInjectableLink } from "@xenon-ssg/express/plugin";
 import { resolvePage, type PageDates } from "./Root.tsx";
 import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
-} from "@xenon-ssg/express/plugins/sitemap";
+} from "@xenon-ssg/express-plugin-sitemap";
 import {
   routeBlogArticleList,
   routeHome,

@@ -18,6 +18,9 @@ catalogs:
     '@types/react-dom':
       specifier: ^19.2.3
       version: 19.2.3
+    express:
+      specifier: ^5.2.1
+      version: 5.2.1
     react:
       specifier: ^19.2.5
       version: 19.2.5
@@ -76,6 +79,21 @@ importers:
       '@xenon-ssg/express':
         specifier: workspace:*
         version: link:../packages/express
+      '@xenon-ssg/express-plugin-favicon':
+        specifier: workspace:*
+        version: link:../packages/express-plugin-favicon
+      '@xenon-ssg/express-plugin-single-lightningcss':
+        specifier: workspace:*
+        version: link:../packages/express-plugin-single-lightningcss
+      '@xenon-ssg/express-plugin-sitemap':
+        specifier: workspace:*
+        version: link:../packages/express-plugin-sitemap
+      '@xenon-ssg/express-plugin-static-file':
+        specifier: workspace:*
+        version: link:../packages/express-plugin-static-file
+      '@xenon-ssg/express-plugin-static-folder':
+        specifier: workspace:*
+        version: link:../packages/express-plugin-static-folder
       '@xenon-ssg/thunks':
         specifier: workspace:*
         version: link:../packages/thunks
@@ -228,27 +246,15 @@ importers:
       '@types/express':
         specifier: 'catalog:'
         version: 5.0.6
-      '@xenon-ssg/thunks':
-        specifier: workspace:^
-        version: link:../thunks
       express:
-        specifier: ^5.2.1
+        specifier: 'catalog:'
         version: 5.2.1
-      favicons:
-        specifier: ^7.2.0
-        version: 7.2.0
-      lightningcss:
-        specifier: ^1.25.1
-        version: 1.32.0
       morgan:
         specifier: ^1.10.0
         version: 1.10.1
       type-fest:
         specifier: 'catalog:'
         version: 5.10.0
-      xmlbuilder2:
-        specifier: 'catalog:'
-        version: 4.0.3
     devDependencies:
       '@types/morgan':
         specifier: ^1.9.9
@@ -268,9 +274,104 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
+
+  packages/express-plugin-favicon:
+    dependencies:
+      '@types/express':
+        specifier: 'catalog:'
+        version: 5.0.6
+      '@xenon-ssg/thunks':
+        specifier: workspace:^
+        version: link:../thunks
+      favicons:
+        specifier: ^7.2.0
+        version: 7.2.0
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@xenon-ssg/core':
+        specifier: workspace:*
+        version: link:../core
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../express
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/express-plugin-single-lightningcss:
+    dependencies:
+      lightningcss:
+        specifier: ^1.25.1
+        version: 1.32.0
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../express
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/express-plugin-sitemap:
+    dependencies:
+      xmlbuilder2:
+        specifier: 'catalog:'
+        version: 4.0.3
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../express
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
+
+  packages/express-plugin-static-file:
+    dependencies:
+      '@types/express':
+        specifier: 'catalog:'
+        version: 5.0.6
+      express:
+        specifier: 'catalog:'
+        version: 5.2.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../express
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/express-plugin-static-folder:
+    dependencies:
+      '@types/express':
+        specifier: 'catalog:'
+        version: 5.0.6
+      express:
+        specifier: 'catalog:'
+        version: 5.2.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../express
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
 
   packages/thunks:
     devDependencies:

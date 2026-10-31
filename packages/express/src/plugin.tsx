@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import type { XenonExpressSiteMeta } from "../index.tsx";
+import type { XenonExpressSiteMeta } from "./index.tsx";
 import type { ReactNode } from "react";
 import type { XenonGeneratedPage } from "@xenon-ssg/core/generate/generate";
 import type { UnknownRecord } from "type-fest";

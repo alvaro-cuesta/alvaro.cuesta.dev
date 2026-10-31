@@ -6,7 +6,7 @@ import {
   DEFAULT_DEV_PORT,
   getSiteMeta,
 } from "./index.tsx";
-import { getTagsFromInjectableRaw } from "./plugins/plugins.tsx";
+import { getTagsFromInjectableRaw } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
 
 /**

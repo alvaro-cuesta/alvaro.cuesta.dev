@@ -9,7 +9,7 @@ import type {
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
   PluginInjectableTag,
-} from "@xenon-ssg/express/plugins/plugins";
+} from "@xenon-ssg/express/plugin";
 import { serializeAtomDocument } from "./atom.ts";
 import { compileFeedPageModels } from "./content.ts";
 import { serializeJsonDocuments } from "./jsonfeed.ts";

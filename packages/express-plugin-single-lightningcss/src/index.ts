@@ -6,11 +6,11 @@ import type {
   PluginAttachToExpressFunction,
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
-} from "./plugins.tsx";
+} from "@xenon-ssg/express/plugin";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
-} from "../cache-busting.ts";
+} from "@xenon-ssg/express/cache-busting";
 
 type SingleLightningCssPluginOptions = {
   inputFilepath: string;

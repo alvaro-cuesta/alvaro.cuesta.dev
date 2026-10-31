@@ -4,6 +4,11 @@
     { "path": "./packages/thunks" },
     { "path": "./packages/core" },
     { "path": "./packages/express" },
+    { "path": "./packages/express-plugin-favicon" },
+    { "path": "./packages/express-plugin-sitemap" },
+    { "path": "./packages/express-plugin-single-lightningcss" },
+    { "path": "./packages/express-plugin-static-file" },
+    { "path": "./packages/express-plugin-static-folder" },
     { "path": "./alvaro.cuesta.dev" }
   ]
 }

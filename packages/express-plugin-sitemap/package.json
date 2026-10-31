@@ -1,0 +1,61 @@
+{
+  "name": "@xenon-ssg/express-plugin-sitemap",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Xenon SSG Express plugin that writes a sitemap of the generated pages, and a robots.txt that points to it.",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@xenon-ssg/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.package.json",
+    "clean": "tsc -b tsconfig.package.json --clean && node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prepack": "pnpm run clean && tsc -b tsconfig.package.json --sourceMap false --declarationMap false",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:tsc": "tsc -b"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git",
+    "directory": "packages/express-plugin-sitemap"
+  },
+  "keywords": [
+    "xenon",
+    "ssg",
+    "static-site-generator",
+    "express",
+    "xenon-ssg-express-plugin",
+    "sitemap",
+    "robots.txt"
+  ],
+  "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
+  "license": "AGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
+  },
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express-plugin-sitemap#readme",
+  "dependencies": {
+    "xmlbuilder2": "catalog:"
+  },
+  "peerDependencies": {
+    "@xenon-ssg/express": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@xenon-ssg/express": "workspace:*",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

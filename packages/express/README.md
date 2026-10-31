@@ -12,10 +12,16 @@ Dead simple layer, following the same simplicity philosophy (libraries before fr
 
 ## Plugins
 
-- [Static file](./src/plugins/static-file.ts)
-- [Static folder](./src/plugins/static-folder.ts)
-- [Single LightningCSS](./src/plugins/single-lightningcss.ts)
-- [Favicon](./src/plugins/favicon.ts)
+Each one is a package of its own:
+
+- [Static file](../express-plugin-static-file/)
+- [Static folder](../express-plugin-static-folder/)
+- [Single LightningCSS](../express-plugin-single-lightningcss/)
+- [Favicon](../express-plugin-favicon/)
+- [Sitemap](../express-plugin-sitemap/)
+
+To write your own, see [`plugin.tsx`](./src/plugin.tsx). Plugins can also use the runtime's
+[cache](./src/cache.ts) and [cache busting](./src/cache-busting.ts).
 
 ## License
 

@@ -16,6 +16,11 @@
   "references": [
     { "path": "../packages/core/tsconfig.package.json" },
     { "path": "../packages/express/tsconfig.package.json" },
+    { "path": "../packages/express-plugin-favicon/tsconfig.package.json" },
+    { "path": "../packages/express-plugin-sitemap/tsconfig.package.json" },
+    { "path": "../packages/express-plugin-single-lightningcss/tsconfig.package.json" },
+    { "path": "../packages/express-plugin-static-file/tsconfig.package.json" },
+    { "path": "../packages/express-plugin-static-folder/tsconfig.package.json" },
     { "path": "../packages/thunks/tsconfig.package.json" }
   ]
 }

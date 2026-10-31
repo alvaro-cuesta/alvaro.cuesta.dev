@@ -5,7 +5,7 @@ import type {
   Plugin,
   PluginAttachToExpressFunction,
   PluginBuildPreFunction,
-} from "./plugins.tsx";
+} from "@xenon-ssg/express/plugin";
 
 type StaticFolderPluginOptions = {
   inputFolder: string;

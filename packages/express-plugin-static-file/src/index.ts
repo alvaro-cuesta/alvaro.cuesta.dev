@@ -5,11 +5,11 @@ import type {
   Plugin,
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
-} from "./plugins.tsx";
+} from "@xenon-ssg/express/plugin";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentFile,
-} from "../cache-busting.ts";
+} from "@xenon-ssg/express/cache-busting";
 
 type StaticFilePluginOptions = {
   inputFilepath: string;

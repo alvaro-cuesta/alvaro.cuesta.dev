@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import vfs from "node:vfs";
 import { describe, expect, it } from "vitest";
-import type { XenonExpressSiteMeta } from "../index.tsx";
+import type { XenonExpressSiteMeta } from "@xenon-ssg/express";
 import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
-} from "./sitemap.ts";
+} from "./index.ts";
 
 // Missing from `@types/node` (as of 26.6.6).
 declare module "node:vfs" {

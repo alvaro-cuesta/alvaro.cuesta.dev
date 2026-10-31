@@ -10,7 +10,8 @@ import type {
   Plugin,
   PluginGetInjectableFunction,
   PluginBuildPreFunction,
-} from "./plugins.tsx";
+} from "@xenon-ssg/express/plugin";
+import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { cell } from "@xenon-ssg/thunks";
@@ -18,9 +19,8 @@ import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
-} from "../cache-busting.ts";
-import { getContentHash } from "../crypto.ts";
-import type { XenonCache } from "../cache.ts";
+} from "@xenon-ssg/express/cache-busting";
+import type { XenonCache } from "@xenon-ssg/express/cache";
 
 const LINK_REGEX =
   /<link\s+rel="(?<rel>.+?)"\s+(?:type="(?<type>.+?)"\s+)?(?:sizes="(?<sizes>.+?)"\s+)?(?:media="(?<media>.+?)"\s+)?href="(?<href>.+?)">/;
@@ -119,7 +119,7 @@ const getFaviconCacheKey = async (
     Buffer.from("\0"),
     Buffer.from(JSON.stringify(faviconOptions)),
   ]);
-  return getContentHash(payload, "hex");
+  return crypto.createHash("sha256").update(payload).digest("hex");
 };
 
 type FaviconDerivedState = {

@@ -76,7 +76,7 @@ jobs:
         package:
           - alvaro.cuesta.dev
           - packages/core
-          - packages/express
+          - packages/express-plugin-sitemap
           - packages/thunks
     steps:
       - *checkout
