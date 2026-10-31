@@ -6,8 +6,9 @@ import {
   type TransformCallback,
 } from "node:stream";
 import fs from "node:fs/promises";
+import { pipeline } from "node:stream/promises";
 import type { ReactNode } from "react";
-import type { PathLike } from "node:fs";
+import { createWriteStream, type PathLike } from "node:fs";
 
 // Matches React's placeholder comments:
 // - <!-- --> (text node separator)
@@ -159,12 +160,14 @@ export const renderToString = async (
  * Render a React node to a file.
  */
 const renderToFile = async (
-  path: PathLike | fs.FileHandle,
+  path: PathLike,
   reactNode: ReactNode,
   options?: RenderToStreamOptions,
 ) => {
   const stream = renderToStream(reactNode, options);
-  await fs.writeFile(path, stream);
+  // Not `fs.writeFile`: it only starts reading the stream once the file is open, so a render that
+  // fails before that emits an error nothing listens to, crashing the process.
+  await pipeline(stream, createWriteStream(path));
 };
 
 /**
