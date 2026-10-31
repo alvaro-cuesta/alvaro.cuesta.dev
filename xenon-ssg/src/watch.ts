@@ -5,6 +5,10 @@ import fs, { type FileChangeInfo } from "node:fs/promises";
  * and call `onChange` with every change event. Does nothing in production
  * (`NODE_ENV !== "development"`).
  *
+ * The watch lasts until the returned `Disposable` is disposed, so `using` ends
+ * it with its scope. Ignoring it keeps the watch for as long as the process
+ * runs.
+ *
  * Errors from `fs.watch` itself (file deleted, permissions changed, etc.)
  * are caught and logged as warnings rather than left as unhandled rejections
  * — a misbehaving watcher should not take the dev server down.
@@ -16,19 +20,27 @@ import fs, { type FileChangeInfo } from "node:fs/promises";
  * const page = cachedPromise(loadPage, { lazy: true });
  * watchInDev(filePath, () => page.reset());
  * ```
+ *
+ * @returns What stops the watch when disposed.
  */
 export function watchInDev(
   watchPath: string,
   onChange: (event: FileChangeInfo<string>) => void,
-): void {
-  if (process.env["NODE_ENV"] !== "development") return;
+): Disposable {
+  const controller = new AbortController();
+  const watch = { [Symbol.dispose]: () => controller.abort() };
+  if (process.env["NODE_ENV"] !== "development") return watch;
   void (async () => {
     try {
-      for await (const event of fs.watch(watchPath)) {
+      for await (const event of fs.watch(watchPath, {
+        signal: controller.signal,
+      })) {
         onChange(event);
       }
     } catch (err) {
+      if (controller.signal.aborted) return;
       console.warn(`[watchInDev] watch on ${watchPath} aborted:`, err);
     }
   })();
+  return watch;
 }

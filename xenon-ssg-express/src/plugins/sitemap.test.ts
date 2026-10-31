@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import vfs from "node:vfs";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { XenonExpressSiteMeta } from "../index.tsx";
 import {
   sitemapPlugin,
@@ -14,24 +14,16 @@ declare module "node:vfs" {
   interface VirtualFileSystem {
     /** Mounts the file system at a path of its own and returns it. */
     mount(): string;
-    unmount(): void;
+    /** Unmounts the file system. */
+    [Symbol.dispose](): void;
   }
 }
 
 describe("sitemapPlugin", () => {
-  let virtualFs: vfs.VirtualFileSystem;
-  let baseOutputFolder: string;
-
-  beforeEach(() => {
-    virtualFs = vfs.create({ emitExperimentalWarning: false });
-    baseOutputFolder = virtualFs.mount();
-  });
-
-  afterEach(() => {
-    virtualFs.unmount();
-  });
-
   it("omits generated pages explicitly excluded from the sitemap", async () => {
+    using virtualFs = vfs.create({ emitExperimentalWarning: false });
+    const baseOutputFolder = virtualFs.mount();
+
     const siteMeta: XenonExpressSiteMeta = {
       origin: "https://example.com",
       basepath: "",
