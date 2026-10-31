@@ -13,7 +13,7 @@ import type {
 } from "./plugins.tsx";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { cachedPromise } from "@xenon-ssg/core/promise";
+import { cell } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   getCacheBustedFilename,
@@ -172,16 +172,16 @@ export const faviconPlugin = ({
   };
 
   // In-memory memoization of `favicons()` + all the derived shapes
-  // (`filesByName`, parsed html). `state.get()` returns the same Promise
-  // instance until `state.reset()` is called — so `getInjectable` doesn't
+  // (`filesByName`, parsed html). `state()` returns the same Promise
+  // instance until `state.invalidate()` is called — so `getInjectable` doesn't
   // re-parse the html list, the request handler doesn't rebuild
   // `filesByName`, and `buildPre` doesn't have to redo either. In dev, the
-  // `watchInDev` below resets the cache when the SVG changes and eagerly
+  // `watchInDev` below invalidates the cache when the SVG changes and eagerly
   // re-fires the work so the next request hits an already-resolved state.
-  const state = cachedPromise(resolveState, { lazy: true });
+  const state = cell(resolveState);
 
   const surfaceErrors = () => {
-    void state.get().catch((err) => {
+    void state().catch((err) => {
       console.error("[faviconPlugin] background favicon work failed:", err);
     });
   };
@@ -191,7 +191,7 @@ export const faviconPlugin = ({
   surfaceErrors();
 
   watchInDev(inputFilepath, () => {
-    state.reset();
+    state.invalidate();
     surfaceErrors();
   });
 
@@ -207,7 +207,7 @@ export const faviconPlugin = ({
         }
 
         const filename = pathFragments[1]!; // `!` is okay because we checked the length
-        const { filesByName } = await state.get();
+        const { filesByName } = await state();
         const content = filesByName[filename];
 
         if (content === undefined) {
@@ -226,7 +226,7 @@ export const faviconPlugin = ({
   }) => {
     const {
       response: { images, files },
-    } = await state.get();
+    } = await state();
     const cacheBustingMap: Record<string, string> = {};
     const toPathname = (filename: string) =>
       `/${[...mountPointFragments, filename].join("/")}`;
@@ -293,7 +293,7 @@ export const faviconPlugin = ({
   const getInjectable: PluginGetInjectableFunction<
     FaviconPluginBuildPreResult
   > = async (options) => {
-    const { response, parsedHtmlDev } = await state.get();
+    const { response, parsedHtmlDev } = await state();
     // Dev: reuse the memoized parsed tag array — stable reference until the
     // SVG source changes and the watcher resets the cache.
     if (!options.isBuild) {

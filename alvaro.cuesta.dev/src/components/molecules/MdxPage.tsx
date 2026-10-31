@@ -7,7 +7,7 @@ import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { getGitFileDates } from "../../utils/git.ts";
-import { cachedPromise } from "@xenon-ssg/core/promise";
+import { cell } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
 import { SITE_ROOT_FOLDER } from "../../../config.ts";
@@ -33,12 +33,12 @@ export function makeMdxPage(contentFileUrl: string) {
   const isDev = process.env["NODE_ENV"] === "development";
   const filePath = url.fileURLToPath(contentFileUrl);
 
-  const page = cachedPromise(
+  const page = cell(
     async () => {
-      // In dev, cache-bust the dynamic import so the watcher's `page.reset()`
+      // In dev, cache-bust the dynamic import so the watcher's `page.invalidate()`
       // actually picks up the new module instance — without the `?${Date.now()}`
       // suffix, Node's ESM module cache would return the same (stale) module
-      // object even after the cachedPromise wrapper has been reset. In
+      // object even after the cell has been invalidated. In
       // production, use the bare URL to avoid leaking unique module
       // instances at build time. Same trick as `content-loader.ts` uses for
       // blog/timeline content.
@@ -52,20 +52,17 @@ export function makeMdxPage(contentFileUrl: string) {
 
       return { module, gitDates };
     },
-    {
-      lazy: true,
-    },
   );
 
   // On source-file change in dev, drop the cached module so the next render
   // re-imports a fresh one via the cache-busted URL above. Same mechanism
   // `content-loader.ts` uses for blog/timeline content.
-  watchInDev(filePath, () => page.reset());
+  watchInDev(filePath, () => page.invalidate());
 
   // A page that was never edited was last updated when it was created. No git history means it isn't committed yet,
   // i.e. it's being written right now.
   const getLastUpdated = async (): Promise<Temporal.Instant> => {
-    const { gitDates } = await page.get();
+    const { gitDates } = await page();
     return (
       gitDates?.lastModifiedAt ?? gitDates?.createdAt ?? Temporal.Now.instant()
     );
@@ -80,7 +77,7 @@ export function makeMdxPage(contentFileUrl: string) {
         openGraphType = "website",
         tableOfContents,
       },
-    } = await page.get();
+    } = await page();
 
     if (title === undefined) {
       throw new Error(

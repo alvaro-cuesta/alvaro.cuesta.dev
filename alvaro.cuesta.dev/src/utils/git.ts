@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { cachedPromise, type CachedPromise } from "@xenon-ssg/core/promise";
+import { cell, type Cell } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 
 const runGitCommand = async (
@@ -49,7 +49,7 @@ const readIgnoredRevs = async (
   );
 };
 
-const ignoredRevsByCwd = new Map<string, CachedPromise<Set<string>>>();
+const ignoredRevsByCwd = new Map<string, Cell<Set<string>>>();
 
 /**
  * The commits listed in the repository's `.git-blame-ignore-revs`.
@@ -66,7 +66,7 @@ const getIgnoredRevs = (cwd: string): Promise<Set<string>> => {
 
   if (ignoredRevs === undefined) {
     const repoRootPath = runGitCommand(["rev-parse", "--show-toplevel"], cwd);
-    const cache = cachedPromise(async () =>
+    const cache = cell(async () =>
       readIgnoredRevs(await repoRootPath),
     );
 
@@ -74,7 +74,7 @@ const getIgnoredRevs = (cwd: string): Promise<Set<string>> => {
     void repoRootPath.then((root) => {
       if (root === null) return;
       watchInDev(root, ({ filename }) => {
-        if (filename === IGNORE_REVS_FILENAME) cache.reset();
+        if (filename === IGNORE_REVS_FILENAME) cache.invalidate();
       });
     });
 
@@ -82,7 +82,7 @@ const getIgnoredRevs = (cwd: string): Promise<Set<string>> => {
     ignoredRevsByCwd.set(cwd, ignoredRevs);
   }
 
-  return ignoredRevs.get();
+  return ignoredRevs();
 };
 
 const parseGitDate = (iso8601: string): Temporal.Instant | null => {

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getGitLastModifiedDate, getGitWatchPaths } from "./git.ts";
-import { cachedPromise } from "@xenon-ssg/core/promise";
+import { cell } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   analyzeItems,
@@ -77,7 +77,7 @@ type ContentLoader<TModuleParsed> = {
 export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
 ): ContentLoader<TModuleParsed> {
-  const cache = cachedPromise(() => loadContentItems(options), { lazy: true });
+  const cache = cell(() => loadContentItems(options));
 
   // Reset on edits to any file under the content folder, plus to anything
   // git considers a "watch path" (so things like commit metadata changes
@@ -85,7 +85,7 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   // exists to avoid shelling out to `git` in production builds —
   // `watchInDev` itself is already a no-op outside dev.
   if (process.env["NODE_ENV"] === "development") {
-    watchInDev(options.contentFolderPath, () => cache.reset());
+    watchInDev(options.contentFolderPath, () => cache.invalidate());
     void (async () => {
       const gitWatchPaths = await getGitWatchPaths(options.siteRootPath);
       for (const gitWatchPath of gitWatchPaths) {
@@ -95,11 +95,11 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
         // change on every `git status`.
         const fileName = path.basename(gitWatchPath);
         watchInDev(path.dirname(gitWatchPath), ({ filename }) => {
-          if (filename === fileName) cache.reset();
+          if (filename === fileName) cache.invalidate();
         });
       }
     })();
   }
 
-  return cache.get;
+  return cache;
 }

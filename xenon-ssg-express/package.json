@@ -92,6 +92,7 @@
   "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg-express#readme",
   "dependencies": {
     "@types/express": "catalog:",
+    "@xenon-ssg/thunks": "workspace:^",
     "express": "^5.2.1",
     "favicons": "^7.2.0",
     "lightningcss": "^1.25.1",

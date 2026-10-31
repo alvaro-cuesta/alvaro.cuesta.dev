@@ -33,6 +33,7 @@
     "@wooorm/starry-night": "^3.4.0",
     "@xenon-ssg/core": "workspace:*",
     "@xenon-ssg/express": "workspace:*",
+    "@xenon-ssg/thunks": "workspace:*",
     "classnames": "^2.5.1",
     "estree-walker": "^3.0.3",
     "fontawesome-free": "^1.0.4",

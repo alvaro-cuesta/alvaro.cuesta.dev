@@ -103,8 +103,8 @@ export type PluginGetInjectableFunctionOptions<BuildPreResult> = {
  *
  * **Performance contract for plugins:** because dev-mode invocation is
  * per-request, plugins that do non-trivial work to produce their tags MUST
- * memoize internally — typically with a `cachedPromise` over the heavy
- * compute, plus an `fs.watch`-driven `reset()` for invalidation. Returning
+ * memoize internally — typically with a `cell` (`@xenon-ssg/thunks`) over
+ * the heavy compute, plus an `fs.watch`-driven `invalidate()`. Returning
  * a stable reference until the underlying source changes makes the
  * per-request call effectively free (one microtask tick to await an
  * already-resolved promise) while still letting the middleware see fresh

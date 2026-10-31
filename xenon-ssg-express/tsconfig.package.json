@@ -4,5 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "references": [{ "path": "../xenon-ssg/tsconfig.package.json" }]
+  "references": [
+    { "path": "../xenon-ssg/tsconfig.package.json" },
+    { "path": "../packages/thunks/tsconfig.package.json" }
+  ]
 }

@@ -9,6 +9,9 @@ You are probably interested in one of these packages:
 - [@xenon-ssg/express](./xenon-ssg-express) — Express layer for Xenon SSG. Provides `dev` mode and some reusable plugins
   to have a bit more functionality over the barebones SSG.
 
+- [@xenon-ssg/thunks](./packages/thunks/) — Values you get later: lazy, shared promises, and cells that can be
+  invalidated. Not Xenon-specific.
+
 - [alvaro.cuesta.dev](./alvaro.cuesta.dev/) — The actual source code for my website at https://alvaro.cuesta.dev
 
 ## License

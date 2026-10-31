@@ -13,12 +13,12 @@ import fs, { type FileChangeInfo } from "node:fs/promises";
  * are caught and logged as warnings rather than left as unhandled rejections
  * — a misbehaving watcher should not take the dev server down.
  *
- * Typically paired with a {@link cachedPromise} so its `reset()` runs on
- * source-file edits, but the callback is generic and can do anything:
+ * Typically paired with a `cell` (see `@xenon-ssg/thunks`) so it's invalidated
+ * on source-file edits, but the callback is generic and can do anything:
  *
  * ```ts
- * const page = cachedPromise(loadPage, { lazy: true });
- * watchInDev(filePath, () => page.reset());
+ * const page = cell(loadPage);
+ * watchInDev(filePath, () => page.invalidate());
  * ```
  *
  * @returns What stops the watch when disposed.

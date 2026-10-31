@@ -21,11 +21,6 @@
       "types": "./dist/url.d.ts",
       "default": "./dist/url.js"
     },
-    "./promise": {
-      "@xenon-ssg/source": "./src/promise.ts",
-      "types": "./dist/promise.d.ts",
-      "default": "./dist/promise.js"
-    },
     "./watch": {
       "@xenon-ssg/source": "./src/watch.ts",
       "types": "./dist/watch.d.ts",
