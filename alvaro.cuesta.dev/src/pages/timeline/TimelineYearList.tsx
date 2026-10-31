@@ -1,4 +1,4 @@
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { timeline } from "../../timeline/promise.ts";
 import { Template } from "../../components/Template.tsx";
 import { TimelineLayout } from "./components/TimelineLayout.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
@@ -18,7 +18,7 @@ type TimelineYearListProps = {
 export async function TimelineYearList({
   siteRenderMeta,
 }: TimelineYearListProps) {
-  const timelineItems = await read(getTimelineItems);
+  const timelineItems = await read(timeline);
 
   return (
     <Template

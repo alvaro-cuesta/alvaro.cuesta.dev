@@ -1,7 +1,7 @@
 import { Template } from "../../components/Template.tsx";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
 import { BlogLayout } from "./components/BlogLayout.tsx";
-import { getBlogItems } from "../../blog/promise.ts";
+import { blog } from "../../blog/promise.ts";
 import { BlogArticleListItem } from "./components/BlogArticleListItem.tsx";
 import type { SiteRenderMeta } from "../../site.tsx";
 import {
@@ -27,7 +27,7 @@ export async function BlogArticleList({
   siteRenderMeta,
   page: rawPage,
 }: BlogArticleListProps) {
-  const blogItems = await read(getBlogItems);
+  const blogItems = await read(blog);
 
   const page = rawPage ?? 1;
 

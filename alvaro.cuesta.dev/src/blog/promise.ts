@@ -9,7 +9,7 @@ const BLOG_FOLDER = path.join(SITE_ROOT_FOLDER, "blog");
 
 const UNCATEGORIZED_TAG = "uncategorized";
 
-export const getBlogItems = createContentLoader({
+export const blog = createContentLoader({
   contentFolderPath: BLOG_FOLDER,
   contentFolderUrl: pathToFileURL(BLOG_FOLDER + path.sep),
   parseModule: parseBlogItemModuleFromImportModule,
@@ -32,8 +32,8 @@ export const getBlogItems = createContentLoader({
  *
  * The function throws when there's none.
  */
-export const getBlogItem = derived(async (get) => {
-  const { bySlug } = await get(getBlogItems);
+export const findBlogItem = derived(async (get) => {
+  const { bySlug } = await get(blog);
 
   return (slug: string) => {
     const item = bySlug.get(slug);

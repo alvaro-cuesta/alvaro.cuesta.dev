@@ -77,14 +77,14 @@ export function buildFeedSourceItem<TMetadata = unknown>({
 // rendering reads thunks without `get`, so a derived couldn't tell when its
 // items went stale.
 export function createFeedSource<TModuleParsed, const TMetadata = unknown>(
-  getAnalyzedItems: Thunk<AnalyzedItems<TModuleParsed>>,
+  collection: Thunk<AnalyzedItems<TModuleParsed>>,
   toFeedSourceItem: (
     baseUrl: string,
     item: Item<TModuleParsed>,
   ) => FeedSourceItem<TMetadata> | Promise<FeedSourceItem<TMetadata>>,
 ): (baseUrl: string) => Promise<FeedSourceItem<TMetadata>[]> {
   return async (baseUrl: string): Promise<FeedSourceItem<TMetadata>[]> => {
-    const analyzed = await read(getAnalyzedItems);
+    const analyzed = await read(collection);
     return Promise.all(
       analyzed.allSortedByDescendingDate.map((item) =>
         toFeedSourceItem(baseUrl, item),

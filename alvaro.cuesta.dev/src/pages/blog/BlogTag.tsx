@@ -1,6 +1,6 @@
 import { BlogLayout } from "./components/BlogLayout.tsx";
 import { Template } from "../../components/Template.tsx";
-import { getBlogItems } from "../../blog/promise.ts";
+import { blog } from "../../blog/promise.ts";
 import { BlogArticleListItem } from "./components/BlogArticleListItem.tsx";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { makeTitle } from "../../utils/meta.ts";
@@ -16,7 +16,7 @@ type BlogTagProps = {
 };
 
 export async function BlogTag({ siteRenderMeta, tag }: BlogTagProps) {
-  const blogItems = await read(getBlogItems);
+  const blogItems = await read(blog);
 
   const itemsInTag = blogItems.byTag.get(tag);
 

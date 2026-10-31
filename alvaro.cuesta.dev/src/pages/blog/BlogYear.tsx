@@ -1,4 +1,4 @@
-import { getBlogItems } from "../../blog/promise.ts";
+import { blog } from "../../blog/promise.ts";
 import { Template } from "../../components/Template.tsx";
 import { BlogLayout } from "./components/BlogLayout.tsx";
 import { BlogArticleListItem } from "./components/BlogArticleListItem.tsx";
@@ -36,7 +36,7 @@ const MONTH_NUMBER_TO_NAME: {
 const NULL_MONTH_TO_NAME = "Other";
 
 export async function BlogYear({ siteRenderMeta, year }: BlogYearProps) {
-  const blogItems = await read(getBlogItems);
+  const blogItems = await read(blog);
 
   const yearInfo = blogItems.byYear.get(year);
   if (yearInfo === undefined) {

@@ -1,7 +1,7 @@
 import { Template } from "../../components/Template.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
 import { BlogLayout } from "./components/BlogLayout.tsx";
-import { getBlogItems } from "../../blog/promise.ts";
+import { blog } from "../../blog/promise.ts";
 import type { BlogItemModuleParsed } from "../../blog/item-module.ts";
 import type { Item } from "../../utils/analyze.ts";
 import React from "react";
@@ -27,7 +27,7 @@ export async function BlogArticle({
   article: articlePromise,
 }: BlogArticleProps) {
   const [blogItems, article] = await Promise.all([
-    read(getBlogItems),
+    read(blog),
     articlePromise,
   ]);
 

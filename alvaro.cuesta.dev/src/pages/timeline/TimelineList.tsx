@@ -1,6 +1,6 @@
 import { Template } from "../../components/Template.tsx";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { timeline } from "../../timeline/promise.ts";
 import type { SiteRenderMeta } from "../../site.tsx";
 import {
   routeBlogArticleList,
@@ -27,7 +27,7 @@ export async function TimelineList({
   siteRenderMeta,
   page: rawPage,
 }: TimelineListProps) {
-  const timelineItems = await read(getTimelineItems);
+  const timelineItems = await read(timeline);
 
   const page = rawPage ?? 1;
 

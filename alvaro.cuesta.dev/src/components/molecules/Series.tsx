@@ -1,7 +1,7 @@
 import { use } from "react";
 import { Icon } from "../atoms/Icon.tsx";
 import { Link } from "../atoms/Link.tsx";
-import { getBlogItems } from "../../blog/promise.ts";
+import { blog } from "../../blog/promise.ts";
 import { routeBlogArticle, routeBlogTag } from "../../routes.ts";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { SERIES_TAGS } from "../../../config.ts";
@@ -59,7 +59,7 @@ async function SeriesInner({
     );
   }
 
-  const blogItems = await read(getBlogItems);
+  const blogItems = await read(blog);
 
   // `byTag` is sorted by descending date
   const parts = (blogItems.byTag.get(tag) ?? []).toReversed().map((item) => ({

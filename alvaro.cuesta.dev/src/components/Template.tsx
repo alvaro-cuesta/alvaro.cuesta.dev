@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import cx from "classnames";
 import { Link } from "./atoms/Link.tsx";
 import { Icon } from "./atoms/Icon.tsx";
-import { getBlogItems } from "../blog/promise.ts";
+import { blog } from "../blog/promise.ts";
 import type { SiteRenderMeta } from "../site.tsx";
 import {
   routeBlogArticleList,
@@ -12,7 +12,7 @@ import {
   routeBookmarks,
   routeLicenses,
 } from "../routes.ts";
-import { getTimelineItems } from "../timeline/promise.ts";
+import { timeline } from "../timeline/promise.ts";
 import {
   blogItemDateToUTCISO8601Z,
   getCurrentYear,
@@ -66,8 +66,8 @@ export async function Template({
   children,
 }: TemplateProps) {
   const [blogItems, timelineItems] = await Promise.all([
-    read(getBlogItems),
-    read(getTimelineItems),
+    read(blog),
+    read(timeline),
   ]);
 
   const ogImage = metaTags.imageAbsoluteUrl ?? siteRenderMeta.defaultOgImage;

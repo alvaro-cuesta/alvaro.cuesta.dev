@@ -1,4 +1,4 @@
-import { getTimelineItems } from "./promise.ts";
+import { timeline } from "./promise.ts";
 import { routeTimelinePost } from "../routes.ts";
 import { htmlToPlainText } from "../utils/html.ts";
 import {
@@ -20,7 +20,7 @@ function makeExcerptTitle(html: string): string {
 }
 
 export const getTimelineFeedSourceItems = createFeedSource(
-  getTimelineItems,
+  timeline,
   async (baseUrl, item) => {
     const pathname = routeTimelinePost.build({ slug: item.module.slug });
 

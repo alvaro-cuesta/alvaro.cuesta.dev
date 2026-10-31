@@ -34,8 +34,8 @@ import { TimelineYear } from "./pages/timeline/TimelineYear.tsx";
 import { TimelineYearList } from "./pages/timeline/TimelineYearList.tsx";
 import { NotFound } from "./pages/NotFound.tsx";
 import { makeMdxPage } from "./components/molecules/MdxPage.tsx";
-import { getBlogItem } from "./blog/promise.ts";
-import { getTimelineItem } from "./timeline/promise.ts";
+import { findBlogItem } from "./blog/promise.ts";
+import { findTimelineItem } from "./timeline/promise.ts";
 import {
   instantToBlogItemDate,
   type BlogItemDate,
@@ -251,7 +251,7 @@ export async function resolvePage(pathname: string): Promise<ResolvedPage> {
 
   const routeTimelinePostMatch = routeTimelinePost.match(pathname);
   if (routeTimelinePostMatch) {
-    const post = read(getTimelineItem).then((find) =>
+    const post = read(findTimelineItem).then((find) =>
       find(routeTimelinePostMatch.slug),
     );
 
@@ -328,7 +328,7 @@ export async function resolvePage(pathname: string): Promise<ResolvedPage> {
 
   const routeBlogArticleMatch = routeBlogArticle.match(pathname);
   if (routeBlogArticleMatch) {
-    const article = read(getBlogItem).then((find) =>
+    const article = read(findBlogItem).then((find) =>
       find(routeBlogArticleMatch.slug),
     );
 

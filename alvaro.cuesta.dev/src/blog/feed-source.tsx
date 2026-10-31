@@ -1,4 +1,4 @@
-import { getBlogItems } from "./promise.ts";
+import { blog } from "./promise.ts";
 import { routeBlogArticle } from "../routes.ts";
 import {
   renderContentItemHtml,
@@ -7,7 +7,7 @@ import {
 } from "../utils/feed-source.tsx";
 
 export const getBlogFeedSourceItems = createFeedSource(
-  getBlogItems,
+  blog,
   (baseUrl, item) => {
     const pathname = routeBlogArticle.build({ slug: item.module.slug });
 

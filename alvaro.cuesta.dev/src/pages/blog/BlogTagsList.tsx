@@ -1,4 +1,4 @@
-import { getBlogItems } from "../../blog/promise.ts";
+import { blog } from "../../blog/promise.ts";
 import { BlogLayout } from "./components/BlogLayout.tsx";
 import { Template } from "../../components/Template.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
@@ -16,7 +16,7 @@ type BlogTagListProps = {
 };
 
 export async function BlogTagList({ siteRenderMeta }: BlogTagListProps) {
-  const blogItems = await read(getBlogItems);
+  const blogItems = await read(blog);
 
   return (
     <Template

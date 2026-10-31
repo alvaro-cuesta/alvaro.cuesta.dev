@@ -4,7 +4,7 @@ import { parseTimelineItemModuleFromImportModule } from "./item-module.ts";
 import type { TimelineItemModuleParsed } from "./item-module.ts";
 import { createContentLoader } from "../utils/content-loader.ts";
 import { SITE_ROOT_FOLDER } from "../../config.ts";
-import { getBlogItems } from "../blog/promise.ts";
+import { blog } from "../blog/promise.ts";
 import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
@@ -12,7 +12,7 @@ import { derived } from "@xenon-ssg/thunks";
 
 const TIMELINE_FOLDER = path.join(SITE_ROOT_FOLDER, "timeline");
 
-const getRawTimelineItems = createContentLoader({
+const rawTimeline = createContentLoader({
   contentFolderPath: TIMELINE_FOLDER,
   contentFolderUrl: pathToFileURL(TIMELINE_FOLDER + path.sep),
   parseModule: parseTimelineItemModuleFromImportModule,
@@ -57,30 +57,30 @@ function deduplicateSlugs(
 }
 
 function mergeWithImplicitPosts(
-  raw: AnalyzedItems<TimelineItemModuleParsed>,
-  blog: AnalyzedItems<BlogItemModuleParsed>,
+  rawItems: AnalyzedItems<TimelineItemModuleParsed>,
+  blogItems: AnalyzedItems<BlogItemModuleParsed>,
 ): AnalyzedItems<TimelineItemModuleParsed> {
-  const usedSlugs = new Set(raw.all.map((item) => item.module.slug));
+  const usedSlugs = new Set(rawItems.all.map((item) => item.module.slug));
 
-  const implicitItems = blog.allSortedByDescendingDate.map(
+  const implicitItems = blogItems.allSortedByDescendingDate.map(
     blogItemToImplicitTimelineItem,
   );
 
   const deduplicatedImplicitItems = deduplicateSlugs(implicitItems, usedSlugs);
 
   return analyzeItems(
-    [...raw.all, ...deduplicatedImplicitItems],
+    [...rawItems.all, ...deduplicatedImplicitItems],
     ANALYZE_OPTIONS,
   );
 }
 
 /** The timeline's posts, plus one for each blog article. */
-export const getTimelineItems = derived(async (get) => {
-  const [raw, blog] = await Promise.all([
-    get(getRawTimelineItems),
-    get(getBlogItems),
+export const timeline = derived(async (get) => {
+  const [rawItems, blogItems] = await Promise.all([
+    get(rawTimeline),
+    get(blog),
   ]);
-  return mergeWithImplicitPosts(raw, blog);
+  return mergeWithImplicitPosts(rawItems, blogItems);
 });
 
 // One thunk for all slugs, not one per slug: slugs come from requests, so
@@ -90,8 +90,8 @@ export const getTimelineItems = derived(async (get) => {
  *
  * The function throws when there's none.
  */
-export const getTimelineItem = derived(async (get) => {
-  const { bySlug } = await get(getTimelineItems);
+export const findTimelineItem = derived(async (get) => {
+  const { bySlug } = await get(timeline);
 
   return (slug: string) => {
     const item = bySlug.get(slug);

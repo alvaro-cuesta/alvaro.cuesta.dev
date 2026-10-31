@@ -1,7 +1,7 @@
 import { TimelineLayout } from "./components/TimelineLayout.tsx";
 import { TimelinePostItem } from "./components/TimelinePostItem.tsx";
 import { Template } from "../../components/Template.tsx";
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { timeline } from "../../timeline/promise.ts";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { routeTimelineTag } from "../../routes.ts";
 import { makeTitle } from "../../utils/meta.ts";
@@ -24,7 +24,7 @@ export async function TimelineTag({
   tag,
   page: rawPage,
 }: TimelineTagProps) {
-  const timelineItems = await read(getTimelineItems);
+  const timelineItems = await read(timeline);
 
   const allItemsInTag = timelineItems.byTag.get(tag);
 

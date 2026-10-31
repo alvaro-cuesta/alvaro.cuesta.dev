@@ -1,4 +1,4 @@
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { timeline } from "../../timeline/promise.ts";
 import { Template } from "../../components/Template.tsx";
 import { TimelineLayout } from "./components/TimelineLayout.tsx";
 import { TimelinePostItem } from "./components/TimelinePostItem.tsx";
@@ -24,7 +24,7 @@ export async function TimelineYear({
   year,
   page: rawPage,
 }: TimelineYearProps) {
-  const timelineItems = await read(getTimelineItems);
+  const timelineItems = await read(timeline);
 
   const yearInfo = timelineItems.byYear.get(year);
   if (yearInfo === undefined) {

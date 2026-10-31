@@ -7,8 +7,8 @@ import { Link as XenonLink } from "@xenon-ssg/core/generate/Link";
 import { canonicalizeHref } from "@xenon-ssg/core/url";
 import { getDomain, parse } from "tldts";
 import { Icon } from "./Icon.tsx";
-import { getBlogItems } from "../../blog/promise.ts";
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { blog } from "../../blog/promise.ts";
+import { timeline } from "../../timeline/promise.ts";
 import { rewriteCustomProtocolHref } from "../../utils/href.ts";
 import { read } from "@xenon-ssg/thunks";
 
@@ -73,8 +73,8 @@ export async function Link({
   ...props
 }: LinkProps) {
   const [blogItems, timelineItems] = await Promise.all([
-    read(getBlogItems),
-    read(getTimelineItems),
+    read(blog),
+    read(timeline),
   ]);
 
   const rewrittenHref = rewriteCustomProtocolHref(props.href, {

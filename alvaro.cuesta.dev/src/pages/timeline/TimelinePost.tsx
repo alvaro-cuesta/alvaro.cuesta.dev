@@ -1,6 +1,6 @@
 import { Template } from "../../components/Template.tsx";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
-import { getTimelineItems } from "../../timeline/promise.ts";
+import { timeline } from "../../timeline/promise.ts";
 import type { TimelineItemModuleParsed } from "../../timeline/item-module.ts";
 import type { Item } from "../../utils/analyze.ts";
 import type { SiteRenderMeta } from "../../site.tsx";
@@ -28,10 +28,7 @@ export async function TimelinePostPage({
   siteRenderMeta,
   post,
 }: TimelinePostPageProps) {
-  const [timelineItems, item] = await Promise.all([
-    read(getTimelineItems),
-    post,
-  ]);
+  const [timelineItems, item] = await Promise.all([read(timeline), post]);
 
   const { slug, publicationDate, tags } = item.module;
   const dateStr = blogItemDateToShortString(publicationDate);
