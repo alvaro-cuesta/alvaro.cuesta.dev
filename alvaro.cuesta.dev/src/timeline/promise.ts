@@ -8,6 +8,7 @@ import { getBlogItems } from "../blog/promise.ts";
 import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
+import { derived } from "@xenon-ssg/thunks";
 
 const TIMELINE_FOLDER = path.join(SITE_ROOT_FOLDER, "timeline");
 
@@ -74,33 +75,14 @@ function mergeWithImplicitPosts(
   );
 }
 
-// Cache merged results by reference identity of inputs
-let cachedRaw: AnalyzedItems<TimelineItemModuleParsed> | null = null;
-let cachedBlog: AnalyzedItems<BlogItemModuleParsed> | null = null;
-let cachedMerged: AnalyzedItems<TimelineItemModuleParsed> | null = null;
-
-function mergeWithCache(
-  raw: AnalyzedItems<TimelineItemModuleParsed>,
-  blog: AnalyzedItems<BlogItemModuleParsed>,
-): AnalyzedItems<TimelineItemModuleParsed> {
-  if (raw === cachedRaw && blog === cachedBlog && cachedMerged) {
-    return cachedMerged;
-  }
-  cachedRaw = raw;
-  cachedBlog = blog;
-  cachedMerged = mergeWithImplicitPosts(raw, blog);
-  return cachedMerged;
-}
-
-export async function getTimelineItems(): Promise<
-  AnalyzedItems<TimelineItemModuleParsed>
-> {
+/** The timeline's posts, plus one for each blog article. */
+export const getTimelineItems = derived(async (get) => {
   const [raw, blog] = await Promise.all([
-    getRawTimelineItems(),
-    getBlogItems(),
+    get(getRawTimelineItems),
+    get(getBlogItems),
   ]);
-  return mergeWithCache(raw, blog);
-}
+  return mergeWithImplicitPosts(raw, blog);
+});
 
 /**
  * The post with that slug.
