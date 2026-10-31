@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { cell, type Cell } from "@xenon-ssg/thunks";
+import { cell, derived, thunk, type Thunk } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 
 const runGitCommand = async (
@@ -25,16 +25,12 @@ const COMMIT_LINE_PREFIX = "commit ";
 const IGNORE_REVS_FILENAME = ".git-blame-ignore-revs";
 
 const readIgnoredRevs = async (
-  repoRootPath: string | null,
+  root: string,
 ): Promise<Set<string>> => {
-  if (repoRootPath === null) {
-    return new Set();
-  }
-
   let content: string;
   try {
     content = await fs.readFile(
-      path.join(repoRootPath, IGNORE_REVS_FILENAME),
+      path.join(root, IGNORE_REVS_FILENAME),
       "utf-8",
     );
   } catch {
@@ -49,41 +45,114 @@ const readIgnoredRevs = async (
   );
 };
 
-const ignoredRevsByCwd = new Map<string, Cell<Set<string>>>();
+const worktreeRootByCwd = new Map<string, Thunk<string | null>>();
 
 /**
- * The commits listed in the repository's `.git-blame-ignore-revs`.
+ * The top level of the worktree a directory is in.
+ *
+ * `null` outside one.
+ *
+ * It's read once per directory: a directory doesn't move between worktrees.
+ */
+const worktreeRoot = (cwd: string): Thunk<string | null> => {
+  let root = worktreeRootByCwd.get(cwd);
+
+  if (root === undefined) {
+    root = thunk(() => runGitCommand(["rev-parse", "--show-toplevel"], cwd));
+    worktreeRootByCwd.set(cwd, root);
+  }
+
+  return root;
+};
+
+const ignoredRevsByWorktree = new Map<string, Thunk<Set<string>>>();
+
+/** A worktree's ignored commits, read once, and again in development whenever they change. */
+const ignoredRevsOf = (root: string): Thunk<Set<string>> => {
+  let revs = ignoredRevsByWorktree.get(root);
+
+  if (revs === undefined) {
+    const cache = cell(() => readIgnoredRevs(root));
+
+    // Editors may save by renaming over the file, which ends a watch on the file itself, so watch its folder instead.
+    watchInDev(root, ({ filename }) => {
+      if (filename === IGNORE_REVS_FILENAME) cache.invalidate();
+    });
+
+    revs = cache;
+    ignoredRevsByWorktree.set(root, revs);
+  }
+
+  return revs;
+};
+
+/**
+ * The commits listed in `.git-blame-ignore-revs`, in the worktree a directory is in.
  *
  * They're mechanical changes, like refactors or reformatting, so they don't count as modifications.
  *
  * It's the file `git blame --ignore-revs-file` takes (and GitHub's blame view reads): one full commit hash per line,
  * with `#` comments.
  *
- * It's read once per repository, and again in development whenever it changes.
+ * It's read once per worktree, and again in development whenever it changes. There are none outside a worktree.
+ *
+ * @param cwd A directory in the worktree.
+ * @returns The commits.
  */
-const getIgnoredRevs = (cwd: string): Promise<Set<string>> => {
-  let ignoredRevs = ignoredRevsByCwd.get(cwd);
+export const ignoredRevs = (cwd: string): Thunk<Set<string>> =>
+  // A new one on every call is fine: all it reads are cached already.
+  derived(async (get) => {
+    const root = await get(worktreeRoot(cwd));
+    return root === null ? new Set<string>() : get(ignoredRevsOf(root));
+  });
 
-  if (ignoredRevs === undefined) {
-    const repoRootPath = runGitCommand(["rev-parse", "--show-toplevel"], cwd);
-    const cache = cell(async () =>
-      readIgnoredRevs(await repoRootPath),
-    );
+const headByWorktree = new Map<string, Thunk<string | null>>();
 
-    // Editors may save by renaming over the file, which ends a watch on the file itself, so watch its folder instead.
-    void repoRootPath.then((root) => {
-      if (root === null) return;
-      watchInDev(root, ({ filename }) => {
-        if (filename === IGNORE_REVS_FILENAME) cache.invalidate();
+/** A worktree's `HEAD`, read once, and again in development whenever it moves. */
+const headOf = (root: string): Thunk<string | null> => {
+  let head = headByWorktree.get(root);
+
+  if (head === undefined) {
+    const cache = cell(() => runGitCommand(["rev-parse", "HEAD"], root));
+
+    // Finding what to watch shells out to git, and only development watches, so don't in production builds.
+    if (process.env["NODE_ENV"] === "development") {
+      void getGitWatchPaths(root).then((gitWatchPaths) => {
+        for (const gitWatchPath of gitWatchPaths) {
+          // Git replaces these files by renaming a lock file over them, which ends a watch on the file itself, so
+          // watch its folder instead. But only react to the file: other files there (e.g. `.git/index`) change on
+          // every `git status`.
+          const fileName = path.basename(gitWatchPath);
+          watchInDev(path.dirname(gitWatchPath), ({ filename }) => {
+            if (filename === fileName) cache.invalidate();
+          });
+        }
       });
-    });
+    }
 
-    ignoredRevs = cache;
-    ignoredRevsByCwd.set(cwd, ignoredRevs);
+    head = cache;
+    headByWorktree.set(root, head);
   }
 
-  return ignoredRevs();
+  return head;
 };
+
+/**
+ * The commit `HEAD` points to, in the worktree a directory is in.
+ *
+ * `null` outside a worktree, or before its first commit.
+ *
+ * It's read once per worktree, and again in development whenever `HEAD` moves: on commits, checkouts, resets…
+ *
+ * @param cwd A directory in the worktree.
+ * @returns The commit.
+ */
+export const gitHead = (cwd: string): Thunk<string | null> =>
+  // A new one on every call is fine: all it reads are cached already.
+  derived(async (get) => {
+    const root = await get(worktreeRoot(cwd));
+    return root === null ? null : get(headOf(root));
+  });
 
 const parseGitDate = (iso8601: string): Temporal.Instant | null => {
   try {
@@ -113,28 +182,37 @@ export type GitFileDates = {
 };
 
 /**
- * Returns `null` if the file has no git history (e.g. it isn't committed yet).
+ * When a file was created and last modified, according to its history up to `head`.
+ *
+ * @param filePath The file's absolute path.
+ * @param head The commit whose history to read, from {@link gitHead}.
+ * @param ignoredRevs The commits that don't count as modifications, from {@link ignoredRevs}.
+ * @returns The dates, or `null` if the file has no git history (e.g. it isn't committed yet).
  */
 export const getGitFileDates = async (
-  repoRootPath: string,
-  repoRelativeFilePath: string,
+  filePath: string,
+  head: string | null,
+  ignoredRevs: Set<string>,
 ): Promise<GitFileDates | null> => {
+  if (head === null) {
+    return null;
+  }
+
   // Newest first. Each commit prints `commit <hash> <date>` followed by a tab-separated `--name-status` line such as
   // `M <path>` or `R100 <old> <new>`. Merge commits print no status line.
-  const [log, ignoredRevs] = await Promise.all([
-    runGitCommand(
-      [
-        "log",
-        "--follow",
-        "--name-status",
-        `--format=${COMMIT_LINE_PREFIX}%H %aI`,
-        "--",
-        repoRelativeFilePath,
-      ],
-      repoRootPath,
-    ),
-    getIgnoredRevs(repoRootPath),
-  ]);
+  const log = await runGitCommand(
+    [
+      "log",
+      "--follow",
+      "--name-status",
+      `--format=${COMMIT_LINE_PREFIX}%H %aI`,
+      head,
+      "--",
+      filePath,
+    ],
+    // Git finds the worktree from the file's own folder, so callers don't have to pass it.
+    path.dirname(filePath),
+  );
 
   if (log === null) {
     return null;
@@ -176,15 +254,8 @@ export const getGitFileDates = async (
   };
 };
 
-export const getGitLastModifiedDate = async (
-  repoRootPath: string,
-  repoRelativeFilePath: string,
-): Promise<Temporal.Instant | null> =>
-  (await getGitFileDates(repoRootPath, repoRelativeFilePath))?.lastModifiedAt ??
-  null;
-
 /** Absolute paths of the files that change when `HEAD` moves: `HEAD` itself and the current branch's ref. */
-export const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
+const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
   const headPath = await runGitCommand(
     ["rev-parse", "--git-path", "HEAD"],
     cwd,

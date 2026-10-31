@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getGitLastModifiedDate, getGitWatchPaths } from "./git.ts";
-import { cell, type Thunk } from "@xenon-ssg/thunks";
+import { getGitFileDates, gitHead, ignoredRevs } from "./git.ts";
+import { cell, derived, type Thunk } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   analyzeItems,
@@ -28,35 +28,34 @@ type ContentLoaderOptions<TModuleParsed> = {
   analyzeOptions: AnalyzeItemsOptions<TModuleParsed>;
 };
 
+type GitState = {
+  head: string | null;
+  ignoredRevs: Set<string>;
+};
+
 async function loadContentItems<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
+  filelist: string[],
+  { head, ignoredRevs }: GitState,
 ): Promise<AnalyzedItems<TModuleParsed>> {
   const {
-    siteRootPath,
     contentFolderPath,
     contentFolderUrl,
     parseModule,
     analyzeOptions,
   } = options;
 
-  const filelist = await Array.fromAsync(
-    fs.glob("*.mdx", { cwd: contentFolderPath }),
-  );
-
   const importedItems = await Promise.all(
     filelist
       .map(async (filename) => {
         const fileUrl = new URL(filename, contentFolderUrl);
         const filePath = path.join(contentFolderPath, filename);
-        const [lastModificationDate, rawModule] = await Promise.all([
-          getGitLastModifiedDate(
-            siteRootPath,
-            path.relative(siteRootPath, filePath),
-          ),
+        const [gitDates, rawModule] = await Promise.all([
+          getGitFileDates(filePath, head, ignoredRevs),
           import(`${fileUrl}?${Date.now()}`),
         ]);
         const module = parseModule(filename, rawModule, {
-          lastModificationDate,
+          lastModificationDate: gitDates?.lastModifiedAt ?? null,
         });
 
         return { filename, module };
@@ -73,29 +72,22 @@ async function loadContentItems<TModuleParsed extends { draft: boolean }>(
 export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
 ): Thunk<AnalyzedItems<TModuleParsed>> {
-  const cache = cell(() => loadContentItems(options));
+  // The folder's files, read again on any change in it: an edit to a file is
+  // a change to the folder too, and the items are made from what the files hold.
+  const files = cell(() =>
+    Array.fromAsync(fs.glob("*.mdx", { cwd: options.contentFolderPath })),
+  );
+  watchInDev(options.contentFolderPath, () => files.invalidate());
 
-  // Reset on edits to any file under the content folder, plus to anything
-  // git considers a "watch path" (so things like commit metadata changes
-  // trigger a re-render of `lastModified` etc.). The outer env check only
-  // exists to avoid shelling out to `git` in production builds —
-  // `watchInDev` itself is already a no-op outside dev.
-  if (process.env["NODE_ENV"] === "development") {
-    watchInDev(options.contentFolderPath, () => cache.invalidate());
-    void (async () => {
-      const gitWatchPaths = await getGitWatchPaths(options.siteRootPath);
-      for (const gitWatchPath of gitWatchPaths) {
-        // Git replaces these files by renaming a lock file over them, which
-        // ends a watch on the file itself, so watch its folder instead. But
-        // only react to the file: other files there (e.g. `.git/index`)
-        // change on every `git status`.
-        const fileName = path.basename(gitWatchPath);
-        watchInDev(path.dirname(gitWatchPath), ({ filename }) => {
-          if (filename === fileName) cache.invalidate();
-        });
-      }
-    })();
-  }
+  // Their dates come from git, so the items change when `HEAD` moves or the
+  // ignored commits do, too.
+  return derived(async (get) => {
+    const [filelist, head, revs] = await Promise.all([
+      get(files),
+      get(gitHead(options.siteRootPath)),
+      get(ignoredRevs(options.siteRootPath)),
+    ]);
 
-  return cache;
+    return loadContentItems(options, filelist, { head, ignoredRevs: revs });
+  });
 }

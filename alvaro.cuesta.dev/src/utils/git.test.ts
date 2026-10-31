@@ -3,7 +3,11 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getGitFileDates, getGitLastModifiedDate } from "./git.ts";
+import {
+  getGitFileDates as getGitFileDatesAt,
+  gitHead,
+  ignoredRevs,
+} from "./git.ts";
 
 let repo: string;
 
@@ -39,6 +43,19 @@ const commit = async (
 };
 
 const CONTENT = "line\n".repeat(20);
+
+// What the site does: read the dates as of the current `HEAD`, without the
+// ignored commits. Each test has its own repository, so none of them share
+// cells.
+const getGitFileDates = async (repoRootPath: string, file: string) =>
+  getGitFileDatesAt(
+    path.resolve(repoRootPath, file),
+    await gitHead(repoRootPath)(),
+    await ignoredRevs(repoRootPath)(),
+  );
+
+const getLastModifiedAt = async (repoRootPath: string, file: string) =>
+  (await getGitFileDates(repoRootPath, file))?.lastModifiedAt ?? null;
 
 beforeEach(async () => {
   repo = await fs.mkdtemp(path.join(os.tmpdir(), "git-dates-"));
@@ -94,11 +111,11 @@ describe("getGitFileDates", () => {
   });
 });
 
-describe("getGitLastModifiedDate", () => {
+describe("lastModifiedAt", () => {
   it("returns null for a file that was only added", async () => {
     await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
 
-    expect(await getGitLastModifiedDate(repo, "a.mdx")).toBeNull();
+    expect(await getLastModifiedAt(repo, "a.mdx")).toBeNull();
   });
 
   it("returns the date of the last modification", async () => {
@@ -106,7 +123,7 @@ describe("getGitLastModifiedDate", () => {
     await commit("2026-01-02T00:00:00Z", { "a.mdx": CONTENT + "edit\n" });
     await commit("2026-01-03T00:00:00Z", { "a.mdx": CONTENT + "edit 2\n" });
 
-    expect(await getGitLastModifiedDate(repo, "a.mdx")).toEqual(
+    expect(await getLastModifiedAt(repo, "a.mdx")).toEqual(
       Temporal.Instant.from("2026-01-03T00:00:00Z"),
     );
   });
@@ -116,7 +133,7 @@ describe("getGitLastModifiedDate", () => {
     await commit("2026-01-02T00:00:00Z", { "old/a.mdx": CONTENT + "edit\n" });
     await commit("2026-01-03T00:00:00Z", {}, [["old/a.mdx", "new/a.mdx"]]);
 
-    expect(await getGitLastModifiedDate(repo, "new/a.mdx")).toEqual(
+    expect(await getLastModifiedAt(repo, "new/a.mdx")).toEqual(
       Temporal.Instant.from("2026-01-02T00:00:00Z"),
     );
   });
@@ -125,7 +142,7 @@ describe("getGitLastModifiedDate", () => {
     await commit("2026-01-01T00:00:00Z", { "old/a.mdx": CONTENT });
     await commit("2026-01-02T00:00:00Z", {}, [["old/a.mdx", "new/a.mdx"]]);
 
-    expect(await getGitLastModifiedDate(repo, "new/a.mdx")).toBeNull();
+    expect(await getLastModifiedAt(repo, "new/a.mdx")).toBeNull();
   });
 
   it("counts a rename with edits as a modification", async () => {
@@ -134,7 +151,7 @@ describe("getGitLastModifiedDate", () => {
       ["old/a.mdx", "new/a.mdx"],
     ]);
 
-    expect(await getGitLastModifiedDate(repo, "new/a.mdx")).toEqual(
+    expect(await getLastModifiedAt(repo, "new/a.mdx")).toEqual(
       Temporal.Instant.from("2026-01-02T00:00:00Z"),
     );
   });
@@ -150,7 +167,7 @@ describe("getGitLastModifiedDate", () => {
       ".git-blame-ignore-revs": `# Reformatting\n${mechanical}\n`,
     });
 
-    expect(await getGitLastModifiedDate(repo, "a.mdx")).toEqual(
+    expect(await getLastModifiedAt(repo, "a.mdx")).toEqual(
       Temporal.Instant.from("2026-01-02T00:00:00Z"),
     );
   });
@@ -160,13 +177,13 @@ describe("getGitLastModifiedDate", () => {
     await commit("2026-01-02T00:00:00Z", { "a.mdx": CONTENT + "edit\n" });
 
     expect(
-      await getGitLastModifiedDate(repo, path.join(repo, "a.mdx")),
+      await getLastModifiedAt(repo, path.join(repo, "a.mdx")),
     ).toEqual(Temporal.Instant.from("2026-01-02T00:00:00Z"));
   });
 
   it("returns null for an untracked file", async () => {
     await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
 
-    expect(await getGitLastModifiedDate(repo, "missing.mdx")).toBeNull();
+    expect(await getLastModifiedAt(repo, "missing.mdx")).toBeNull();
   });
 });
