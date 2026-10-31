@@ -14,8 +14,7 @@
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
-    "customConditions": ["source"],
+    "customConditions": ["@xenon-ssg/source"],
 
     /* Interop Constraints */
     "isolatedModules": true,
@@ -52,7 +51,6 @@
     "skipLibCheck": true,
 
     /* Other */
-    "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.tsbuildinfo",
     "types": ["node"]
   }
 }

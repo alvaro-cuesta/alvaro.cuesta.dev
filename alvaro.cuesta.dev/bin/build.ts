@@ -1,6 +1,6 @@
 import { makeSite } from "../src/site.tsx";
 import { OUTPUT_FOLDER } from "../config.ts";
-import { buildXenonExpressSite } from "xenon-ssg-express/build";
+import { buildXenonExpressSite } from "@xenon-ssg/express/build";
 
 const main = async () => {
   await buildXenonExpressSite(makeSite(), {

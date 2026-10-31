@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { generateStaticSite } from "xenon-ssg/generate/generate";
+import { generateStaticSite } from "@xenon-ssg/core/generate/generate";
 import { type XenonExpressSite, getSiteMeta } from "./index.tsx";
 import { getTagsFromInjectableRaw, type Plugin } from "./plugins/plugins.tsx";
 import type { UnknownRecord } from "type-fest";

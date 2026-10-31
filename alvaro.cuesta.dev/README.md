@@ -39,3 +39,10 @@
 - Better way to emit URLs to sitemap
   - Currently hardcoded via `feeds.getFeedSitemapPathnames`
   - But maybe there's a way via hooks in plugins?
+
+## License
+
+The code is licensed under the [AGPL 3.0](../LICENSE) only, but the content
+(blog posts, timeline entries, pages' text and logos) is all rights reserved,
+and the favicon is Twemoji's (CC-BY 4.0). See the
+[repository's README](../README.md#license) for details.

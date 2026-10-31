@@ -29,7 +29,10 @@ catalogs:
       version: 0.3.2
     type-fest:
       specifier: ^5.5.0
-      version: 5.5.0
+      version: 5.10.0
+    typescript:
+      specifier: ^6.0.2
+      version: 6.0.2
     vitest:
       specifier: ^4.1.4
       version: 4.1.4
@@ -45,14 +48,13 @@ patchedDependencies:
 importers:
 
   .:
-    dependencies:
-      typescript:
-        specifier: ^6.0.2
-        version: 6.0.2
     devDependencies:
       prettier:
         specifier: ^3.3.3
         version: 3.8.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.2
 
   alvaro.cuesta.dev:
     dependencies:
@@ -68,6 +70,12 @@ importers:
       '@wooorm/starry-night':
         specifier: ^3.4.0
         version: 3.9.0(patch_hash=62f145a6e5733b7de424d56e8d3d479d7d5c58c5756a95f5b257580279dbd11b)
+      '@xenon-ssg/core':
+        specifier: workspace:*
+        version: link:../xenon-ssg
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../xenon-ssg-express
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -137,12 +145,6 @@ importers:
       vfile-reporter:
         specifier: ^8.1.1
         version: 8.1.1
-      xenon-ssg:
-        specifier: workspace:*
-        version: link:../xenon-ssg
-      xenon-ssg-express:
-        specifier: workspace:*
-        version: link:../xenon-ssg-express
       xmlbuilder2:
         specifier: 'catalog:'
         version: 4.0.3
@@ -186,18 +188,18 @@ importers:
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.2
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
 
   xenon-ssg:
     dependencies:
-      react:
+      type-fest:
         specifier: 'catalog:'
-        version: 19.2.5
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.5(react@19.2.5)
+        version: 5.10.0
     devDependencies:
       '@types/express':
         specifier: 'catalog:'
@@ -211,15 +213,24 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.14)
-      type-fest:
+      react:
         specifier: 'catalog:'
-        version: 5.5.0
+        version: 19.2.5
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.5(react@19.2.5)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.2
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
 
   xenon-ssg-express:
     dependencies:
+      '@types/express':
+        specifier: 'catalog:'
+        version: 5.0.6
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -232,25 +243,16 @@ importers:
       morgan:
         specifier: ^1.10.0
         version: 1.10.1
-      react:
-        specifier: 'catalog:'
-        version: 19.2.5
       temporal-polyfill:
         specifier: 'catalog:'
         version: 0.3.2
-      xenon-ssg:
-        specifier: workspace:*
-        version: link:../xenon-ssg
+      type-fest:
+        specifier: 'catalog:'
+        version: 5.10.0
       xmlbuilder2:
         specifier: 'catalog:'
         version: 4.0.3
     devDependencies:
-      '@types/express':
-        specifier: 'catalog:'
-        version: 5.0.6
-      '@types/mock-fs':
-        specifier: ^4.13.4
-        version: 4.13.4
       '@types/morgan':
         specifier: ^1.9.9
         version: 1.9.10
@@ -260,12 +262,15 @@ importers:
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.14
-      mock-fs:
-        specifier: ^5.5.0
-        version: 5.5.0
-      type-fest:
+      '@xenon-ssg/core':
+        specifier: workspace:*
+        version: link:../xenon-ssg
+      react:
         specifier: 'catalog:'
-        version: 5.5.0
+        version: 19.2.5
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.2
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
@@ -930,9 +935,6 @@ packages:
 
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
-
-  '@types/mock-fs@4.13.4':
-    resolution: {integrity: sha512-mXmM0o6lULPI8z3XNnQCpL0BGxPwx1Ul1wXYEPBGl4efShyxW2Rln0JOPEWGyZaYZMM6OVXM/15zUuFMY52ljg==}
 
   '@types/morgan@1.9.10':
     resolution: {integrity: sha512-sS4A1zheMvsADRVfT0lYbJ4S9lmsey8Zo2F7cnbYjWHP67Q0AwMYuuzLlkIM2N8gAbb9cubhIVFwcIN2XyYCkA==}
@@ -1927,10 +1929,6 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  mock-fs@5.5.0:
-    resolution: {integrity: sha512-d/P1M/RacgM3dB0sJ8rjeRNXxtapkPCUnMGmIN0ixJ16F/E4GUZCvWcSGfWGz8eaXYvn1s9baUwNjI4LOPEjiA==}
-    engines: {node: '>=12.0.0'}
-
   morgan@1.10.1:
     resolution: {integrity: sha512-223dMRJtI/l25dJKWpgij2cMtywuG/WiUKXdvwfbhGKBhy1puASqXwFzmWZ7+K73vUPoR7SS2Qz2cI/g9MKw0A==}
     engines: {node: '>= 0.8.0'}
@@ -2347,8 +2345,8 @@ packages:
     resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
     engines: {node: '>=12.20'}
 
-  type-fest@5.5.0:
-    resolution: {integrity: sha512-PlBfpQwiUvGViBNX84Yxwjsdhd1TUlXr6zjX7eoirtCPIr08NAmxwa+fcYBTeRQxHo9YC9wwF3m9i700sHma8g==}
+  type-fest@5.10.0:
+    resolution: {integrity: sha512-NoSdpq/WEiAg5sjmBkmV/hfxv6HJH4NqPNrqjtSO5CwRmpsDfaf4begxW34KdJykH/l1yHtwBWQkCRdoXO8mPA==}
     engines: {node: '>=20'}
 
   type-is@2.0.1:
@@ -3036,10 +3034,6 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/mdx@2.0.13': {}
-
-  '@types/mock-fs@4.13.4':
-    dependencies:
-      '@types/node': 26.6.6
 
   '@types/morgan@1.9.10':
     dependencies:
@@ -4421,8 +4415,6 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  mock-fs@5.5.0: {}
-
   morgan@1.10.1:
     dependencies:
       basic-auth: 2.0.1
@@ -4982,7 +4974,7 @@ snapshots:
 
   type-fest@2.19.0: {}
 
-  type-fest@5.5.0:
+  type-fest@5.10.0:
     dependencies:
       tagged-tag: 1.0.0
 

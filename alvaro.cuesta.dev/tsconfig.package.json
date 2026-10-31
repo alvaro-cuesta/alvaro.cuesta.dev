@@ -1,15 +1,18 @@
 {
-  "extends": "../tsconfig.package.json",
+  // Not `../tsconfig.package.json`: the site runs from its sources (through
+  // tsx) and nothing references it, so it only needs checking.
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./",
+    "noEmit": true,
+    "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.package.tsbuildinfo",
     "types": ["node", "mdx"],
     // Editor-only: TypeScript completion/diagnostics inside .mdx files (tsc
     // ignores it). The VS Code MDX extension already registers it; listing it
     // here pins its version and enables it in other TypeScript-based editors.
     "plugins": [{ "name": "@mdx-js/typescript-plugin" }]
   },
-  "include": ["bin/**/*", "src/**/*", "config.ts", "package.json"],
+  "include": ["bin/**/*", "src/**/*", "config.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "references": [
     { "path": "../xenon-ssg/tsconfig.package.json" },
     { "path": "../xenon-ssg-express/tsconfig.package.json" }

@@ -16,6 +16,7 @@ import {
   routeTimelineYearList,
   routeNow,
   routeBookmarks,
+  routeLicenses,
 } from "./routes.ts";
 import { BlogArticle } from "./pages/blog/BlogArticle.tsx";
 import { BlogArticleList } from "./pages/blog/BlogArticleList.tsx";
@@ -35,6 +36,7 @@ import { makeMdxPage } from "./components/molecules/MdxPage.tsx";
 
 const Now = makeMdxPage(import.meta.resolve("./pages/Now.mdx"));
 const Bookmarks = makeMdxPage(import.meta.resolve("./pages/Bookmarks.mdx"));
+const Licenses = makeMdxPage(import.meta.resolve("./pages/Licenses.mdx"));
 
 type RootProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -57,6 +59,10 @@ export function Root({ siteRenderMeta }: RootProps) {
 
   if (routeBookmarks.match(pathname)) {
     return <Bookmarks siteRenderMeta={siteRenderMeta} />;
+  }
+
+  if (routeLicenses.match(pathname)) {
+    return <Licenses siteRenderMeta={siteRenderMeta} />;
   }
 
   const routeTimelineListMatch = routeTimelineList.match(pathname);

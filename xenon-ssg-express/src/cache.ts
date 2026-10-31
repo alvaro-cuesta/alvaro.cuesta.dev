@@ -36,11 +36,11 @@ const makeXenonCache = (rootDir: string): XenonCache => ({
 });
 
 /**
- * Resolve the consuming site's `node_modules/.cache/xenon-ssg-express/`
+ * Resolve the consuming site's `node_modules/.cache/@xenon-ssg/express/`
  * directory starting from the caller's `import.meta.url`.
  *
  * Why `callerUrl` and not e.g. `process.cwd()` or the plugin's own module
- * location: in a pnpm workspace, `node_modules/xenon-ssg-express` is a
+ * location: in a pnpm workspace, `node_modules/@xenon-ssg/express` is a
  * symlink back to the workspace source, and Node realpath's the symlink
  * before setting the plugin's `import.meta.url`. So from inside the plugin,
  * module resolution walks up from the workspace source and never finds the
@@ -50,7 +50,7 @@ const makeXenonCache = (rootDir: string): XenonCache => ({
  */
 const resolveCacheRoot = async (callerUrl: string): Promise<string> => {
   const req = createRequire(callerUrl);
-  const paths = req.resolve.paths("xenon-ssg-express");
+  const paths = req.resolve.paths("@xenon-ssg/express");
   if (!paths) {
     throw new Error(
       `createXenonCache: could not get module search paths from ${callerUrl}`,
@@ -58,14 +58,14 @@ const resolveCacheRoot = async (callerUrl: string): Promise<string> => {
   }
   for (const candidate of paths) {
     try {
-      await fs.access(path.join(candidate, "xenon-ssg-express"));
-      return path.join(candidate, ".cache", "xenon-ssg-express");
+      await fs.access(path.join(candidate, "@xenon-ssg/express"));
+      return path.join(candidate, ".cache", "@xenon-ssg/express");
     } catch {
       // not this one, keep looking
     }
   }
   throw new Error(
-    `createXenonCache: xenon-ssg-express not found in any node_modules reachable from ${callerUrl}`,
+    `createXenonCache: @xenon-ssg/express not found in any node_modules reachable from ${callerUrl}`,
   );
 };
 

@@ -10,6 +10,7 @@ import {
   routeTimelineList,
   routeNow,
   routeBookmarks,
+  routeLicenses,
 } from "../routes.ts";
 import { getTimelineItems } from "../timeline/promise.ts";
 import {
@@ -330,7 +331,9 @@ export async function Template({
             </div>
           </div>
           <div>
-            <div aria-hidden="true" />
+            <div>
+              <Link href={routeLicenses.build({})}>Licenses</Link>
+            </div>
             <div>
               <Icon collection="fas" name="rss" aria-hidden /> Feed{" "}
               <Link href={siteRenderMeta.feedUrls.blog}>Blog</Link> /{" "}

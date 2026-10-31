@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import { getBlogItems } from "../blog/promise.ts";
 import { getTimelineItems } from "../timeline/promise.ts";
 import { rewriteCustomProtocolHref } from "../utils/href.ts";
-import { canonicalizeHref } from "xenon-ssg/url";
+import { canonicalizeHref } from "@xenon-ssg/core/url";
 
 type MdxAnchorProps = ComponentPropsWithoutRef<"a">;
 

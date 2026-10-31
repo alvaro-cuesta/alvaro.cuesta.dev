@@ -13,8 +13,8 @@ import type {
 } from "./plugins.tsx";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { cachedPromise } from "xenon-ssg/promise";
-import { watchInDev } from "xenon-ssg/watch";
+import { cachedPromise } from "@xenon-ssg/core/promise";
+import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
@@ -64,7 +64,7 @@ type FaviconPluginOptions = {
   /**
    * Optional shared cache from `createXenonCache(...)`. When provided, the
    * expensive `favicons()` call is memoized to disk under
-   * `<siteRoot>/node_modules/.cache/xenon-ssg-express/favicon/`, keyed by a
+   * `<siteRoot>/node_modules/.cache/@xenon-ssg/express/favicon/`, keyed by a
    * hash of the input SVG contents plus the `faviconOptions`. Pass `null` (or
    * omit) to disable caching.
    */

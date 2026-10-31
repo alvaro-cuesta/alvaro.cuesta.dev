@@ -1,58 +1,69 @@
 {
-  "name": "xenon-ssg",
+  "name": "@xenon-ssg/core",
   "private": true,
   "type": "module",
   "version": "0.0.1",
   "description": "A dead simple React Static-Site Generator.",
   "exports": {
     ".": {
-      "source": "./src/index.ts",
-      "default": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "@xenon-ssg/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./render": {
-      "source": "./src/render.ts",
-      "default": "./dist/render.js",
-      "types": "./dist/render.d.ts"
+      "@xenon-ssg/source": "./src/render.ts",
+      "types": "./dist/render.d.ts",
+      "default": "./dist/render.js"
     },
     "./url": {
-      "source": "./src/url.ts",
-      "default": "./dist/url.js",
-      "types": "./dist/url.d.ts"
+      "@xenon-ssg/source": "./src/url.ts",
+      "types": "./dist/url.d.ts",
+      "default": "./dist/url.js"
     },
     "./promise": {
-      "source": "./src/promise.ts",
-      "default": "./dist/promise.js",
-      "types": "./dist/promise.d.ts"
+      "@xenon-ssg/source": "./src/promise.ts",
+      "types": "./dist/promise.d.ts",
+      "default": "./dist/promise.js"
     },
     "./watch": {
-      "source": "./src/watch.ts",
-      "default": "./dist/watch.js",
-      "types": "./dist/watch.d.ts"
+      "@xenon-ssg/source": "./src/watch.ts",
+      "types": "./dist/watch.d.ts",
+      "default": "./dist/watch.js"
     },
     "./middleware": {
-      "source": "./src/middleware.tsx",
-      "default": "./dist/middleware.js",
-      "types": "./dist/middleware.d.ts"
+      "@xenon-ssg/source": "./src/middleware.tsx",
+      "types": "./dist/middleware.d.ts",
+      "default": "./dist/middleware.js"
     },
     "./generate/Link": {
-      "source": "./src/generate/Link.tsx",
-      "default": "./dist/generate/Link.js",
-      "types": "./dist/generate/Link.d.ts"
+      "@xenon-ssg/source": "./src/generate/Link.tsx",
+      "types": "./dist/generate/Link.d.ts",
+      "default": "./dist/generate/Link.js"
     },
     "./generate/generate": {
-      "source": "./src/generate/generate.tsx",
-      "default": "./dist/generate/generate.js",
-      "types": "./dist/generate/generate.d.ts"
+      "@xenon-ssg/source": "./src/generate/generate.tsx",
+      "types": "./dist/generate/generate.d.ts",
+      "default": "./dist/generate/generate.js"
     }
   },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
+    "build": "tsc -b tsconfig.package.json",
+    "clean": "tsc -b tsconfig.package.json --clean && node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prepack": "pnpm run clean && tsc -b tsconfig.package.json --sourceMap false --declarationMap false",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint:tsc": "tsc -b"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alvaro-cuesta/xenon-ssg.git"
+    "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git",
+    "directory": "xenon-ssg"
   },
   "keywords": [
     "xenon",
@@ -62,21 +73,44 @@
     "react"
   ],
   "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/alvaro-cuesta/xenon-ssg/issues"
+    "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/xenon-ssg#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg#readme",
   "dependencies": {
+    "type-fest": "catalog:"
+  },
+  "peerDependencies": {
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "@types/express": "catalog:",
+    "@types/node": ">=24",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@types/express": {
+      "optional": true
+    },
+    "@types/node": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "@types/react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/express": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "type-fest": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

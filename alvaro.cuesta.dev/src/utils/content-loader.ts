@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getGitLastModifiedDate, getGitWatchPaths } from "./git.ts";
-import { cachedPromise } from "xenon-ssg/promise";
-import { watchInDev } from "xenon-ssg/watch";
+import { cachedPromise } from "@xenon-ssg/core/promise";
+import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   analyzeItems,
   type AnalyzedItems,

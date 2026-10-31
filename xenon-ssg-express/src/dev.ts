@@ -1,5 +1,5 @@
 import express, { type Express } from "express";
-import { makeXenonMiddleware } from "xenon-ssg/middleware";
+import { makeXenonMiddleware } from "@xenon-ssg/core/middleware";
 import morgan from "morgan";
 import {
   type XenonExpressSite,

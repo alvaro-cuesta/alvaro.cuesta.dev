@@ -3,8 +3,8 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
-import { Link as XenonLink } from "xenon-ssg/generate/Link";
-import { canonicalizeHref } from "xenon-ssg/url";
+import { Link as XenonLink } from "@xenon-ssg/core/generate/Link";
+import { canonicalizeHref } from "@xenon-ssg/core/url";
 import { getDomain, parse } from "tldts";
 import { Icon } from "./Icon.tsx";
 import { getBlogItems } from "../../blog/promise.ts";

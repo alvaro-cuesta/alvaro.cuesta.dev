@@ -6,6 +6,13 @@
     "${configDir}/src/**/*.test.tsx"
   ],
   "compilerOptions": {
-    "composite": true
+    "composite": true,
+    // Only for emitting: it rejects imports into another project, as tests'
+    // imports into their package's project (the relative paths differ).
+    "rewriteRelativeImportExtensions": true,
+    // For local development: `prepack` builds without them.
+    "declarationMap": true,
+    "sourceMap": true,
+    "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.package.tsbuildinfo"
   }
 }

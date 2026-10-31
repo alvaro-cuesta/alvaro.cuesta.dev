@@ -63,9 +63,9 @@ jobs:
         shell: bash
         run: pnpm install --frozen-lockfile
 
+      # From the workspace root, to check every package.
       - name: Run ${{ matrix.linter.name }}
         run: pnpm run ${{ matrix.linter.script }}
-        working-directory: ${{ env.BUILD_PATH }}
 
   test:
     name: Test ${{ matrix.package }}
@@ -76,6 +76,7 @@ jobs:
         package:
           - alvaro.cuesta.dev
           - xenon-ssg
+          - xenon-ssg-express
     steps:
       - *checkout
       - *setup_pnpm

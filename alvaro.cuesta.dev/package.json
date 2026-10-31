@@ -5,25 +5,22 @@
   "version": "1.0.0",
   "description": "Álvaro Cuesta's personal website.",
   "imports": {
-    "#components/*": {
-      "source": "./src/components/*.tsx",
-      "default": "./dist/src/components/*.js",
-      "types": "./dist/src/components/*.d.ts"
-    }
+    "#components/*": "./src/components/*.tsx"
   },
   "scripts": {
-    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--conditions=source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/build.ts",
+    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--conditions=@xenon-ssg/source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/build.ts",
     "build:serve": "serve ./dist",
-    "dev": "cross-env NODE_ENV=development NODE_OPTIONS=--conditions=source tsx watch --include ./src/mdx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/dev.ts",
+    "dev": "cross-env NODE_ENV=development NODE_OPTIONS=--conditions=@xenon-ssg/source tsx watch --include ./src/mdx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint:tsc": "tsc -b ../tsconfig.json"
+    "lint:tsc": "tsc -b"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git"
   },
   "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
+  "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
@@ -33,6 +30,8 @@
     "@picocss/pico": "^2.0.6",
     "@stefanprobst/rehype-extract-toc": "^3.0.0",
     "@wooorm/starry-night": "^3.4.0",
+    "@xenon-ssg/core": "workspace:*",
+    "@xenon-ssg/express": "workspace:*",
     "classnames": "^2.5.1",
     "estree-walker": "^3.0.3",
     "fontawesome-free": "^1.0.4",
@@ -56,8 +55,6 @@
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "vfile-reporter": "^8.1.1",
-    "xenon-ssg": "workspace:*",
-    "xenon-ssg-express": "workspace:*",
     "xmlbuilder2": "catalog:"
   },
   "devDependencies": {
@@ -74,6 +71,7 @@
     "cross-env": "^10.1.0",
     "serve": "^14.2.4",
     "tsx": "^4.23.15",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

@@ -15,6 +15,10 @@ export const routeBookmarks = makeRoute<{}>("/bookmarks/", {
   activePrefix: "/bookmarks",
 });
 
+export const routeLicenses = makeRoute<{}>("/licenses/", {
+  activePrefix: "/licenses",
+});
+
 // BLOG ARTICLES
 export const routeBlogArticleList = makeRoute<
   { page?: string },

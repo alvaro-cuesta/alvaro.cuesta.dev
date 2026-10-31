@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import mock from "mock-fs";
-import { afterEach, describe, expect, it } from "vitest";
+import vfs from "node:vfs";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { XenonExpressSiteMeta } from "../index.tsx";
 import {
   sitemapPlugin,
@@ -9,9 +9,26 @@ import {
   type SitemapPluginMetadata,
 } from "./sitemap.ts";
 
+// Missing from `@types/node` (as of 26.6.6).
+declare module "node:vfs" {
+  interface VirtualFileSystem {
+    /** Mounts the file system at a path of its own and returns it. */
+    mount(): string;
+    unmount(): void;
+  }
+}
+
 describe("sitemapPlugin", () => {
+  let virtualFs: vfs.VirtualFileSystem;
+  let baseOutputFolder: string;
+
+  beforeEach(() => {
+    virtualFs = vfs.create({ emitExperimentalWarning: false });
+    baseOutputFolder = virtualFs.mount();
+  });
+
   afterEach(() => {
-    mock.restore();
+    virtualFs.unmount();
   });
 
   it("omits generated pages explicitly excluded from the sitemap", async () => {
@@ -26,12 +43,6 @@ describe("sitemapPlugin", () => {
     if (!runnable?.buildPost) {
       throw new Error("Sitemap plugin did not expose buildPost.");
     }
-
-    const baseOutputFolder = path.join(process.cwd(), "virtual-output");
-
-    mock({
-      [baseOutputFolder]: {},
-    });
 
     await runnable.buildPost({
       siteMeta,

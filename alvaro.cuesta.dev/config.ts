@@ -1,4 +1,4 @@
-import type { RenderToStreamOptions } from "xenon-ssg/render";
+import type { RenderToStreamOptions } from "@xenon-ssg/core/render";
 import path from "node:path";
 
 /** Root folder of the site package. Resolve site files (content, assets) from here. */

@@ -1,67 +1,79 @@
 {
-  "name": "xenon-ssg-express",
+  "name": "@xenon-ssg/express",
   "private": true,
   "type": "module",
   "version": "0.0.1",
   "description": "Express layer for Xenon SSG — a dead simple React Static-Site Generator.",
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
-      "default": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "@xenon-ssg/source": "./src/index.tsx",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./build": {
-      "source": "./src/build.ts",
-      "default": "./dist/build.js",
-      "types": "./dist/build.d.ts"
+      "@xenon-ssg/source": "./src/build.ts",
+      "types": "./dist/build.d.ts",
+      "default": "./dist/build.js"
     },
     "./cache": {
-      "source": "./src/cache.ts",
-      "default": "./dist/cache.js",
-      "types": "./dist/cache.d.ts"
+      "@xenon-ssg/source": "./src/cache.ts",
+      "types": "./dist/cache.d.ts",
+      "default": "./dist/cache.js"
     },
     "./dev": {
-      "source": "./src/dev.ts",
-      "default": "./dist/dev.js",
-      "types": "./dist/dev.d.ts"
+      "@xenon-ssg/source": "./src/dev.ts",
+      "types": "./dist/dev.d.ts",
+      "default": "./dist/dev.js"
     },
     "./plugins/favicon": {
-      "source": "./src/plugins/favicon.ts",
-      "default": "./dist/plugins/favicon.js",
-      "types": "./dist/plugins/favicon.d.ts"
+      "@xenon-ssg/source": "./src/plugins/favicon.ts",
+      "types": "./dist/plugins/favicon.d.ts",
+      "default": "./dist/plugins/favicon.js"
     },
     "./plugins/plugins": {
-      "source": "./src/plugins/plugins.tsx",
-      "default": "./dist/plugins/plugins.js",
-      "types": "./dist/plugins/plugins.d.ts"
+      "@xenon-ssg/source": "./src/plugins/plugins.tsx",
+      "types": "./dist/plugins/plugins.d.ts",
+      "default": "./dist/plugins/plugins.js"
     },
     "./plugins/sitemap": {
-      "source": "./src/plugins/sitemap.ts",
-      "default": "./dist/plugins/sitemap.js",
-      "types": "./dist/plugins/sitemap.d.ts"
+      "@xenon-ssg/source": "./src/plugins/sitemap.ts",
+      "types": "./dist/plugins/sitemap.d.ts",
+      "default": "./dist/plugins/sitemap.js"
     },
     "./plugins/single-lightningcss": {
-      "source": "./src/plugins/single-lightningcss.ts",
-      "default": "./dist/plugins/single-lightningcss.js",
-      "types": "./dist/plugins/single-lightningcss.d.ts"
+      "@xenon-ssg/source": "./src/plugins/single-lightningcss.ts",
+      "types": "./dist/plugins/single-lightningcss.d.ts",
+      "default": "./dist/plugins/single-lightningcss.js"
     },
     "./plugins/static-file": {
-      "source": "./src/plugins/static-file.ts",
-      "default": "./dist/plugins/static-file.js",
-      "types": "./dist/plugins/static-file.d.ts"
+      "@xenon-ssg/source": "./src/plugins/static-file.ts",
+      "types": "./dist/plugins/static-file.d.ts",
+      "default": "./dist/plugins/static-file.js"
     },
     "./plugins/static-folder": {
-      "source": "./src/plugins/static-folder.ts",
-      "default": "./dist/plugins/static-folder.js",
-      "types": "./dist/plugins/static-folder.d.ts"
+      "@xenon-ssg/source": "./src/plugins/static-folder.ts",
+      "types": "./dist/plugins/static-folder.d.ts",
+      "default": "./dist/plugins/static-folder.js"
     }
   },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -b tsconfig.package.json",
+    "clean": "tsc -b tsconfig.package.json --clean && node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prepack": "pnpm run clean && tsc -b tsconfig.package.json --sourceMap false --declarationMap false",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:tsc": "tsc -b"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alvaro-cuesta/xenon-ssg.git"
+    "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git",
+    "directory": "xenon-ssg-express"
   },
   "keywords": [
     "xenon",
@@ -72,31 +84,42 @@
     "express"
   ],
   "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/alvaro-cuesta/xenon-ssg/issues"
+    "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/xenon-ssg#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg-express#readme",
   "dependencies": {
+    "@types/express": "catalog:",
     "express": "^5.2.1",
     "favicons": "^7.2.0",
     "lightningcss": "^1.25.1",
     "morgan": "^1.10.0",
-    "react": "catalog:",
     "temporal-polyfill": "catalog:",
+    "type-fest": "catalog:",
     "xmlbuilder2": "catalog:"
   },
+  "peerDependencies": {
+    "@xenon-ssg/core": "workspace:^",
+    "react": "catalog:",
+    "@types/node": ">=24",
+    "@types/react": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  },
   "devDependencies": {
-    "@types/express": "catalog:",
-    "@types/mock-fs": "^4.13.4",
     "@types/morgan": "^1.9.9",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "mock-fs": "^5.5.0",
-    "type-fest": "catalog:",
+    "@xenon-ssg/core": "workspace:*",
+    "react": "catalog:",
+    "typescript": "catalog:",
     "vitest": "catalog:"
-  },
-  "peerDependencies": {
-    "xenon-ssg": "workspace:*"
   }
 }

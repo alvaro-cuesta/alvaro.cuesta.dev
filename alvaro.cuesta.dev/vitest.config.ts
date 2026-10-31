@@ -5,7 +5,12 @@ export default defineConfig({
     resolve: {
       // Resolve workspace packages to their sources instead of `dist/`.
       // Overrides Vite's `defaultServerConditions`, so repeat them here.
-      conditions: ["source", "module", "node", "development|production"],
+      conditions: [
+        "@xenon-ssg/source",
+        "module",
+        "node",
+        "development|production",
+      ],
     },
   },
 });
