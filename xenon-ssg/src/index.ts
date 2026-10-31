@@ -3,7 +3,15 @@ import type { UnknownRecord } from "type-fest";
 
 export type XenonRenderResult<PageMetadata extends UnknownRecord> = {
   reactNode: ReactNode;
-  metadata: PageMetadata;
+  /**
+   * Facts about the page for plugins, e.g. the sitemap.
+   *
+   * The build awaits it after the page has rendered, so it can resolve whenever the data it
+   * depends on does.
+   *
+   * The dev server never reads it.
+   */
+  metadata: PageMetadata | Promise<PageMetadata>;
 };
 
 /**

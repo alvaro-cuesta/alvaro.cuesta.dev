@@ -17,7 +17,9 @@ export function makeXenonMiddleware<PageMetadata extends UnknownRecord>(
 
     let renderedStream;
     try {
-      const { reactNode } = await render(pathname);
+      const { reactNode, metadata } = await render(pathname);
+      // Only the build reads metadata. Don't let a rejection crash the dev server.
+      Promise.resolve(metadata).catch(doNothing);
       renderedStream = renderToStream(
         <Root
           // We don't have to crawl links in middleware mode since we're not pre-rendering anything
