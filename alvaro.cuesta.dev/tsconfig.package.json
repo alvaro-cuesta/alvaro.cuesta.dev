@@ -14,8 +14,8 @@
   "include": ["bin/**/*", "src/**/*", "config.ts"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "references": [
-    { "path": "../xenon-ssg/tsconfig.package.json" },
-    { "path": "../xenon-ssg-express/tsconfig.package.json" },
+    { "path": "../packages/core/tsconfig.package.json" },
+    { "path": "../packages/express/tsconfig.package.json" },
     { "path": "../packages/thunks/tsconfig.package.json" }
   ]
 }

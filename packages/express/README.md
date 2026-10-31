@@ -1,8 +1,8 @@
 # Xenon SSG Express
 
-Express layer for [Xenon SSG](../xenon-ssg/) — a dead simple React Static-Site Generator.
+Express layer for [Xenon SSG](../core/) — a dead simple React Static-Site Generator.
 
-Dead simple layer, following the same simplicity philosophy (libraries before frameworks) as [Xenon SSG](../xenon-ssg/).
+Dead simple layer, following the same simplicity philosophy (libraries before frameworks) as [Xenon SSG](../core/).
 
 ## Entry point functions
 

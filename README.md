@@ -4,9 +4,9 @@
 
 You are probably interested in one of these packages:
 
-- [@xenon-ssg/core](./xenon-ssg/) — A React static site generator written in TypeScript. It powers this very website!
+- [@xenon-ssg/core](./packages/core/) — A React static site generator written in TypeScript. It powers this very website!
 
-- [@xenon-ssg/express](./xenon-ssg-express) — Express layer for Xenon SSG. Provides `dev` mode and some reusable plugins
+- [@xenon-ssg/express](./packages/express/) — Express layer for Xenon SSG. Provides `dev` mode and some reusable plugins
   to have a bit more functionality over the barebones SSG.
 
 - [@xenon-ssg/thunks](./packages/thunks/) — Values you get later: lazy, shared promises, and cells that can be

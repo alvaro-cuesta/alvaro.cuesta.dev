@@ -4,7 +4,7 @@
   // emits, and the site's only checks. If it's ever made composite, reference
   // it too, so tests check against its declarations instead of its sources.
   "references": [
-    { "path": "../xenon-ssg/tsconfig.package.json" },
-    { "path": "../xenon-ssg-express/tsconfig.package.json" }
+    { "path": "../packages/core/tsconfig.package.json" },
+    { "path": "../packages/express/tsconfig.package.json" }
   ]
 }

@@ -72,10 +72,10 @@ importers:
         version: 3.9.0(patch_hash=62f145a6e5733b7de424d56e8d3d479d7d5c58c5756a95f5b257580279dbd11b)
       '@xenon-ssg/core':
         specifier: workspace:*
-        version: link:../xenon-ssg
+        version: link:../packages/core
       '@xenon-ssg/express':
         specifier: workspace:*
-        version: link:../xenon-ssg-express
+        version: link:../packages/express
       '@xenon-ssg/thunks':
         specifier: workspace:*
         version: link:../packages/thunks
@@ -192,19 +192,7 @@ importers:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
 
-  packages/thunks:
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.6
-      typescript:
-        specifier: 'catalog:'
-        version: 7.0.2
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
-
-  xenon-ssg:
+  packages/core:
     dependencies:
       type-fest:
         specifier: 'catalog:'
@@ -235,14 +223,14 @@ importers:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
 
-  xenon-ssg-express:
+  packages/express:
     dependencies:
       '@types/express':
         specifier: 'catalog:'
         version: 5.0.6
       '@xenon-ssg/thunks':
         specifier: workspace:^
-        version: link:../packages/thunks
+        version: link:../thunks
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -273,10 +261,22 @@ importers:
         version: 19.2.14
       '@xenon-ssg/core':
         specifier: workspace:*
-        version: link:../xenon-ssg
+        version: link:../core
       react:
         specifier: 'catalog:'
         version: 19.2.5
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
+
+  packages/thunks:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

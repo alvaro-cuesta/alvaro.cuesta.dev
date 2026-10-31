@@ -2,8 +2,8 @@
   "files": [],
   "references": [
     { "path": "./packages/thunks" },
-    { "path": "./xenon-ssg" },
-    { "path": "./xenon-ssg-express" },
+    { "path": "./packages/core" },
+    { "path": "./packages/express" },
     { "path": "./alvaro.cuesta.dev" }
   ]
 }

@@ -74,7 +74,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git",
-    "directory": "xenon-ssg-express"
+    "directory": "packages/express"
   },
   "keywords": [
     "xenon",
@@ -89,7 +89,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg-express#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express#readme",
   "dependencies": {
     "@types/express": "catalog:",
     "@xenon-ssg/thunks": "workspace:^",

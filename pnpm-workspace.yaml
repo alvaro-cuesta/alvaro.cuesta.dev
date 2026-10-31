@@ -1,7 +1,5 @@
 packages:
   - alvaro.cuesta.dev
-  - xenon-ssg
-  - xenon-ssg-express
   - packages/*
 
 # Runs scripts with pnpm's own shell, so `NAME=value command` works on Windows too.

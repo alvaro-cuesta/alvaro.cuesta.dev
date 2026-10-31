@@ -75,8 +75,8 @@ jobs:
       matrix:
         package:
           - alvaro.cuesta.dev
-          - xenon-ssg
-          - xenon-ssg-express
+          - packages/core
+          - packages/express
           - packages/thunks
     steps:
       - *checkout

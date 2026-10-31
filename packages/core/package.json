@@ -59,7 +59,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alvaro-cuesta/alvaro.cuesta.dev.git",
-    "directory": "xenon-ssg"
+    "directory": "packages/core"
   },
   "keywords": [
     "xenon",
@@ -73,7 +73,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/xenon-ssg#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/core#readme",
   "dependencies": {
     "type-fest": "catalog:"
   },
