@@ -13,6 +13,7 @@ import {
   cBetween,
   cMany,
 } from "../utils/parsers.mts";
+import type { Properties } from "hast";
 import type { Code } from "mdast";
 
 // Parsers for meta
@@ -66,14 +67,20 @@ const metaEntry: Parser<[string, string | boolean]> = (input) => {
 };
 
 export const parseMeta = oComplete(
-  cBetween(cMap(cMany(metaEntry), Object.fromEntries), cOpt(pWs())),
+  cBetween(
+    cMap(cMany(metaEntry), (entries) => Object.fromEntries(entries)),
+    cOpt(pWs()),
+  ),
 );
 
+// Also declared by `mdast-util-to-hast`, which only comes in transitively, so
+// its types aren't always part of the program.
 declare module "mdast" {
-  interface CodeData {
-    hProperties?: Record<string, unknown>;
+  interface Data {
+    hProperties?: Properties | undefined;
   }
 }
+
 /**
  * Remark plugin to parse code block meta into data- attributes.
  * If the meta has key "caption", find a footnote with identification codeMeta[caption]

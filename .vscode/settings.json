@@ -1,4 +1,6 @@
 {
-  "typescript.tsdk": "./node_modules/typescript/lib",
+  // TypeScript 6, aliased: TypeScript 7 has no tsserver yet, which the MDX
+  // TypeScript plugin needs. Builds use TypeScript 7.
+  "typescript.tsdk": "./node_modules/typescript6/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true
 }

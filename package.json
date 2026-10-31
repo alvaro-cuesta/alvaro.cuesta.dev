@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "prettier": "^3.3.3",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "typescript6": "npm:typescript@^6.0.2"
   }
 }
