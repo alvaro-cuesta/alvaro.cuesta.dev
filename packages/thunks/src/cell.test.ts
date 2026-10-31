@@ -108,6 +108,25 @@ describe("cell", () => {
     expect(subscribe).toHaveBeenCalledOnce();
   });
 
+  it("stops what it's subscribed to once it has started, if disposed before then", async () => {
+    const dispose = vi.fn();
+    const started = Promise.withResolvers<Disposable>();
+    const getValue = cell(
+      () => Promise.resolve(1),
+      () => started.promise,
+    );
+
+    read(getValue);
+    getValue[Symbol.dispose]();
+
+    expect(dispose).not.toHaveBeenCalled();
+
+    started.resolve({ [Symbol.dispose]: dispose });
+    await started.promise;
+
+    expect(dispose).toHaveBeenCalledOnce();
+  });
+
   it("is never subscribed if disposed before it's read", () => {
     const subscribe = vi.fn(() => ({ [Symbol.dispose]: () => {} }));
     const getValue = cell(() => Promise.resolve(1), subscribe);

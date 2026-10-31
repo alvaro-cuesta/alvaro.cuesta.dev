@@ -82,29 +82,53 @@ export const ignoredRevs = family((cwd: string) =>
   }),
 );
 
+const NOT_WATCHING: Disposable = { [Symbol.dispose]: () => {} };
+
+/**
+ * Watches one of a worktree's git files, like `HEAD` or a branch's ref, in development.
+ *
+ * Git says where it is: a linked worktree keeps some of its files in the main worktree's git directory.
+ */
+const watchGitFileInDev = async (
+  root: string,
+  name: string,
+  onChange: () => void,
+): Promise<Disposable> => {
+  // Finding the file shells out to git, and only development watches, so don't in production builds.
+  if (process.env["NODE_ENV"] !== "development") return NOT_WATCHING;
+
+  const gitPath = await runGitCommand(["rev-parse", "--git-path", name], root);
+  return gitPath === null
+    ? NOT_WATCHING
+    : watchInDev(path.resolve(root, gitPath), onChange);
+};
+
 /** A worktree's `HEAD`, read once, and again in development whenever it moves. */
-const headOf = family((root: string) =>
-  cell(
-    () => runGitCommand(["rev-parse", "HEAD"], root),
-    (invalidate) => {
-      const watches = new DisposableStack();
+const headOf = family((root: string) => {
+  // The branch `HEAD` is on, like `refs/heads/main`, or `null` when it's detached. It changes on checkouts.
+  const branch = cell(
+    () => runGitCommand(["symbolic-ref", "-q", "HEAD"], root),
+    (invalidate) => watchGitFileInDev(root, "HEAD", invalidate),
+  );
 
-      // Finding what to watch shells out to git, and only development watches, so don't in production builds.
-      if (process.env["NODE_ENV"] === "development") {
-        void getGitWatchPaths(root).then((gitWatchPaths) => {
-          // They're found later, and by then the cell may be disposed, with nothing left to watch for.
-          if (watches.disposed) return;
+  // The commit a ref points to. It changes on commits, resets…
+  const commitOf = family((ref: string) =>
+    cell(
+      () => runGitCommand(["rev-parse", ref], root),
+      (invalidate) => watchGitFileInDev(root, ref, invalidate),
+    ),
+  );
 
-          for (const gitWatchPath of gitWatchPaths) {
-            watches.use(watchInDev(gitWatchPath, invalidate));
-          }
-        });
-      }
+  return derived(async (get) => {
+    // Detached, `HEAD` holds the commit itself, so it's what moves.
+    const ref = (await get(branch)) ?? "HEAD";
 
-      return watches;
-    },
-  ),
-);
+    // Only the ref `HEAD` is on moves it, so stop watching the ones it left.
+    commitOf.retain([ref]);
+
+    return get(commitOf(ref));
+  });
+});
 
 /**
  * The commit `HEAD` points to, in the worktree a directory is in.
@@ -233,20 +257,3 @@ export const gitFileDates = family((filePath: string) =>
     return readGitFileDates(filePath, head, revs);
   }),
 );
-
-/** Absolute paths of the files that change when `HEAD` moves: `HEAD` itself and the current branch's ref. */
-const getGitWatchPaths = async (cwd: string): Promise<string[]> => {
-  const headPath = await runGitCommand(
-    ["rev-parse", "--git-path", "HEAD"],
-    cwd,
-  );
-  const headRef = await runGitCommand(["symbolic-ref", "-q", "HEAD"], cwd);
-  const headRefPath =
-    headRef === null
-      ? null
-      : await runGitCommand(["rev-parse", "--git-path", headRef], cwd);
-
-  return [...new Set([headPath, headRefPath].filter((x) => x !== null))].map(
-    (gitPath) => path.resolve(cwd, gitPath),
-  );
-};

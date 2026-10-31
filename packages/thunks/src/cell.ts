@@ -20,10 +20,18 @@ export type Cell<T> = Thunk<T> &
  * Starts whatever knows when a cell's value changes, like a file watcher, and has it call
  * `invalidate` then.
  *
+ * It can take a while to start, e.g. when it has to find what to watch first, by giving a promise
+ * for what stops it. Changes only count once it has started, and if the cell is disposed before
+ * then, it's stopped as soon as it has.
+ *
+ * It mustn't fail: a rejection is left unhandled, so it's reported like any other bug.
+ *
  * @param invalidate Invalidates the cell.
- * @returns What stops it, when the cell is disposed.
+ * @returns What stops it, when the cell is disposed, or a promise for it.
  */
-export type Subscribe = (invalidate: () => void) => Disposable;
+export type Subscribe = (
+  invalidate: () => void,
+) => Disposable | Promise<Disposable>;
 
 /**
  * A cell that runs `make` the first time it's read, and again on the first read after each
@@ -48,7 +56,7 @@ export function cell<T>(
     current = thunk(make);
   };
 
-  let subscription: Disposable | undefined;
+  let subscription: Disposable | Promise<Disposable> | undefined;
   let disposed = false;
 
   return Object.assign(
@@ -62,7 +70,17 @@ export function cell<T>(
       invalidate,
       [Symbol.dispose]: () => {
         disposed = true;
-        subscription?.[Symbol.dispose]();
+
+        if (subscription instanceof Promise) {
+          // Its rejection is already left unhandled on `subscription` itself,
+          // so don't report it twice.
+          subscription.then(
+            (started) => started[Symbol.dispose](),
+            () => {},
+          );
+        } else {
+          subscription?.[Symbol.dispose]();
+        }
       },
     },
   );
