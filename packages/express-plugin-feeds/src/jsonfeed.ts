@@ -1,5 +1,4 @@
-import { getRouteUrl } from "./routes.ts";
-import { instantToUtcIso8601 } from "./dates.ts";
+import { toAbsoluteUrl } from "./routes.ts";
 import type { FeedFormatRoute, FeedItem, FeedPage } from "./types.ts";
 
 type JsonFeedExtensionMap = {
@@ -98,10 +97,10 @@ const toJsonFeedItem = (item: FeedItem, language: string): JsonFeedItem => {
     ...(item.title ? { title: item.title } : {}),
     ...(item.summary !== undefined ? { summary: item.summary } : {}),
     ...(item.datePublished
-      ? { date_published: instantToUtcIso8601(item.datePublished) }
+      ? { date_published: item.datePublished.toString() }
       : {}),
     ...(item.dateModified
-      ? { date_modified: instantToUtcIso8601(item.dateModified) }
+      ? { date_modified: item.dateModified.toString() }
       : {}),
     ...(item.authors?.length
       ? {
@@ -150,11 +149,11 @@ const toJsonFeed = (
     version: "https://jsonfeed.org/version/1.1",
     title: page.title,
     ...(page.homePageUrl ? { home_page_url: page.homePageUrl } : {}),
-    feed_url: getRouteUrl(page.baseUrl, feedRoute),
+    feed_url: toAbsoluteUrl(page.baseUrl, feedRoute.pathname),
     ...(page.description ? { description: page.description } : {}),
     ...(nextRoute
       ? {
-          next_url: getRouteUrl(page.baseUrl, nextRoute),
+          next_url: toAbsoluteUrl(page.baseUrl, nextRoute.pathname),
         }
       : {}),
     ...(page.authors?.length

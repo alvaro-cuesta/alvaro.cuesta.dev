@@ -18,6 +18,7 @@ Each one is a package of its own:
 - [Static folder](../express-plugin-static-folder/)
 - [Single LightningCSS](../express-plugin-single-lightningcss/)
 - [Favicon](../express-plugin-favicon/)
+- [Feeds](../express-plugin-feeds/)
 - [Sitemap](../express-plugin-sitemap/)
 
 To write your own, see [`plugin.tsx`](./src/plugin.tsx). Plugins can also use the runtime's

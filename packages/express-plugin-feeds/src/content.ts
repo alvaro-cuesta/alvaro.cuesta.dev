@@ -1,5 +1,3 @@
-import { htmlToPlainText } from "../../utils/html.ts";
-import { compareInstants } from "./dates.ts";
 import { getFeedFormatRoute, toAbsoluteUrl } from "./routes.ts";
 import type {
   FeedAuthor,
@@ -45,7 +43,7 @@ const getPageUpdatedAt = (items: FeedItem[]): FeedItem["datePublished"] => {
   });
 
   return timestamps.reduce((latest, candidate) => {
-    return compareInstants(candidate, latest) > 0 ? candidate : latest;
+    return Temporal.Instant.compare(candidate, latest) > 0 ? candidate : latest;
   });
 };
 
@@ -65,7 +63,7 @@ const toFeedItemModel = async (
     fullContentHtml = await item.render();
 
     if (content.text === "full") {
-      fullContentText = htmlToPlainText(fullContentHtml);
+      fullContentText = content.htmlToText(fullContentHtml);
     }
   }
 

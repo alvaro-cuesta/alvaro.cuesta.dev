@@ -5,6 +5,7 @@
     { "path": "./packages/core" },
     { "path": "./packages/express" },
     { "path": "./packages/express-plugin-favicon" },
+    { "path": "./packages/express-plugin-feeds" },
     { "path": "./packages/express-plugin-sitemap" },
     { "path": "./packages/express-plugin-single-lightningcss" },
     { "path": "./packages/express-plugin-static-file" },

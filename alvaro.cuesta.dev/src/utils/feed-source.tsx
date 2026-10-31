@@ -1,7 +1,7 @@
 import { makeMdxDefaultComponents } from "../mdx/mdx.tsx";
 import { MdxRenderContext } from "../mdx/MdxRenderContext.tsx";
 import { blogItemDateToTemporalInstant, type BlogItemDate } from "./item-dates.ts";
-import type { FeedSourceItem } from "../plugins/feeds/types.ts";
+import type { FeedSourceItem } from "@xenon-ssg/express-plugin-feeds";
 import { renderToString } from "@xenon-ssg/core/render";
 import type { MDXContent } from "mdx/types.js";
 import type { AnalyzedItems, Item } from "./analyze.ts";

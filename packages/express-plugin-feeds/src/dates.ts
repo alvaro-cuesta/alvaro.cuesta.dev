@@ -14,17 +14,6 @@ const RFC822_MONTHS = [
   "Dec",
 ];
 
-export function instantToUtcIso8601(instant: Temporal.Instant): string {
-  return instant.toString();
-}
-
-export function compareInstants(
-  a: Temporal.Instant,
-  b: Temporal.Instant,
-): number {
-  return Temporal.Instant.compare(a, b);
-}
-
 export function instantToRfc822(instant: Temporal.Instant): string {
   const dateTime = instant.toZonedDateTimeISO("UTC");
   const weekday = RFC822_WEEKDAYS[dateTime.dayOfWeek - 1];

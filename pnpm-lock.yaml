@@ -82,6 +82,9 @@ importers:
       '@xenon-ssg/express-plugin-favicon':
         specifier: workspace:*
         version: link:../packages/express-plugin-favicon
+      '@xenon-ssg/express-plugin-feeds':
+        specifier: workspace:*
+        version: link:../packages/express-plugin-feeds
       '@xenon-ssg/express-plugin-single-lightningcss':
         specifier: workspace:*
         version: link:../packages/express-plugin-single-lightningcss
@@ -163,9 +166,6 @@ importers:
       vfile-reporter:
         specifier: ^8.1.1
         version: 8.1.1
-      xmlbuilder2:
-        specifier: 'catalog:'
-        version: 4.0.3
     devDependencies:
       '@mdx-js/typescript-plugin':
         specifier: ^0.1.4
@@ -299,6 +299,25 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
+
+  packages/express-plugin-feeds:
+    dependencies:
+      xmlbuilder2:
+        specifier: 'catalog:'
+        version: 4.0.3
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@xenon-ssg/express':
+        specifier: workspace:*
+        version: link:../express
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
 
   packages/express-plugin-single-lightningcss:
     dependencies:

@@ -35,11 +35,6 @@ export function toAbsoluteUrl(baseUrl: string, pathname: string): string {
   return `${baseUrl}${pathname}`;
 }
 
-/** Resolve a feed format route to an absolute URL. */
-export function getRouteUrl(baseUrl: string, route: FeedFormatRoute): string {
-  return toAbsoluteUrl(baseUrl, route.pathname);
-}
-
 function getFeedPathFragments(
   mountPointFragments: string[],
   page: number,
@@ -98,7 +93,7 @@ export function getPaginatedFeedFormatRoutePath(
  */
 export function getFeedSitemapPathnames(
   totalPages: number,
-  mountPointFragments = DEFAULT_MOUNT_POINT_FRAGMENTS,
+  mountPointFragments: string[] = DEFAULT_MOUNT_POINT_FRAGMENTS,
   formats: readonly FeedFormat[] = ALL_FEED_FORMATS,
 ): string[] {
   return Array.from(

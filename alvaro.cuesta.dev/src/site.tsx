@@ -33,11 +33,11 @@ import {
   routeHome,
   routeTimelineList,
 } from "./routes.ts";
-import { feedsPlugin } from "./plugins/feeds/index.ts";
-import { compareInstants } from "./plugins/feeds/dates.ts";
+import { feedsPlugin } from "@xenon-ssg/express-plugin-feeds";
 import { getBlogFeedSourceItems } from "./blog/feed-source.tsx";
 import { getTimelineFeedSourceItems } from "./timeline/feed-source.tsx";
 import { makeTitle } from "./utils/meta.ts";
+import { htmlToPlainText } from "./utils/html.ts";
 import { blogItemDateToTemporalInstant } from "./utils/item-dates.ts";
 
 export type SiteFeedUrls = {
@@ -214,6 +214,7 @@ const timelineFeeds = feedsPlugin({
   content: {
     html: "full",
     text: "full",
+    htmlToText: htmlToPlainText,
   },
   linkRelFormats: ["atom"],
   sitemapFormats: ["atom"],
@@ -233,7 +234,7 @@ const allFeeds = feedsPlugin({
     );
 
     return [...blogItems, ...nonImplicitTimelineItems].sort((a, b) =>
-      compareInstants(b.datePublished, a.datePublished),
+      Temporal.Instant.compare(b.datePublished, a.datePublished),
     );
   },
   homePagePathname: routeHome.build({}),

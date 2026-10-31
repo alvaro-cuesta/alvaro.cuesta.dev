@@ -10,7 +10,8 @@ You are probably interested in one of these packages:
   to have a bit more functionality over the barebones SSG.
 
 - @xenon-ssg/express-plugin-* — The plugins for Xenon SSG Express, one package each:
-  [favicon](./packages/express-plugin-favicon/), [sitemap](./packages/express-plugin-sitemap/),
+  [favicon](./packages/express-plugin-favicon/), [feeds](./packages/express-plugin-feeds/),
+  [sitemap](./packages/express-plugin-sitemap/),
   [single LightningCSS](./packages/express-plugin-single-lightningcss/),
   [static file](./packages/express-plugin-static-file/) and [static folder](./packages/express-plugin-static-folder/).
 

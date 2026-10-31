@@ -1,6 +1,6 @@
 import { create } from "xmlbuilder2";
 import { instantToRfc822 } from "./dates.ts";
-import { FEED_FORMATS, getRouteUrl } from "./routes.ts";
+import { FEED_FORMATS, toAbsoluteUrl } from "./routes.ts";
 import type { FeedItem, FeedPage } from "./types.ts";
 
 type RssAtomLink = {
@@ -169,12 +169,16 @@ const toRssItemDocument = (item: FeedItem): RssItemDocument => {
   } as RssItemDocument;
 };
 
-const toRssDocument = (page: FeedPage, language: string): RssFeedDocument => {
+const toRssDocument = (
+  page: FeedPage,
+  language: string,
+  generator: string,
+): RssFeedDocument => {
   const atomLinks: RssAtomLink[] = [
     {
       rel: "self",
       type: FEED_FORMATS.rss.contentType,
-      href: getRouteUrl(page.baseUrl, page.routes.rss),
+      href: toAbsoluteUrl(page.baseUrl, page.routes.rss.pathname),
     },
   ];
 
@@ -182,7 +186,7 @@ const toRssDocument = (page: FeedPage, language: string): RssFeedDocument => {
     atomLinks.push({
       rel: page.currentPage === 2 ? "previous" : "prev-archive",
       type: FEED_FORMATS.rss.contentType,
-      href: getRouteUrl(page.baseUrl, page.previousPage.rss),
+      href: toAbsoluteUrl(page.baseUrl, page.previousPage.rss.pathname),
     });
   }
 
@@ -190,7 +194,7 @@ const toRssDocument = (page: FeedPage, language: string): RssFeedDocument => {
     atomLinks.push({
       rel: page.currentPage === 1 ? "next" : "next-archive",
       type: FEED_FORMATS.rss.contentType,
-      href: getRouteUrl(page.baseUrl, page.nextPage.rss),
+      href: toAbsoluteUrl(page.baseUrl, page.nextPage.rss.pathname),
     });
   }
 
@@ -206,6 +210,7 @@ const toRssDocument = (page: FeedPage, language: string): RssFeedDocument => {
     ),
     language,
     ...(page.updated ? { lastBuildDate: instantToRfc822(page.updated) } : {}),
+    generator,
     ...(atomLinks.length ? { atomLinks } : {}),
     ...(page.currentPage > 1 ? { historyArchive: true } : {}),
     items: page.items.map((item) => toRssItemDocument(item)),
@@ -215,8 +220,9 @@ const toRssDocument = (page: FeedPage, language: string): RssFeedDocument => {
 export const serializeRssDocument = (
   page: FeedPage,
   language: string,
+  generator: string,
 ): string => {
-  const document = toRssDocument(page, language);
+  const document = toRssDocument(page, language, generator);
   const root = create({ version: "1.0", encoding: "UTF-8" });
   const rss = root.ele("rss", {
     version: "2.0",
@@ -235,6 +241,10 @@ export const serializeRssDocument = (
 
   if (document.lastBuildDate) {
     channel.ele("lastBuildDate").txt(document.lastBuildDate);
+  }
+
+  if (document.generator) {
+    channel.ele("generator").txt(document.generator);
   }
 
   if (document.historyArchive) {

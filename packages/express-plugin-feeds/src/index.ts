@@ -1,7 +1,7 @@
+import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
+import { findPackageJSON } from "node:module";
 import path from "node:path";
-import pkg from "../../../package.json" with { type: "json" };
-const packageVersion = pkg.version;
 import type {
   Plugin,
   PluginAttachToExpressFunction,
@@ -31,13 +31,29 @@ import type {
   FeedSourceItem,
 } from "./types.ts";
 
+export type {
+  FeedAuthor,
+  FeedContentInclusionMode,
+  FeedContentOptions,
+  FeedFormat,
+  FeedSourceItem,
+} from "./types.ts";
+
 const DEFAULT_LANGUAGE = "en";
 const DEFAULT_ITEMS_PER_PAGE = 10;
-const DEFAULT_GENERATOR_NAME = "Xenon SSG";
+// This package is what generates the feeds, so it's their generator.
+const packageJson: { name: string; version: string } = JSON.parse(
+  readFileSync(findPackageJSON(import.meta.url)!, "utf-8"),
+);
+const DEFAULT_GENERATOR: FeedGeneratorConfig = {
+  name: packageJson.name,
+  version: packageJson.version,
+};
 const SITEMAP_COUNT_BASE_URL = "https://feeds.invalid";
 
-type FeedGeneratorConfig = {
+export type FeedGeneratorConfig = {
   name: string;
+  version?: string;
   uri?: string;
 };
 
@@ -144,12 +160,18 @@ function serializeFeedPage(
   if (formats.includes("atom")) {
     documents.atom = serializeAtomDocument(page, language, {
       value: generator.name,
-      version: packageVersion,
+      ...(generator.version ? { version: generator.version } : {}),
       ...(generator.uri ? { uri: generator.uri } : {}),
     });
   }
   if (formats.includes("rss")) {
-    documents.rss = serializeRssDocument(page, language);
+    documents.rss = serializeRssDocument(
+      page,
+      language,
+      generator.version
+        ? `${generator.name} v${generator.version}`
+        : generator.name,
+    );
   }
 
   return { page, documents };
@@ -202,11 +224,6 @@ async function compileFeeds<TMetadata = unknown>({
   );
 }
 
-/** Ensure output folder exists before writing serialized feed files. */
-async function ensureParentFolder(filepath: string): Promise<void> {
-  await fs.mkdir(path.dirname(filepath), { recursive: true });
-}
-
 /**
  * Feed plugin entry point. Generates JSON Feed, Atom and RSS outputs.
  */
@@ -223,7 +240,7 @@ export function feedsPlugin<
   content,
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
   language = DEFAULT_LANGUAGE,
-  generator = { name: DEFAULT_GENERATOR_NAME },
+  generator = DEFAULT_GENERATOR,
   formats,
   linkRelFormats,
   sitemapFormats,
@@ -406,7 +423,7 @@ export function feedsPlugin<
               serializedPage.page.routes[format].outputRelativePath,
             );
             console.debug(`[Feed:${format}] ${outputFilepath}`);
-            await ensureParentFolder(outputFilepath);
+            await fs.mkdir(path.dirname(outputFilepath), { recursive: true });
             await fs.writeFile(outputFilepath, document);
           }
         }

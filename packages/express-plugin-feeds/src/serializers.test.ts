@@ -222,8 +222,10 @@ describe("feed serializers", () => {
       nextPage: null,
     };
 
-    const document = serializeRssDocument(page, "en");
+    const document = serializeRssDocument(page, "en", "Example Generator v1.0.0");
     const itemMatch = document.match(/<item>([\s\S]*?)<\/item>/);
+
+    expect(document).toContain("<generator>Example Generator v1.0.0</generator>");
 
     expect(itemMatch?.[1]).toContain("<title>Post 1</title>");
     expect(itemMatch?.[1]).toContain(

@@ -1,6 +1,5 @@
 import { create } from "xmlbuilder2";
-import { instantToUtcIso8601 } from "./dates.ts";
-import { FEED_FORMATS, getRouteUrl } from "./routes.ts";
+import { FEED_FORMATS, toAbsoluteUrl } from "./routes.ts";
 import type { FeedAuthor, FeedItem, FeedPage } from "./types.ts";
 
 type AtomTextType = "text" | "html" | "xhtml";
@@ -157,9 +156,9 @@ const toAtomEntry = (item: FeedItem): AtomEntry => {
           }
         : {}),
     ...(item.datePublished
-      ? { published: instantToUtcIso8601(item.datePublished) }
+      ? { published: item.datePublished.toString() }
       : {}),
-    updated: instantToUtcIso8601(updated),
+    updated: updated.toString(),
     ...(item.authors?.length
       ? {
           authors: item.authors.map((author) => toAtomPerson(author)),
@@ -181,7 +180,7 @@ const toAtomDocument = (
     {
       rel: "self",
       type: FEED_FORMATS.atom.contentType,
-      href: getRouteUrl(page.baseUrl, page.routes.atom),
+      href: toAbsoluteUrl(page.baseUrl, page.routes.atom.pathname),
     },
   ];
 
@@ -197,7 +196,7 @@ const toAtomDocument = (
     links.push({
       rel: page.currentPage === 2 ? "previous" : "prev-archive",
       type: FEED_FORMATS.atom.contentType,
-      href: getRouteUrl(page.baseUrl, page.previousPage.atom),
+      href: toAbsoluteUrl(page.baseUrl, page.previousPage.atom.pathname),
     });
   }
 
@@ -205,7 +204,7 @@ const toAtomDocument = (
     links.push({
       rel: page.currentPage === 1 ? "next" : "next-archive",
       type: FEED_FORMATS.atom.contentType,
-      href: getRouteUrl(page.baseUrl, page.nextPage.atom),
+      href: toAbsoluteUrl(page.baseUrl, page.nextPage.atom.pathname),
     });
   }
 
@@ -213,10 +212,11 @@ const toAtomDocument = (
     title: {
       value: page.title,
     },
-    id: getRouteUrl(page.baseUrl, page.routes.atom),
-    updated: instantToUtcIso8601(
-      requireFeedField(page.updated, "Atom feeds require an updated date."),
-    ),
+    id: toAbsoluteUrl(page.baseUrl, page.routes.atom.pathname),
+    updated: requireFeedField(
+      page.updated,
+      "Atom feeds require an updated date.",
+    ).toString(),
     ...(page.description
       ? {
           subtitle: {

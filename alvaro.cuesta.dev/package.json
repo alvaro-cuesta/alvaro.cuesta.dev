@@ -34,6 +34,7 @@
     "@xenon-ssg/core": "workspace:*",
     "@xenon-ssg/express": "workspace:*",
     "@xenon-ssg/express-plugin-favicon": "workspace:*",
+    "@xenon-ssg/express-plugin-feeds": "workspace:*",
     "@xenon-ssg/express-plugin-single-lightningcss": "workspace:*",
     "@xenon-ssg/express-plugin-sitemap": "workspace:*",
     "@xenon-ssg/express-plugin-static-file": "workspace:*",
@@ -60,8 +61,7 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "vfile-reporter": "^8.1.1",
-    "xmlbuilder2": "catalog:"
+    "vfile-reporter": "^8.1.1"
   },
   "devDependencies": {
     "@mdx-js/typescript-plugin": "^0.1.4",

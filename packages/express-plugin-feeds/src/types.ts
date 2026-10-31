@@ -63,5 +63,13 @@ export type FeedContentInclusionMode = "full" | "summary" | "none";
 
 export type FeedContentOptions = {
   html?: FeedContentInclusionMode;
-  text?: FeedContentInclusionMode;
-};
+} & (
+  | {
+      text?: Exclude<FeedContentInclusionMode, "full">;
+    }
+  | {
+      text: "full";
+      /** Turns an item's rendered HTML into its full text content. */
+      htmlToText: (html: string) => string;
+    }
+);
