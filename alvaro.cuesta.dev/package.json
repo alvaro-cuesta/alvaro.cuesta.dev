@@ -9,9 +9,9 @@
     "#components/*": "./src/components/*.tsx"
   },
   "scripts": {
-    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--conditions=@xenon-ssg/source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/build.ts",
+    "build": "NODE_ENV=production NODE_OPTIONS=--conditions=@xenon-ssg/source tsx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/build.ts",
     "build:serve": "serve ./dist",
-    "dev": "cross-env NODE_ENV=development NODE_OPTIONS=--conditions=@xenon-ssg/source tsx watch --include ./src/mdx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/dev.ts",
+    "dev": "NODE_ENV=development NODE_OPTIONS=--conditions=@xenon-ssg/source tsx watch --include ./src/mdx --tsconfig ../tsconfig.base.json --import ./src/mdx/mdxNodeLoaderRegister.mts ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint:tsc": "tsc -b"
@@ -68,7 +68,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/unist": "^3.0.3",
-    "cross-env": "^10.1.0",
     "serve": "^14.2.4",
     "tsx": "^4.23.15",
     "typescript": "catalog:",

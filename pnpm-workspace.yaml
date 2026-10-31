@@ -3,6 +3,9 @@ packages:
   - xenon-ssg
   - xenon-ssg-express
 
+# Runs scripts with pnpm's own shell, so `NAME=value command` works on Windows too.
+shellEmulator: true
+
 allowBuilds:
   esbuild: true
   sharp: true
