@@ -12,15 +12,23 @@ this package makes thunks, so a function that just returns a promise isn't one, 
 take it as one.
 
 - `thunk(make)` runs `make` the first time it's called, and gives every call that same promise.
-- `cell(make)` is a thunk that can be invalidated: the next call after that runs `make` again.
+- `cell(make)` is a thunk that can be invalidated: the next call after that runs `make` again. It's
+  for values that come from outside, like files, which only whoever watches them knows have changed.
+- `derived(make)` makes its value from other thunks, read through `get`, and runs `make` again once
+  any of them gives a new promise. It can't be invalidated: it only changes when what it read does.
 
 ```ts
 const config = cell(() => readConfig(CONFIG_PATH));
 watchInDev(CONFIG_PATH, () => config.invalidate());
 
+const theme = derived(async (get) => (await get(config)).theme);
+
 // Consumers only see a thunk.
 export const getConfig: Thunk<Config> = config;
 ```
+
+Only what `make` reads through `get` counts. Anything else it reads, like a file, an environment
+variable or the time, doesn't make it run again, so a value that can change should be a cell.
 
 ## License
 
