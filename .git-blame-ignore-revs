@@ -1,0 +1,19 @@
+# Mechanical commits: they changed files without changing what they say (e.g.
+# refactors or reformatting). `git blame` can skip them, and the site doesn't
+# count them as modifications of its content (see `getGitFileDates`).
+#
+# Add a commit's full hash once it's in `master`. To have `git blame` skip them
+# too: `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+
+# style: adjust TOC styles
+e1c0e151754037e603b59cdd37efc145f76ced35
+# feat: code blocks with captions
+42a4e1fe4cae45c1eaac5808a0619f0eb8be2b3a
+# feat: better meta tags
+5f17338dd7a97f6656c5748556ab33e5bdcfea90
+# chore: experiment with soft instead of hard warpping
+dc14fb462a21d352338a415240f4d5b1232aaa6d
+# refactor: rename microblog internals to timeline
+250fb2d839e6c45211aac0da6848360a0569bc89
+# refactor: MDX posts import TableOfContents and BlogDateTime explicitly
+071906faa6ce9e821f6a7aac2c4a7a93196d4997

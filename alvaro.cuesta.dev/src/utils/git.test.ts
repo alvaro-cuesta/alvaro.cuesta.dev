@@ -8,7 +8,7 @@ import { getGitFileDates, getGitLastModifiedDate } from "./git.ts";
 
 let repo: string;
 
-const git = (args: string[], date: string) =>
+const git = (args: string[], date: string, committerDate = date) =>
   execFileSync("git", args, {
     cwd: repo,
     env: {
@@ -18,7 +18,7 @@ const git = (args: string[], date: string) =>
       GIT_AUTHOR_DATE: date,
       GIT_COMMITTER_NAME: "Test",
       GIT_COMMITTER_EMAIL: "test@example.com",
-      GIT_COMMITTER_DATE: date,
+      GIT_COMMITTER_DATE: committerDate,
     },
   });
 
@@ -66,6 +66,22 @@ describe("getGitFileDates", () => {
     await commit("2026-01-03T00:00:00Z", {}, [["old/a.mdx", "new/a.mdx"]]);
 
     expect(await getGitFileDates(repo, "new/a.mdx")).toEqual({
+      createdAt: Temporal.Instant.from("2026-01-01T00:00:00Z"),
+      lastModifiedAt: Temporal.Instant.from("2026-01-02T00:00:00Z"),
+    });
+  });
+
+  it("uses author dates, which survive amends and rebases", async () => {
+    await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
+    await commit("2026-01-02T00:00:00Z", { "a.mdx": CONTENT + "edit\n" });
+    // Rewrite both commits on a later day, as a rebase would.
+    git(
+      ["rebase", "--quiet", "--root", "--force-rebase"],
+      "2026-01-01T00:00:00Z",
+      "2026-02-01T00:00:00Z",
+    );
+
+    expect(await getGitFileDates(repo, "a.mdx")).toEqual({
       createdAt: Temporal.Instant.from("2026-01-01T00:00:00Z"),
       lastModifiedAt: Temporal.Instant.from("2026-01-02T00:00:00Z"),
     });
@@ -120,6 +136,22 @@ describe("getGitLastModifiedDate", () => {
     ]);
 
     expect(await getGitLastModifiedDate(repo, "new/a.mdx")).toEqual(
+      Temporal.Instant.from("2026-01-02T00:00:00Z"),
+    );
+  });
+
+  it("ignores commits listed in .git-blame-ignore-revs", async () => {
+    await commit("2026-01-01T00:00:00Z", { "a.mdx": CONTENT });
+    await commit("2026-01-02T00:00:00Z", { "a.mdx": CONTENT + "edit\n" });
+    await commit("2026-01-03T00:00:00Z", { "a.mdx": CONTENT + "reformat\n" });
+    const mechanical = git(["rev-parse", "HEAD"], "2026-01-03T00:00:00Z")
+      .toString()
+      .trim();
+    await commit("2026-01-04T00:00:00Z", {
+      ".git-blame-ignore-revs": `# Reformatting\n${mechanical}\n`,
+    });
+
+    expect(await getGitLastModifiedDate(repo, "a.mdx")).toEqual(
       Temporal.Instant.from("2026-01-02T00:00:00Z"),
     );
   });
