@@ -1,5 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { thunk } from "./thunk.ts";
+import { thunk, type Thunk } from "./thunk.ts";
+
+describe("Thunk", () => {
+  it("isn't any function that returns a promise", () => {
+    // @ts-expect-error Only this package makes thunks.
+    const notAThunk: Thunk<number> = async () => 1;
+
+    expect(notAThunk).toBeTypeOf("function");
+  });
+});
 
 describe("thunk", () => {
   it("doesn't run until it's called", () => {

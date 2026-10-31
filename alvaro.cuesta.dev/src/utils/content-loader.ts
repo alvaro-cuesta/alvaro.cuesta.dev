@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getGitLastModifiedDate, getGitWatchPaths } from "./git.ts";
-import { cell } from "@xenon-ssg/thunks";
+import { cell, type Thunk } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   analyzeItems,
@@ -70,13 +70,9 @@ async function loadContentItems<TModuleParsed extends { draft: boolean }>(
   return analyzeItems(filteredItems, analyzeOptions);
 }
 
-type ContentLoader<TModuleParsed> = {
-  (): Promise<AnalyzedItems<TModuleParsed>>;
-};
-
 export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
-): ContentLoader<TModuleParsed> {
+): Thunk<AnalyzedItems<TModuleParsed>> {
   const cache = cell(() => loadContentItems(options));
 
   // Reset on edits to any file under the content folder, plus to anything

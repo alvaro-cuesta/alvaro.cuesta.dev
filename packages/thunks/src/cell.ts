@@ -1,4 +1,4 @@
-import { thunk, type Thunk } from "./thunk.ts";
+import { brand, thunk, type Thunk } from "./thunk.ts";
 
 /**
  * A thunk that can be invalidated, so the value it gives can change.
@@ -22,7 +22,7 @@ export type Cell<T> = Thunk<T> & {
  */
 export function cell<T>(make: () => Promise<T>): Cell<T> {
   let current = thunk(make);
-  return Object.assign(() => current(), {
+  return Object.assign(brand(() => current()), {
     invalidate: () => {
       current = thunk(make);
     },

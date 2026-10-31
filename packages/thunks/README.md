@@ -7,6 +7,10 @@ A **thunk** is a function that gives you a promise for a value: `() => Promise<T
 `await` or `use()` what it gives you. Whether the value is cached, where it comes from, or whether it
 can change is none of your business.
 
+Every call gets the same promise until the value changes, so a new promise means a new value. Only
+this package makes thunks, so a function that just returns a promise isn't one, and TypeScript won't
+take it as one.
+
 - `thunk(make)` runs `make` the first time it's called, and gives every call that same promise.
 - `cell(make)` is a thunk that can be invalidated: the next call after that runs `make` again.
 
