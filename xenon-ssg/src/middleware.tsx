@@ -11,7 +11,7 @@ const doNothing = () => {};
 export function makeXenonMiddleware<PageMetadata extends UnknownRecord>(
   render: XenonRenderFunction<PageMetadata>,
   options?: RenderToStreamOptions,
-) {
+): (req: Request, res: Response, next: NextFunction) => Promise<void> {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { pathname } = canonicalizeHref(req.path);
 

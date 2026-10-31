@@ -29,7 +29,7 @@ export class StripReactComments extends Transform {
     chunk: string,
     _encoding: BufferEncoding,
     callback: TransformCallback,
-  ) {
+  ): void {
     const data = this.tail + chunk;
 
     // Find a safe cut point: any `<` in the last MAX_COMMENT_LENGTH-1 chars
@@ -50,7 +50,7 @@ export class StripReactComments extends Transform {
     callback(null, data.slice(0, cutPoint).replace(REACT_COMMENT_RE, ""));
   }
 
-  override _flush(callback: TransformCallback) {
+  override _flush(callback: TransformCallback): void {
     callback(null, this.tail.replace(REACT_COMMENT_RE, ""));
   }
 }
@@ -178,7 +178,7 @@ export const renderToFileAtomic = async (
   path: string,
   reactNode: ReactNode,
   options?: RenderToStreamOptions,
-) => {
+): Promise<void> => {
   const uniqueId = Math.random().toString(36).slice(2);
   const timestamp = Date.now();
 

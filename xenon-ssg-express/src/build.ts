@@ -19,7 +19,7 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
     outputDir = path.join(process.cwd(), "dist"),
     entryPaths = ["/"],
   }: BuildXenonSiteOptions = {},
-) {
+): Promise<void> {
   await fs.rm(outputDir, {
     recursive: true,
     force: true,

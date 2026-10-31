@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+import React, { type JSX, type ReactNode } from "react";
 
 type AddLink = (href: string) => void;
 
@@ -20,7 +20,10 @@ export type LinkProviderProps = {
  *
  * @private Not meant to be used by end users. Will be automatically added by the renderer.
  */
-export function LinkProvider({ addLink, children }: LinkProviderProps) {
+export function LinkProvider({
+  addLink,
+  children,
+}: LinkProviderProps): JSX.Element {
   return <LinkContext value={addLink}>{children}</LinkContext>;
 }
 
@@ -29,7 +32,7 @@ export function LinkProvider({ addLink, children }: LinkProviderProps) {
  *
  * @private Not meant to be used by end users. Will be automatically added by the renderer.
  */
-export const useAddLink = () => {
+export const useAddLink = (): AddLink => {
   const addLink = React.useContext(LinkContext);
 
   if (!addLink) {

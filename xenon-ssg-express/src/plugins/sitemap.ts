@@ -36,7 +36,7 @@ export type SitemapPluginMetadata = {
     | undefined;
 };
 
-export const sitemapPluginKey = Symbol("SitemapPlugin");
+export const sitemapPluginKey: unique symbol = Symbol("SitemapPlugin");
 
 const ABSOLUTE_URL_PATTERN = /^[a-z][a-z\d+.-]*:\/\//i;
 
