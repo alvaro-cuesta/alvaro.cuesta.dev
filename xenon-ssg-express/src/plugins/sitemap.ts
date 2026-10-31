@@ -8,7 +8,6 @@ import type {
   PluginBuildPostFunction,
   PluginGetInjectableFunction,
 } from "./plugins.tsx";
-import type { Temporal } from "temporal-polyfill";
 
 type SitemapPluginOptions = {
   robotsTxtContent?: string;

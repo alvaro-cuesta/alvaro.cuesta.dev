@@ -1,5 +1,3 @@
-import { Temporal } from "temporal-polyfill";
-
 const RFC822_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const RFC822_MONTHS = [
   "Jan",

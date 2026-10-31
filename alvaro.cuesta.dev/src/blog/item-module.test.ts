@@ -1,7 +1,6 @@
 import React from "react";
 import { describe, expect, it } from "vitest";
 import type { MDXContent } from "mdx/types.js";
-import { Temporal } from "temporal-polyfill";
 import { parseBlogItemModuleFromImportModule } from "./item-module.ts";
 
 const createMdxComponent = (): MDXContent => {

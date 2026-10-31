@@ -1,4 +1,3 @@
-import { Temporal } from "temporal-polyfill";
 import { DATETIME_INPUT_TZ } from "../../config.ts";
 
 export type BlogItemMonth =

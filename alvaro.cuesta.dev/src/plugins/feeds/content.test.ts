@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { Temporal } from "temporal-polyfill";
 import { compileFeedPageModels } from "./content.ts";
 
 describe("compileFeedPageModels", () => {

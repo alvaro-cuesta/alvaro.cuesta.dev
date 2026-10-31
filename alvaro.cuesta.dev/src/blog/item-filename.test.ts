@@ -1,5 +1,4 @@
 import { describe, test, expect } from "vitest";
-import { Temporal } from "temporal-polyfill";
 import { parseBlogItemFilename } from "./item-filename.ts";
 
 const MEANINGLESS_DATE_STRING = "2000-01-01-00-00-00";
@@ -215,7 +214,7 @@ describe("parseBlogItemFilename", () => {
           parseBlogItemFilename(
             "1999-20-07-17-35-43__this-is-a-test article.mdx",
           ),
-        ).toThrow(new RangeError("Invalid month: 20; must be between 1-12"));
+        ).toThrow(RangeError);
       });
 
       test("day", () => {
@@ -223,7 +222,7 @@ describe("parseBlogItemFilename", () => {
           parseBlogItemFilename(
             "1999-07-32-17-35-43__this-is-a-test article.mdx",
           ),
-        ).toThrow(new RangeError("Invalid day: 32; must be between 1-31"));
+        ).toThrow(RangeError);
       });
 
       test("31 of February", () => {
@@ -231,7 +230,7 @@ describe("parseBlogItemFilename", () => {
           parseBlogItemFilename(
             "1999-02-31-17-35-43__this-is-a-test article.mdx",
           ),
-        ).toThrow(new RangeError("Invalid day: 31; must be between 1-28"));
+        ).toThrow(RangeError);
       });
     });
 
@@ -241,7 +240,7 @@ describe("parseBlogItemFilename", () => {
           parseBlogItemFilename(
             "1999-07-20-99-35-43__this-is-a-test article.mdx",
           ),
-        ).toThrow(new RangeError("Invalid isoHour: 99; must be between 0-23"));
+        ).toThrow(RangeError);
       });
 
       test("minutes", () => {
@@ -250,7 +249,7 @@ describe("parseBlogItemFilename", () => {
             "1999-07-20-17-99-43__this-is-a-test article.mdx",
           ),
         ).toThrow(
-          new RangeError("Invalid isoMinute: 99; must be between 0-59"),
+          RangeError,
         );
       });
 
@@ -260,7 +259,7 @@ describe("parseBlogItemFilename", () => {
             "1999-07-20-17-35-99__this-is-a-test article.mdx",
           ),
         ).toThrow(
-          new RangeError("Invalid isoSecond: 99; must be between 0-59"),
+          RangeError,
         );
       });
     });

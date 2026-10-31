@@ -9,7 +9,6 @@ import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { getGitFileDates } from "../../utils/git.ts";
 import { cachedPromise } from "@xenon-ssg/core/promise";
 import { watchInDev } from "@xenon-ssg/core/watch";
-import { Temporal } from "temporal-polyfill";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
 import { SITE_ROOT_FOLDER } from "../../../config.ts";
 

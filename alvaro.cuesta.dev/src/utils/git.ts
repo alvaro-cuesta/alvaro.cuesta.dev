@@ -1,7 +1,6 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { Temporal } from "temporal-polyfill";
 import { cachedPromise, type CachedPromise } from "@xenon-ssg/core/promise";
 import { watchInDev } from "@xenon-ssg/core/watch";
 

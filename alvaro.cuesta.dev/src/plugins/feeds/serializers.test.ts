@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { Temporal } from "temporal-polyfill";
 import { serializeAtomDocument } from "./atom.ts";
 import { serializeJsonDocuments } from "./jsonfeed.ts";
 import { serializeRssDocument } from "./rss.ts";

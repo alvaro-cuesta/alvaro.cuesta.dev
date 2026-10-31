@@ -61,7 +61,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "scripts": {
     "build": "tsc -b tsconfig.package.json",
@@ -96,14 +96,13 @@
     "favicons": "^7.2.0",
     "lightningcss": "^1.25.1",
     "morgan": "^1.10.0",
-    "temporal-polyfill": "catalog:",
     "type-fest": "catalog:",
     "xmlbuilder2": "catalog:"
   },
   "peerDependencies": {
     "@xenon-ssg/core": "workspace:^",
     "react": "catalog:",
-    "@types/node": ">=24",
+    "@types/node": ">=26",
     "@types/react": "catalog:"
   },
   "peerDependenciesMeta": {

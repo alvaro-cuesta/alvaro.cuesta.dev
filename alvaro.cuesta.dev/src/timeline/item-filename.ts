@@ -1,4 +1,3 @@
-import { Temporal } from "temporal-polyfill";
 import type { BlogItemDate } from "../utils/item-dates.ts";
 
 const FILENAME_REGEX =

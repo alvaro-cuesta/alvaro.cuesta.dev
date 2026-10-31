@@ -1,5 +1,3 @@
-import type { Temporal } from "temporal-polyfill";
-
 export type FeedAuthor =
   | {
       name: string;
