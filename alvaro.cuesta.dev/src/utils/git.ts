@@ -60,10 +60,7 @@ const worktreeRoot = family((cwd: string) =>
 const ignoredRevsOf = family((root: string) => {
   const revs = cell(() => readIgnoredRevs(root));
 
-  // Editors may save by renaming over the file, which ends a watch on the file itself, so watch its folder instead.
-  watchInDev(root, ({ filename }) => {
-    if (filename === IGNORE_REVS_FILENAME) revs.invalidate();
-  });
+  watchInDev(path.join(root, IGNORE_REVS_FILENAME), () => revs.invalidate());
 
   return revs;
 });
@@ -93,13 +90,7 @@ const headOf = family((root: string) => {
   if (process.env["NODE_ENV"] === "development") {
     void getGitWatchPaths(root).then((gitWatchPaths) => {
       for (const gitWatchPath of gitWatchPaths) {
-        // Git replaces these files by renaming a lock file over them, which ends a watch on the file itself, so
-        // watch its folder instead. But only react to the file: other files there (e.g. `.git/index`) change on
-        // every `git status`.
-        const fileName = path.basename(gitWatchPath);
-        watchInDev(path.dirname(gitWatchPath), ({ filename }) => {
-          if (filename === fileName) head.invalidate();
-        });
+        watchInDev(gitWatchPath, () => head.invalidate());
       }
     });
   }

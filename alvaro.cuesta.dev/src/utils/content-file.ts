@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import url from "node:url";
 import { cell, derived, type Thunk } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
@@ -25,18 +24,13 @@ export type ContentFile = {
 export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
   const isDev = process.env["NODE_ENV"] === "development";
   const filePath = url.fileURLToPath(fileUrl);
-  const fileName = path.basename(filePath);
 
   // The file's version on disk. In nanoseconds, so no two saves share one.
   const mtime = cell(
     async () => (await fs.stat(filePath, { bigint: true })).mtimeNs,
   );
 
-  // Editors may save by renaming over the file, which ends a watch on the file
-  // itself, so watch its folder instead, and only react to the file.
-  const watch = watchInDev(path.dirname(filePath), ({ filename }) => {
-    if (filename === fileName) mtime.invalidate();
-  });
+  const watch = watchInDev(filePath, () => mtime.invalidate());
 
   const module = derived(async (get): Promise<unknown> => {
     // Node caches modules by URL and never frees them, so in dev the URL

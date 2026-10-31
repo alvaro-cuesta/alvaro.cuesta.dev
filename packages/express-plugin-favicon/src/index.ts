@@ -142,12 +142,7 @@ export const faviconPlugin = ({
   // they always come from the same version of the file.
   const svg = cell(() => fs.readFile(inputFilepath));
 
-  // Editors may save by renaming over the file, which ends a watch on the file
-  // itself, so watch its folder instead, and only react to the file.
-  const inputFilename = path.basename(inputFilepath);
-  watchInDev(path.dirname(inputFilepath), ({ filename }) => {
-    if (filename === inputFilename) svg.invalidate();
-  });
+  watchInDev(inputFilepath, () => svg.invalidate());
 
   // `favicons()` and everything made from its response, so `getInjectable`,
   // the request handler and `buildPre` share them. They're made when something
