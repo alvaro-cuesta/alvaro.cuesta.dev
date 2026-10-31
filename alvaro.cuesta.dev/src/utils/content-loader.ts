@@ -39,11 +39,12 @@ async function loadContentItems<TModuleParsed extends { draft: boolean }>(
     analyzeOptions,
   } = options;
 
-  const filelist = await fs.readdir(contentFolderPath);
+  const filelist = await Array.fromAsync(
+    fs.glob("*.mdx", { cwd: contentFolderPath }),
+  );
 
   const importedItems = await Promise.all(
     filelist
-      .filter((filename) => filename.endsWith(".mdx"))
       .map(async (filename) => {
         const fileUrl = new URL(filename, contentFolderUrl);
         const filePath = path.join(contentFolderPath, filename);
