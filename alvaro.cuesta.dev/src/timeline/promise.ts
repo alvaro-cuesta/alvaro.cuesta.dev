@@ -8,12 +8,11 @@ import { getBlogItems } from "../blog/promise.ts";
 import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
-import { derived } from "@xenon-ssg/thunks";
+import { derived, family } from "@xenon-ssg/thunks";
 
 const TIMELINE_FOLDER = path.join(SITE_ROOT_FOLDER, "timeline");
 
 const getRawTimelineItems = createContentLoader({
-  siteRootPath: SITE_ROOT_FOLDER,
   contentFolderPath: TIMELINE_FOLDER,
   contentFolderUrl: pathToFileURL(TIMELINE_FOLDER + path.sep),
   parseModule: parseTimelineItemModuleFromImportModule,
@@ -89,14 +88,14 @@ export const getTimelineItems = derived(async (get) => {
  *
  * Rejects when there's none.
  */
-export async function getTimelineItem(
-  slug: string,
-): Promise<Item<TimelineItemModuleParsed>> {
-  const item = (await getTimelineItems()).bySlug.get(slug);
+export const getTimelineItem = family((slug: string) =>
+  derived(async (get) => {
+    const item = (await get(getTimelineItems)).bySlug.get(slug);
 
-  if (item === undefined) {
-    throw new Error(`Timeline post "${slug}" not found`);
-  }
+    if (item === undefined) {
+      throw new Error(`Timeline post "${slug}" not found`);
+    }
 
-  return item;
-}
+    return item;
+  }),
+);

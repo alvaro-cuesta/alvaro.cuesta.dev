@@ -1,0 +1,63 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import url from "node:url";
+import { cell, derived, type Thunk } from "@xenon-ssg/thunks";
+import { watchInDev } from "@xenon-ssg/core/watch";
+import { gitFileDates, type GitFileDates } from "./git.ts";
+
+/** A content file: the module it compiles to, and when git says it was created and last modified. */
+export type ContentFile = {
+  module: unknown;
+  gitDates: GitFileDates | null;
+};
+
+/**
+ * A content file, read again whenever what it's made from changes.
+ *
+ * In development, its module is imported again whenever the file changes. Its dates are read again whenever `HEAD`
+ * moves or the ignored commits change.
+ *
+ * Disposing it stops watching the file.
+ *
+ * @param fileUrl The file's URL.
+ * @returns The content file.
+ */
+export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
+  const isDev = process.env["NODE_ENV"] === "development";
+  const filePath = url.fileURLToPath(fileUrl);
+  const fileName = path.basename(filePath);
+
+  // The file's version on disk. In nanoseconds, so no two saves share one.
+  const mtime = cell(
+    async () => (await fs.stat(filePath, { bigint: true })).mtimeNs,
+  );
+
+  // Editors may save by renaming over the file, which ends a watch on the file
+  // itself, so watch its folder instead, and only react to the file.
+  const watch = watchInDev(path.dirname(filePath), ({ filename }) => {
+    if (filename === fileName) mtime.invalidate();
+  });
+
+  const module = derived(async (get): Promise<unknown> => {
+    // Node caches modules by URL and never frees them, so in dev the URL
+    // carries the file's version: an edit gets a new URL, and so a fresh
+    // module, but reading the same version again reuses the cached one instead
+    // of leaking another copy. In production each file is imported once, so
+    // the bare URL will do, and the file is never stat'd.
+    const importUrl = isDev ? `${fileUrl}?${await get(mtime)}` : fileUrl;
+
+    return import(importUrl);
+  });
+
+  return Object.assign(
+    derived(async (get) => {
+      const [fileModule, gitDates] = await Promise.all([
+        get(module),
+        get(gitFileDates(filePath)),
+      ]);
+
+      return { module: fileModule, gitDates };
+    }),
+    { [Symbol.dispose]: () => watch[Symbol.dispose]() },
+  );
+}

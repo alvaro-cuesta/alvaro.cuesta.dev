@@ -250,7 +250,7 @@ export async function resolvePage(pathname: string): Promise<ResolvedPage> {
 
   const routeTimelinePostMatch = routeTimelinePost.match(pathname);
   if (routeTimelinePostMatch) {
-    const post = getTimelineItem(routeTimelinePostMatch.slug);
+    const post = getTimelineItem(routeTimelinePostMatch.slug)();
 
     return {
       render: (siteRenderMeta) => (
@@ -325,7 +325,7 @@ export async function resolvePage(pathname: string): Promise<ResolvedPage> {
 
   const routeBlogArticleMatch = routeBlogArticle.match(pathname);
   if (routeBlogArticleMatch) {
-    const article = getBlogItem(routeBlogArticleMatch.slug);
+    const article = getBlogItem(routeBlogArticleMatch.slug)();
 
     return {
       render: (siteRenderMeta) => (

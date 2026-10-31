@@ -1,7 +1,9 @@
 import { Template } from "../../components/Template.tsx";
 import { Link } from "../../components/atoms/Link.tsx";
 import { BlogLayout } from "./components/BlogLayout.tsx";
-import { getBlogItem, getBlogItems } from "../../blog/promise.ts";
+import { getBlogItems } from "../../blog/promise.ts";
+import type { BlogItemModuleParsed } from "../../blog/item-module.ts";
+import type { Item } from "../../utils/analyze.ts";
 import React from "react";
 import {
   getBlogItemDateYear,
@@ -16,7 +18,7 @@ import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 
 type BlogArticleProps = {
   siteRenderMeta: SiteRenderMeta;
-  article: ReturnType<typeof getBlogItem>;
+  article: Promise<Item<BlogItemModuleParsed>>;
 };
 
 export async function BlogArticle({

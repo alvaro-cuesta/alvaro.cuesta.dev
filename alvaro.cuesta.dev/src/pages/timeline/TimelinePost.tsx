@@ -1,6 +1,8 @@
 import { Template } from "../../components/Template.tsx";
 import { Pagination } from "../../components/atoms/Pagination.tsx";
-import { getTimelineItem, getTimelineItems } from "../../timeline/promise.ts";
+import { getTimelineItems } from "../../timeline/promise.ts";
+import type { TimelineItemModuleParsed } from "../../timeline/item-module.ts";
+import type { Item } from "../../utils/analyze.ts";
 import type { SiteRenderMeta } from "../../site.tsx";
 import { routeTimelinePost } from "../../routes.ts";
 import { makeTitle } from "../../utils/meta.ts";
@@ -18,7 +20,7 @@ import { Link } from "../../components/atoms/Link.tsx";
 
 type TimelinePostPageProps = {
   siteRenderMeta: SiteRenderMeta;
-  post: ReturnType<typeof getTimelineItem>;
+  post: Promise<Item<TimelineItemModuleParsed>>;
 };
 
 export async function TimelinePostPage({

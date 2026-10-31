@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
-import path from "node:path";
-import { getGitFileDates, gitHead, ignoredRevs } from "./git.ts";
-import { cell, derived, type Thunk } from "@xenon-ssg/thunks";
+import { contentFile } from "./content-file.ts";
+import { cell, derived, family, type Thunk } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/core/watch";
 import {
   analyzeItems,
@@ -21,23 +20,15 @@ type ParseModule<TModuleParsed> = (
 ) => TModuleParsed;
 
 type ContentLoaderOptions<TModuleParsed> = {
-  siteRootPath: string;
   contentFolderPath: string;
   contentFolderUrl: URL;
   parseModule: ParseModule<TModuleParsed>;
   analyzeOptions: AnalyzeItemsOptions<TModuleParsed>;
 };
 
-type GitState = {
-  head: string | null;
-  ignoredRevs: Set<string>;
-};
-
-async function loadContentItems<TModuleParsed extends { draft: boolean }>(
+export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
-  filelist: string[],
-  { head, ignoredRevs }: GitState,
-): Promise<AnalyzedItems<TModuleParsed>> {
+): Thunk<AnalyzedItems<TModuleParsed>> {
   const {
     contentFolderPath,
     contentFolderUrl,
@@ -45,49 +36,39 @@ async function loadContentItems<TModuleParsed extends { draft: boolean }>(
     analyzeOptions,
   } = options;
 
-  const importedItems = await Promise.all(
-    filelist
-      .map(async (filename) => {
-        const fileUrl = new URL(filename, contentFolderUrl);
-        const filePath = path.join(contentFolderPath, filename);
-        const [gitDates, rawModule] = await Promise.all([
-          getGitFileDates(filePath, head, ignoredRevs),
-          import(`${fileUrl}?${Date.now()}`),
-        ]);
-        const module = parseModule(filename, rawModule, {
+  // The folder's files, read again on any change in it: the watcher can't tell
+  // an added or removed file from an edited one, and only the list knows.
+  const files = cell(() =>
+    Array.fromAsync(fs.glob("*.mdx", { cwd: contentFolderPath })),
+  );
+  watchInDev(contentFolderPath, () => files.invalidate());
+
+  // Each file watches itself, so only the ones that changed are read again.
+  const fileFor = family((filename: string) =>
+    contentFile(new URL(filename, contentFolderUrl).href),
+  );
+
+  return derived(async (get) => {
+    const filelist = await get(files);
+
+    // Removed files stop being watched.
+    fileFor.retain(filelist);
+
+    const importedItems = await Promise.all(
+      filelist.map(async (filename) => {
+        const { module: rawModule, gitDates } = await get(fileFor(filename));
+        const module = parseModule(filename, rawModule as NodeModule, {
           lastModificationDate: gitDates?.lastModifiedAt ?? null,
         });
 
         return { filename, module };
       }),
-  );
+    );
 
-  const filteredItems = importedItems.filter(
-    (item) => process.env["NODE_ENV"] === "development" || !item.module.draft,
-  );
+    const filteredItems = importedItems.filter(
+      (item) => process.env["NODE_ENV"] === "development" || !item.module.draft,
+    );
 
-  return analyzeItems(filteredItems, analyzeOptions);
-}
-
-export function createContentLoader<TModuleParsed extends { draft: boolean }>(
-  options: ContentLoaderOptions<TModuleParsed>,
-): Thunk<AnalyzedItems<TModuleParsed>> {
-  // The folder's files, read again on any change in it: an edit to a file is
-  // a change to the folder too, and the items are made from what the files hold.
-  const files = cell(() =>
-    Array.fromAsync(fs.glob("*.mdx", { cwd: options.contentFolderPath })),
-  );
-  watchInDev(options.contentFolderPath, () => files.invalidate());
-
-  // Their dates come from git, so the items change when `HEAD` moves or the
-  // ignored commits do, too.
-  return derived(async (get) => {
-    const [filelist, head, revs] = await Promise.all([
-      get(files),
-      get(gitHead(options.siteRootPath)),
-      get(ignoredRevs(options.siteRootPath)),
-    ]);
-
-    return loadContentItems(options, filelist, { head, ignoredRevs: revs });
+    return analyzeItems(filteredItems, analyzeOptions);
   });
 }

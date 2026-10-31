@@ -5,6 +5,7 @@ import type { FeedSourceItem } from "@xenon-ssg/express-plugin-feeds";
 import { renderToString } from "@xenon-ssg/core/render";
 import type { MDXContent } from "mdx/types.js";
 import type { AnalyzedItems, Item } from "./analyze.ts";
+import type { Thunk } from "@xenon-ssg/thunks";
 
 type RenderContentItemHtmlOptions = {
   baseUrl: string;
@@ -72,8 +73,11 @@ export function buildFeedSourceItem<TMetadata = unknown>({
   } as FeedSourceItem<TMetadata>;
 }
 
+// Made again on every call, not derived: making a feed item may render it, and
+// rendering reads thunks without `get`, so a derived couldn't tell when its
+// items went stale.
 export function createFeedSource<TModuleParsed, const TMetadata = unknown>(
-  getAnalyzedItems: () => Promise<AnalyzedItems<TModuleParsed>>,
+  getAnalyzedItems: Thunk<AnalyzedItems<TModuleParsed>>,
   toFeedSourceItem: (
     baseUrl: string,
     item: Item<TModuleParsed>,

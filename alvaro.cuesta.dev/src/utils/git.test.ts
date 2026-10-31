@@ -3,11 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-  getGitFileDates as getGitFileDatesAt,
-  gitHead,
-  ignoredRevs,
-} from "./git.ts";
+import { gitFileDates } from "./git.ts";
 
 let repo: string;
 
@@ -44,15 +40,9 @@ const commit = async (
 
 const CONTENT = "line\n".repeat(20);
 
-// What the site does: read the dates as of the current `HEAD`, without the
-// ignored commits. Each test has its own repository, so none of them share
-// cells.
-const getGitFileDates = async (repoRootPath: string, file: string) =>
-  getGitFileDatesAt(
-    path.resolve(repoRootPath, file),
-    await gitHead(repoRootPath)(),
-    await ignoredRevs(repoRootPath)(),
-  );
+// Each test has its own repository, so none of them share thunks.
+const getGitFileDates = (repoRootPath: string, file: string) =>
+  gitFileDates(path.resolve(repoRootPath, file))();
 
 const getLastModifiedAt = async (repoRootPath: string, file: string) =>
   (await getGitFileDates(repoRootPath, file))?.lastModifiedAt ?? null;

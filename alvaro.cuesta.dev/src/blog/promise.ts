@@ -2,6 +2,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseBlogItemModuleFromImportModule } from "./item-module.ts";
 import { createContentLoader } from "../utils/content-loader.ts";
+import { derived, family } from "@xenon-ssg/thunks";
 import { SITE_ROOT_FOLDER } from "../../config.ts";
 
 const BLOG_FOLDER = path.join(SITE_ROOT_FOLDER, "blog");
@@ -9,7 +10,6 @@ const BLOG_FOLDER = path.join(SITE_ROOT_FOLDER, "blog");
 const UNCATEGORIZED_TAG = "uncategorized";
 
 export const getBlogItems = createContentLoader({
-  siteRootPath: SITE_ROOT_FOLDER,
   contentFolderPath: BLOG_FOLDER,
   contentFolderUrl: pathToFileURL(BLOG_FOLDER + path.sep),
   parseModule: parseBlogItemModuleFromImportModule,
@@ -30,12 +30,14 @@ export const getBlogItems = createContentLoader({
  *
  * Rejects when there's none.
  */
-export async function getBlogItem(slug: string) {
-  const item = (await getBlogItems()).bySlug.get(slug);
+export const getBlogItem = family((slug: string) =>
+  derived(async (get) => {
+    const item = (await get(getBlogItems)).bySlug.get(slug);
 
-  if (item === undefined) {
-    throw new Error(`Article ${slug} not found`);
-  }
+    if (item === undefined) {
+      throw new Error(`Article ${slug} not found`);
+    }
 
-  return item;
-}
+    return item;
+  }),
+);
