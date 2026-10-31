@@ -63,4 +63,58 @@ describe("cell", () => {
 
     expect(await read(getValue)).toBe(1);
   });
+
+  it("isn't subscribed until it's read, and then only once", () => {
+    const subscribe = vi.fn(() => ({ [Symbol.dispose]: () => {} }));
+    const getValue = cell(() => Promise.resolve(1), subscribe);
+
+    expect(subscribe).not.toHaveBeenCalled();
+
+    read(getValue);
+    read(getValue);
+
+    expect(subscribe).toHaveBeenCalledOnce();
+  });
+
+  it("runs again once what it's subscribed to invalidates it", async () => {
+    let value = 1;
+    let invalidate = () => {};
+    const getValue = cell(
+      () => Promise.resolve(value),
+      (newInvalidate) => {
+        invalidate = newInvalidate;
+        return { [Symbol.dispose]: () => {} };
+      },
+    );
+
+    expect(await read(getValue)).toBe(1);
+
+    value = 2;
+    invalidate();
+
+    expect(await read(getValue)).toBe(2);
+  });
+
+  it("stops what it's subscribed to once disposed, and isn't subscribed again", async () => {
+    const dispose = vi.fn();
+    const subscribe = vi.fn(() => ({ [Symbol.dispose]: dispose }));
+    const getValue = cell(() => Promise.resolve(1), subscribe);
+
+    read(getValue);
+    getValue[Symbol.dispose]();
+
+    expect(dispose).toHaveBeenCalledOnce();
+    expect(await read(getValue)).toBe(1);
+    expect(subscribe).toHaveBeenCalledOnce();
+  });
+
+  it("is never subscribed if disposed before it's read", () => {
+    const subscribe = vi.fn(() => ({ [Symbol.dispose]: () => {} }));
+    const getValue = cell(() => Promise.resolve(1), subscribe);
+
+    getValue[Symbol.dispose]();
+    read(getValue);
+
+    expect(subscribe).not.toHaveBeenCalled();
+  });
 });

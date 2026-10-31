@@ -38,10 +38,10 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
 
   // The folder's files, read again on any change in it: the watcher can't tell
   // an added or removed file from an edited one, and only the list knows.
-  const files = cell(() =>
-    Array.fromAsync(fs.glob("*.mdx", { cwd: contentFolderPath })),
+  const files = cell(
+    () => Array.fromAsync(fs.glob("*.mdx", { cwd: contentFolderPath })),
+    (invalidate) => watchInDev(contentFolderPath, invalidate),
   );
-  watchInDev(contentFolderPath, () => files.invalidate());
 
   // Each file watches itself, so only the ones that changed are read again.
   const fileFor = family((filename: string) =>

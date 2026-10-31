@@ -57,13 +57,13 @@ const worktreeRoot = family((cwd: string) =>
 );
 
 /** A worktree's ignored commits, read once, and again in development whenever they change. */
-const ignoredRevsOf = family((root: string) => {
-  const revs = cell(() => readIgnoredRevs(root));
-
-  watchInDev(path.join(root, IGNORE_REVS_FILENAME), () => revs.invalidate());
-
-  return revs;
-});
+const ignoredRevsOf = family((root: string) =>
+  cell(
+    () => readIgnoredRevs(root),
+    (invalidate) =>
+      watchInDev(path.join(root, IGNORE_REVS_FILENAME), invalidate),
+  ),
+);
 
 /**
  * The commits listed in `.git-blame-ignore-revs`, in the worktree a directory is in.
@@ -83,20 +83,28 @@ export const ignoredRevs = family((cwd: string) =>
 );
 
 /** A worktree's `HEAD`, read once, and again in development whenever it moves. */
-const headOf = family((root: string) => {
-  const head = cell(() => runGitCommand(["rev-parse", "HEAD"], root));
+const headOf = family((root: string) =>
+  cell(
+    () => runGitCommand(["rev-parse", "HEAD"], root),
+    (invalidate) => {
+      const watches = new DisposableStack();
 
-  // Finding what to watch shells out to git, and only development watches, so don't in production builds.
-  if (process.env["NODE_ENV"] === "development") {
-    void getGitWatchPaths(root).then((gitWatchPaths) => {
-      for (const gitWatchPath of gitWatchPaths) {
-        watchInDev(gitWatchPath, () => head.invalidate());
+      // Finding what to watch shells out to git, and only development watches, so don't in production builds.
+      if (process.env["NODE_ENV"] === "development") {
+        void getGitWatchPaths(root).then((gitWatchPaths) => {
+          // They're found later, and by then the cell may be disposed, with nothing left to watch for.
+          if (watches.disposed) return;
+
+          for (const gitWatchPath of gitWatchPaths) {
+            watches.use(watchInDev(gitWatchPath, invalidate));
+          }
+        });
       }
-    });
-  }
 
-  return head;
-});
+      return watches;
+    },
+  ),
+);
 
 /**
  * The commit `HEAD` points to, in the worktree a directory is in.

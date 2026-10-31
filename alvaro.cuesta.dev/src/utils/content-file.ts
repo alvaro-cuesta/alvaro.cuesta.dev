@@ -28,9 +28,8 @@ export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
   // The file's version on disk. In nanoseconds, so no two saves share one.
   const mtime = cell(
     async () => (await fs.stat(filePath, { bigint: true })).mtimeNs,
+    (invalidate) => watchInDev(filePath, invalidate),
   );
-
-  const watch = watchInDev(filePath, () => mtime.invalidate());
 
   const module = derived(async (get): Promise<unknown> => {
     // Node caches modules by URL and never frees them, so in dev the URL
@@ -52,6 +51,6 @@ export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
 
       return { module: fileModule, gitDates };
     }),
-    { [Symbol.dispose]: () => watch[Symbol.dispose]() },
+    { [Symbol.dispose]: () => mtime[Symbol.dispose]() },
   );
 }

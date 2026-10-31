@@ -140,9 +140,10 @@ export const faviconPlugin = ({
 }: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
   // The SVG's bytes. Both the cache key and the favicons are made from them, so
   // they always come from the same version of the file.
-  const svg = cell(() => fs.readFile(inputFilepath));
-
-  watchInDev(inputFilepath, () => svg.invalidate());
+  const svg = cell(
+    () => fs.readFile(inputFilepath),
+    (invalidate) => watchInDev(inputFilepath, invalidate),
+  );
 
   // `favicons()` and everything made from its response, so `getInjectable`,
   // the request handler and `buildPre` share them. They're made when something

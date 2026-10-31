@@ -20,12 +20,12 @@ import path from "node:path";
  * are caught and logged as warnings rather than left as unhandled rejections
  * — a misbehaving watcher should not take the dev server down.
  *
- * Typically paired with a `cell` (see `@xenon-ssg/thunks`) so it's invalidated
- * on source-file edits, but the callback is generic and can do anything:
+ * Typically a `cell`'s subscription (see `@xenon-ssg/thunks`), so it's
+ * invalidated on source-file edits, but the callback is generic and can do
+ * anything:
  *
  * ```ts
- * const page = cell(loadPage);
- * watchInDev(filePath, () => page.invalidate());
+ * const page = cell(loadPage, (invalidate) => watchInDev(filePath, invalidate));
  * ```
  *
  * @returns What stops the watch when disposed.
