@@ -295,6 +295,17 @@ blockquote {
   & > :last-child {
     margin-bottom: 0;
   }
+
+  /* Pico lays out lists in asides as sidebar navigation (block items, without markers). Cards
+   * hold content, so their lists stay lists. */
+  & li {
+    display: list-item;
+    padding: 0;
+
+    & a {
+      display: inline;
+    }
+  }
 }
 
 .footnotes {
