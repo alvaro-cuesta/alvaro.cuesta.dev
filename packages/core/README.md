@@ -61,20 +61,9 @@ even if you didn't specify that route. Any links that use `Link` will be **autom
 and statically generated for you!
 
 But what's the fun in generating your whole website during development? Ugh. That's like, so 90s.
-Wait, Xenon's got you covered!
-
-```tsx
-const app = express();
-
-app.use(express.static('./public')); // <- optional if you don't need to serve CSS or images
-app.use(makeXenonMiddleware((pathname) =>
-  <App pathname={pathname} />,
-));
-
-app.listen(PORT, () => {
-  console.log(`Xenon SSG listening on port ${PORT}`);
-});
-```
+Render each page when it's requested instead: [`@xenon-ssg/express`](../express) serves a site
+that way, or bring your own server and answer each request with `renderPage` (from
+`@xenon-ssg/core/page`), which renders a page just like the build does.
 
 ## Caveats
 

@@ -1,6 +1,6 @@
 import express, { type Express } from "express";
-import { makeXenonMiddleware } from "@xenon-ssg/core/middleware";
 import morgan from "morgan";
+import { makeXenonMiddleware } from "./middleware.ts";
 import {
   type XenonExpressSite,
   DEFAULT_DEV_PORT,

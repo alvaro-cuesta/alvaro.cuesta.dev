@@ -157,30 +157,27 @@ export const renderToString = async (
 };
 
 /**
- * Render a React node to a file.
+ * Write a rendered stream to a file.
  */
-const renderToFile = async (
-  path: PathLike,
-  reactNode: ReactNode,
-  options?: RenderToStreamOptions,
-) => {
-  const stream = renderToStream(reactNode, options);
+const writeToFile = async (path: PathLike, stream: Readable) => {
   // Not `fs.writeFile`: it only starts reading the stream once the file is open, so a render that
   // fails before that emits an error nothing listens to, crashing the process.
   await pipeline(stream, createWriteStream(path));
 };
 
 /**
- * Render a React node to a file atomically.
+ * Write a rendered stream (e.g. from `renderToStream`) to a file atomically.
  *
  * This means that the file will be written to a temporary file first, and then renamed to the final
  * path to avoid truncating the original file if the render process files in the middle of writing
  * the file.
+ *
+ * It starts reading the stream right away, so call it as soon as the stream is made: until then,
+ * an error the stream emits crashes the process.
  */
-export const renderToFileAtomic = async (
+export const writeToFileAtomic = async (
   path: string,
-  reactNode: ReactNode,
-  options?: RenderToStreamOptions,
+  stream: Readable,
 ): Promise<void> => {
   const uniqueId = Math.random().toString(36).slice(2);
   const timestamp = Date.now();
@@ -188,10 +185,19 @@ export const renderToFileAtomic = async (
   const tempPath = `${path}.${uniqueId}-${timestamp}.tmp`;
 
   try {
-    await renderToFile(tempPath, reactNode, options);
+    await writeToFile(tempPath, stream);
     await fs.rename(tempPath, path);
   } catch (error) {
     await fs.unlink(tempPath);
     throw error;
   }
 };
+
+/**
+ * Render a React node to a file atomically (see `writeToFileAtomic`).
+ */
+export const renderToFileAtomic = (
+  path: string,
+  reactNode: ReactNode,
+  options?: RenderToStreamOptions,
+): Promise<void> => writeToFileAtomic(path, renderToStream(reactNode, options));

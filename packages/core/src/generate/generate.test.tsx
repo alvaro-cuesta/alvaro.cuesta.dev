@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { generateStaticSite } from "./generate.tsx";
+import { NeedsTrailingSlashError } from "../index.ts";
 
 let outputDir: string;
 
@@ -65,5 +66,21 @@ describe("generateStaticSite", () => {
         { outputDir },
       ),
     ).rejects.toThrow("metadata failed");
+  });
+
+  test("renders a page that needs a trailing slash with it", async () => {
+    const generatedPages = await generateStaticSite(
+      (pathname) => {
+        if (!pathname.endsWith("/"))
+          throw new NeedsTrailingSlashError(pathname);
+        return { reactNode: <p>{pathname}</p>, metadata: {} };
+      },
+      { outputDir, entryPaths: ["/blog"] },
+    );
+
+    expect(generatedPages).toEqual([{ pathname: "/blog/", metadata: {} }]);
+    expect(
+      await fs.readFile(path.join(outputDir, "blog", "index.html"), "utf-8"),
+    ).toBe("<p>/blog/</p>");
   });
 });

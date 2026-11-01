@@ -26,10 +26,10 @@
       "types": "./dist/watch.d.ts",
       "default": "./dist/watch.js"
     },
-    "./middleware": {
-      "@xenon-ssg/source": "./src/middleware.tsx",
-      "types": "./dist/middleware.d.ts",
-      "default": "./dist/middleware.js"
+    "./page": {
+      "@xenon-ssg/source": "./src/page.tsx",
+      "types": "./dist/page.d.ts",
+      "default": "./dist/page.js"
     },
     "./generate/Link": {
       "@xenon-ssg/source": "./src/generate/Link.tsx",
@@ -80,15 +80,11 @@
   "peerDependencies": {
     "react": "catalog:",
     "react-dom": "catalog:",
-    "@types/express": "catalog:",
     "@types/node": ">=26",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:"
   },
   "peerDependenciesMeta": {
-    "@types/express": {
-      "optional": true
-    },
     "@types/node": {
       "optional": true
     },
@@ -100,7 +96,6 @@
     }
   },
   "devDependencies": {
-    "@types/express": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

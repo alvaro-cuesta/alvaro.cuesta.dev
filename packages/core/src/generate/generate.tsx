@@ -1,13 +1,11 @@
-import { type RenderToStreamOptions, renderToFileAtomic } from "../render.ts";
+import { type RenderToStreamOptions, writeToFileAtomic } from "../render.ts";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { mapIter } from "../iter.ts";
 import { canonicalizeHref } from "../url.ts";
-import { Root } from "../Root.tsx";
+import { renderPage } from "../page.tsx";
 import type { XenonRenderFunction } from "../index.ts";
 import type { UnknownRecord } from "type-fest";
-
-const doNothing = () => {};
 
 const FAKE_BASE_URL =
   "https://www.fakeorigin.if-this-collides-with-a-real-url-im-gonna-be-surprised.example.com";
@@ -133,22 +131,24 @@ export async function generateStaticSite<PageMetadata extends UnknownRecord>(
       pendingRenderPathnames.add(linkPathname);
     };
 
-    const { reactNode, metadata } = await renderFn(pathname);
-
-    // Awaited below, after rendering. Until then, mark a rejection as handled so a failing
-    // render reports its own error instead of crashing on this one.
-    const metadataPromise = Promise.resolve(metadata);
-    metadataPromise.catch(doNothing);
-
-    await renderToFileAtomic(
-      fullFilePath,
-      <Root addLink={addLink}>{reactNode}</Root>,
+    const page = await renderPage(renderFn, pathname, {
+      addLink,
       renderToStreamOptions,
-    );
+    });
 
+    // Rendered where it redirects to instead, as a link to it would be: it's the same file, so a
+    // static host serves it for this pathname too.
+    if ("redirect" in page) {
+      addLink(page.redirect);
+      continue;
+    }
+
+    await writeToFileAtomic(fullFilePath, page.stream);
+
+    // Awaited after rendering, so a failing render reports its own error instead of this one.
     generatedPages.push({
       pathname,
-      metadata: await metadataPromise,
+      metadata: await page.metadata,
     });
   }
 
