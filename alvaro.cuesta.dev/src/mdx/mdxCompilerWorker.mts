@@ -1,17 +1,13 @@
 // The thread `mdxNodeLoader.mts` compiles `.mdx` files on. See there.
 
 import { fileURLToPath } from "node:url";
-import { type MessagePort, workerData } from "node:worker_threads";
-
-export type MdxCompilerWorkerData = {
-  port: MessagePort;
-  /** Set to 1 after posting each response, so the main thread can wait for it. */
-  signal: Int32Array;
-};
-
-export type MdxCompilerRequest = { url: string };
-
-export type MdxCompilerResponse = { source: string } | { error: unknown };
+import { workerData } from "node:worker_threads";
+import {
+  SIGNAL,
+  type MdxCompilerRequest,
+  type MdxCompilerResponse,
+  type MdxCompilerWorkerData,
+} from "./mdxCompilerProtocol.mts";
 
 const { port, signal } = workerData as MdxCompilerWorkerData;
 
@@ -37,6 +33,6 @@ port.on("message", async ({ url }: MdxCompilerRequest) => {
   }
 
   port.postMessage(response);
-  Atomics.store(signal, 0, 1);
+  Atomics.store(signal, 0, SIGNAL.ANSWERED);
   Atomics.notify(signal, 0);
 });

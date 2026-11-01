@@ -4,11 +4,12 @@ import {
   receiveMessageOnPort,
   Worker,
 } from "node:worker_threads";
-import type {
-  MdxCompilerRequest,
-  MdxCompilerResponse,
-  MdxCompilerWorkerData,
-} from "./mdxCompilerWorker.mts";
+import {
+  SIGNAL,
+  type MdxCompilerRequest,
+  type MdxCompilerResponse,
+  type MdxCompilerSupervisorData,
+} from "./mdxCompilerProtocol.mts";
 
 // The same extensions `@mdx-js/mdx` detects (from `markdown-extensions`):
 // `compileSync` compiles the Markdown ones as plain Markdown and `.mdx` as MDX.
@@ -26,25 +27,55 @@ const EXTENSIONS = [
 
 // Compile on a thread of their own: loading the compiler and its plugins takes
 // a while, and there it happens while this thread starts the app, instead of
-// before.
-const { port1: port, port2: workerPort } = new MessageChannel();
+// before. Started by a supervisor, which tells this thread if it dies.
+const { port1: port, port2: compilerPort } = new MessageChannel();
+const { port1: deathPort, port2: supervisorDeathPort } = new MessageChannel();
 const signal = new Int32Array(new SharedArrayBuffer(4));
-const worker = new Worker(new URL("./mdxCompilerWorker.mts", import.meta.url), {
-  workerData: { port: workerPort, signal } satisfies MdxCompilerWorkerData,
-  transferList: [workerPort],
+Atomics.store(signal, 0, SIGNAL.ANSWERED);
+const supervisorUrl = new URL("./mdxCompilerSupervisor.mts", import.meta.url);
+const supervisor = new Worker(supervisorUrl, {
+  workerData: {
+    port: compilerPort,
+    signal,
+    deathPort: supervisorDeathPort,
+  } satisfies MdxCompilerSupervisorData,
+  transferList: [compilerPort, supervisorDeathPort],
   // Not this thread's flags: they `--import` this module (and tsx), which would
-  // start a worker from the worker. Node strips the types itself.
+  // start a supervisor from the supervisor. Node strips the types itself.
   execArgv: [],
 });
 // Don't keep the process alive, e.g. once a build is done.
-worker.unref();
+supervisor.unref();
+
+// Once it dies, for every compile after.
+let compilerDeath: Error | undefined;
+const failOnDeath = (): never => {
+  compilerDeath ??= new Error(
+    `The MDX compiler died: ${receiveMessageOnPort(deathPort)?.message as string}`,
+  );
+  throw compilerDeath;
+};
 
 const compileMdx = (url: string): string => {
-  Atomics.store(signal, 0, 0);
+  // Not if it died while nothing was waiting: then nothing would wake this.
+  if (
+    Atomics.compareExchange(signal, 0, SIGNAL.ANSWERED, SIGNAL.WAITING) ===
+    SIGNAL.DIED
+  ) {
+    failOnDeath();
+  }
   port.postMessage({ url } satisfies MdxCompilerRequest);
-  Atomics.wait(signal, 0, 0);
+  // No timeout: the supervisor wakes this if the compiler dies, and a compile
+  // can legitimately take long.
+  Atomics.wait(signal, 0, SIGNAL.WAITING);
 
-  const response = receiveMessageOnPort(port)?.message as MdxCompilerResponse;
+  // Even if it died right after answering.
+  const response = receiveMessageOnPort(port)?.message as
+    | MdxCompilerResponse
+    | undefined;
+  if (response === undefined) {
+    return failOnDeath();
+  }
   if ("error" in response) {
     throw response.error;
   }
