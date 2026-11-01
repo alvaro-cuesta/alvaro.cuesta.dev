@@ -5,7 +5,6 @@
     "rootDir": "./src"
   },
   "references": [
-    { "path": "../core/tsconfig.package.json" },
     { "path": "../express/tsconfig.package.json" },
     { "path": "../thunks/tsconfig.package.json" }
   ]

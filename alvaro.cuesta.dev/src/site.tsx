@@ -19,6 +19,8 @@ import path from "node:path";
 import url from "node:url";
 import { faviconPlugin } from "@xenon-ssg/express-plugin-favicon";
 import { createXenonCache } from "@xenon-ssg/express/cache";
+import { cell } from "@xenon-ssg/thunks";
+import { watchInDev } from "@xenon-ssg/core/watch";
 import pkg from "../package.json" with { type: "json" };
 const version = pkg.version;
 import type { PluginInjectableLink } from "@xenon-ssg/express/plugin";
@@ -268,8 +270,14 @@ const sitemap = sitemapPlugin({
   ],
 });
 
+const faviconSvgPath = path.join(import.meta.dirname, "favicon.svg");
 const favicon = faviconPlugin({
-  inputFilepath: path.join(import.meta.dirname, "favicon.svg"),
+  // Always the same path: it's invalidated to tell the plugin the file changed,
+  // so it makes the favicons again.
+  inputFile: cell(
+    async () => faviconSvgPath,
+    (invalidate) => watchInDev(faviconSvgPath, invalidate),
+  ),
   cache,
   faviconOptions: {
     appName: SITE_TITLE,

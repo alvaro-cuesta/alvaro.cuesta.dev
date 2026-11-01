@@ -95,7 +95,7 @@ export type PluginGetInjectableFunctionOptions<BuildPreResult> = {
  *   *every* request. Returning a `Promise` is allowed — the middleware
  *   awaits before rendering. Returning a different array (by reference or
  *   by content) on different calls is also allowed: that's how a plugin
- *   reflects updated source files (e.g. favicon's `fs.watch` on the SVG)
+ *   reflects updated source files (e.g. favicon's `inputFile` thunk)
  *   without forcing a process restart.
  *
  * - **Build mode**: called by `buildXenonExpressSite` exactly once per

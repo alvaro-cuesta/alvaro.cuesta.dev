@@ -280,12 +280,6 @@ importers:
 
   packages/express-plugin-favicon:
     dependencies:
-      '@types/express':
-        specifier: 'catalog:'
-        version: 5.0.6
-      '@xenon-ssg/thunks':
-        specifier: workspace:^
-        version: link:../thunks
       favicons:
         specifier: ^7.2.0
         version: 7.2.0
@@ -293,12 +287,12 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
-      '@xenon-ssg/core':
-        specifier: workspace:*
-        version: link:../core
       '@xenon-ssg/express':
         specifier: workspace:*
         version: link:../express
+      '@xenon-ssg/thunks':
+        specifier: workspace:*
+        version: link:../thunks
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

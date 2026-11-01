@@ -1,4 +1,3 @@
-import type { Express } from "express";
 import favicons, {
   type FaviconFile,
   type FaviconImage,
@@ -8,14 +7,14 @@ import favicons, {
 import type {
   PluginInjectableTag,
   Plugin,
+  PluginAttachToExpressFunction,
   PluginGetInjectableFunction,
   PluginBuildPreFunction,
 } from "@xenon-ssg/express/plugin";
 import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { cell, derived, read } from "@xenon-ssg/thunks";
-import { watchInDev } from "@xenon-ssg/core/watch";
+import { derived, read, thunk, type Thunk } from "@xenon-ssg/thunks";
 import {
   getCacheBustedFilename,
   getCacheBustingFragmentContent,
@@ -52,7 +51,15 @@ const parseHtmlTag = (tag: string): PluginInjectableTag => {
 };
 
 type FaviconPluginOptions = {
-  inputFilepath: string;
+  /**
+   * The SVG's path. Read once if it's a `string`.
+   *
+   * A thunk to have the favicons follow edits to the file, however the site
+   * finds out about them (e.g. a watcher that invalidates a `cell`): each new
+   * value it gives means the file may have changed, even if the path is the
+   * same, and the favicons are made again from it.
+   */
+  inputFile: string | Thunk<string>;
   faviconOptions: Omit<FaviconOptions, "cacheBustingQueryParam">;
   mountPointFragments?: string[];
   /**
@@ -132,26 +139,24 @@ type FaviconDerivedState = {
 };
 
 export const faviconPlugin = ({
-  inputFilepath,
+  inputFile,
   faviconOptions,
   mountPointFragments = [],
   cacheBustingFragment,
   cache,
 }: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
-  // The SVG's bytes. Both the cache key and the favicons are made from them, so
-  // they always come from the same version of the file.
-  const svg = cell(
-    () => fs.readFile(inputFilepath),
-    (invalidate) => watchInDev(inputFilepath, invalidate),
-  );
+  const svgPath =
+    typeof inputFile === "string" ? thunk(async () => inputFile) : inputFile;
 
   // `favicons()` and everything made from its response, so `getInjectable`,
   // the request handler and `buildPre` share them. They're made when something
   // reads them, not when the SVG changes: a save can fire several change
   // events, and the first may come while it's still being written, but they
-  // only invalidate the bytes, and the next read makes the favicons once.
+  // only give the path again, and the next read reads the file and makes the
+  // favicons once. Both the cache key and the favicons are made from that one
+  // read, so they always come from the same version of the SVG.
   const state = derived(async (get): Promise<FaviconDerivedState> => {
-    const svgContents = await get(svg);
+    const svgContents = await fs.readFile(await get(svgPath));
     const ns = cache?.namespace("favicon") ?? null;
     const cacheKey = ns
       ? `${getFaviconCacheKey(svgContents, faviconOptions)}.json`
@@ -183,7 +188,7 @@ export const faviconPlugin = ({
     return { response, filesByName, parsedHtmlDev };
   });
 
-  const attachToExpress = (app: Express) => {
+  const attachToExpress: PluginAttachToExpressFunction = (app) => {
     app.use(
       `/${mountPointFragments.join("/")}`,
       async (req, res, next) => {
