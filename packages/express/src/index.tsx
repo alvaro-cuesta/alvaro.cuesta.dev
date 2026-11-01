@@ -4,8 +4,6 @@ import type { ReactNode } from "react";
 import type { XenonRenderFunction } from "@xenon-ssg/core";
 import type { UnknownRecord } from "type-fest";
 
-export const DEFAULT_DEV_PORT = 31337;
-
 export type XenonExpressSiteMeta = {
   origin: string;
   basepath: string;
@@ -34,16 +32,17 @@ export type XenonExpressSite<
 };
 
 /**
- * `port` is the dev server's, which makes the origin unless `XENON_ORIGIN` sets
- * it.
+ * The site meta for a site served at `basepath` (e.g. `/repo`, or `""` for the
+ * root) of `origin` (e.g. `https://example.com`, with no trailing slash).
+ *
+ * Taken, not guessed: only whoever builds or serves the site knows where it'll
+ * be, and a guess ends up in every absolute URL (canonical URLs, feeds,
+ * sitemaps…) without anything failing.
  */
-export function getSiteMeta(
-  port: number = DEFAULT_DEV_PORT,
+export function makeSiteMeta(
+  origin: string,
+  basepath: string = "",
 ): XenonExpressSiteMeta {
-  const origin = process.env["XENON_ORIGIN"] ?? `http://localhost:${port}`;
-
-  const basepath = process.env["XENON_BASE_PATH"] ?? "";
-
   return {
     origin,
     basepath,

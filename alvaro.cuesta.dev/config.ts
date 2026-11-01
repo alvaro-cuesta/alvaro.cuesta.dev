@@ -6,7 +6,11 @@ export const SITE_ROOT_FOLDER = import.meta.dirname;
 
 export const OUTPUT_FOLDER = path.join(SITE_ROOT_FOLDER, "dist");
 
-export const DEV_PORT = 3000;
+/**
+ * Where the site is deployed, so a local build is the one CI deploys unless
+ * told otherwise (as CI does, with `XENON_ORIGIN` and `XENON_BASE_PATH`).
+ */
+export const SITE_ORIGIN = "https://alvaro.cuesta.dev";
 
 export const RENDER_TO_STREAM_OPTIONS: RenderToStreamOptions = {
   timeoutMsecs: 2000,

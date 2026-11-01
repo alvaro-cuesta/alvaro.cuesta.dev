@@ -1,13 +1,16 @@
+import type { AddressInfo } from "node:net";
 import express, { type Express } from "express";
 import morgan from "morgan";
 import { makeXenonMiddleware } from "./middleware.ts";
 import {
   type XenonExpressSite,
-  DEFAULT_DEV_PORT,
-  getSiteMeta,
+  type XenonExpressSiteMeta,
+  makeSiteMeta,
 } from "./index.tsx";
 import { getTagsFromInjectableRaw } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
+
+const DEFAULT_DEV_PORT = 31337;
 
 /**
  * Create an Express app that serves a Xenon site in development mode.
@@ -27,16 +30,18 @@ import type { UnknownRecord } from "type-fest";
  * The per-request cost when everything is memoized is sub-millisecond:
  * a microtask tick, an `Array.flat()`, and ~N React element creations for
  * the injected tag list.
+ *
+ * `siteMeta` is where the app is served (see `makeSiteMeta`), so the site's
+ * absolute URLs point at it.
  */
 export function makeXenonDevExpressApp<PageMetadata extends UnknownRecord>(
   site: XenonExpressSite<PageMetadata>,
-  port: number = DEFAULT_DEV_PORT,
+  siteMeta: XenonExpressSiteMeta,
 ): Express {
   const app = express();
 
   app.use(morgan("dev"));
 
-  const siteMeta = getSiteMeta(port);
   const plugins = site.plugins
     .map((plugin) => plugin(siteMeta))
     .filter((x) => x !== undefined);
@@ -106,19 +111,23 @@ export async function startXenonExpressDevApp<
     resolvedSiteApp(req, res, next);
   });
 
-  await new Promise<void>((resolve, reject) => {
-    app.listen(port, "127.0.0.1", (error) => {
+  const origin = await new Promise<string>((resolve, reject) => {
+    const server = app.listen(port, "127.0.0.1", (error) => {
       if (error) {
         reject(error);
         return;
       }
-      console.log(`Listening on http://localhost:${port}`);
-      resolve();
+      // The port it's bound to, which isn't `port` when that's 0.
+      const { port: boundPort } = server.address() as AddressInfo;
+      resolve(`http://localhost:${boundPort}`);
     });
   });
+  console.log(`Listening on ${origin}`);
 
   try {
-    siteApp.resolve(makeXenonDevExpressApp(await loadSite(), port));
+    siteApp.resolve(
+      makeXenonDevExpressApp(await loadSite(), makeSiteMeta(origin)),
+    );
   } catch (error) {
     console.error(error);
     siteApp.reject(error);

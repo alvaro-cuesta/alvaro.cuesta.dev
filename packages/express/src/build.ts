@@ -1,11 +1,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { generateStaticSite } from "@xenon-ssg/core/generate/generate";
-import { type XenonExpressSite, getSiteMeta } from "./index.tsx";
+import { type XenonExpressSite, makeSiteMeta } from "./index.tsx";
 import { getTagsFromInjectableRaw, type Plugin } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
 
 type BuildXenonSiteOptions = {
+  /**
+   * Where the build will be deployed, for its absolute URLs (see
+   * `makeSiteMeta`). No default: a build made for the wrong one still works,
+   * until its links point elsewhere.
+   */
+  origin: string;
+  /** Where in `origin` the build will be deployed, if not at its root. */
+  basepath?: string | undefined;
   outputDir?: string;
   entryPaths?: Iterable<string>;
 };
@@ -16,16 +24,18 @@ type BuildXenonSiteOptions = {
 export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
   site: XenonExpressSite<PageMetadata, Plugin<unknown, PageMetadata>[]>,
   {
+    origin,
+    basepath,
     outputDir = path.join(process.cwd(), "dist"),
     entryPaths = ["/"],
-  }: BuildXenonSiteOptions = {},
+  }: BuildXenonSiteOptions,
 ): Promise<void> {
   await fs.rm(outputDir, {
     recursive: true,
     force: true,
   });
 
-  const siteMeta = getSiteMeta();
+  const siteMeta = makeSiteMeta(origin, basepath);
   const plugins = site.plugins
     .map((plugin) => plugin(siteMeta))
     .filter((x) => x !== undefined);
