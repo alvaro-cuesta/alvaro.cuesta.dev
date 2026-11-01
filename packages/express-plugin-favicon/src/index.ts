@@ -73,7 +73,8 @@ type FaviconPluginOptions = {
    * A thunk to have the favicons follow edits to the file, however the site
    * finds out about them (e.g. a watcher that invalidates a `cell`): each new
    * value it gives means the file may have changed, even if the path is the
-   * same, and the favicons are made again from it.
+   * same, and the favicons are made again from it. The plugin only reads it:
+   * whoever made it disposes it.
    */
   inputFile: string | Thunk<string>;
   /**
@@ -194,15 +195,26 @@ type FaviconDerivedState = {
   parsedHtmlDev: PluginInjectableTag[];
 };
 
+/**
+ * Generates favicons, and the tags that link to them, from one SVG.
+ *
+ * Disposing it lets go of the favicons it made (see `@xenon-ssg/thunks`), but
+ * not of a thunk it's given as `inputFile`.
+ */
 export const faviconPlugin = ({
   inputFile,
   faviconOptions,
   mountPointFragments = [],
   cacheBustingFragment,
   cache,
-}: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
+}: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> & Disposable => {
+  // The path's thunk, if it's made here from a `string`: a thunk the plugin is
+  // given is whoever made it's to dispose.
+  const ownedByState = new DisposableStack();
   const svgPath =
-    typeof inputFile === "string" ? thunk(async () => inputFile) : inputFile;
+    typeof inputFile === "string"
+      ? ownedByState.use(thunk(async () => inputFile))
+      : inputFile;
   // Also what the cache is keyed by, so it never gives favicons made with
   // other options, e.g. by an older version of this plugin.
   const resolvedFaviconOptions = toFaviconOptions(
@@ -248,7 +260,7 @@ export const faviconPlugin = ({
     };
     const parsedHtmlDev = response.html.map(parseHtmlTag);
     return { response, filesByName, parsedHtmlDev };
-  });
+  }, ownedByState);
 
   const attachToExpress: PluginAttachToExpressFunction = (router) => {
     router.use(
@@ -374,9 +386,12 @@ export const faviconPlugin = ({
     );
   };
 
-  return () => ({
-    attachToExpress,
-    buildPre,
-    getInjectable,
-  });
+  return Object.assign(
+    () => ({
+      attachToExpress,
+      buildPre,
+      getInjectable,
+    }),
+    { [Symbol.dispose]: () => state[Symbol.dispose]() },
+  );
 };

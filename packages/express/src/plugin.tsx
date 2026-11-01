@@ -163,6 +163,10 @@ export type RunnablePlugin<
 /**
  * Can return `undefined` if the plugin doesn't need to do anything. Useful if you want to disable the plugin with some
  * specific options for example.
+ *
+ * A plugin that owns something, like thunks that watch its source files, is also `Disposable`, and whoever made it
+ * disposes it once it's done with it: e.g. the module that makes the site, once a dev server reload replaces it. The
+ * site's runs of it (one per `siteMeta`) share it, so they don't own anything themselves.
  */
 export type Plugin<
   BuildPreResult = unknown,
