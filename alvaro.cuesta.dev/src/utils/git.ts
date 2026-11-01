@@ -119,6 +119,12 @@ const headOf = family((root: string) => {
     ),
   );
 
+  // Disposed along with the worktree's `HEAD`, which stops watching its git
+  // files: nothing else reads them.
+  const owned = new DisposableStack();
+  owned.use(branch);
+  owned.use(commitOf);
+
   return derived(async (get) => {
     // Detached, `HEAD` holds the commit itself, so it's what moves.
     const ref = (await get(branch)) ?? "HEAD";
@@ -127,7 +133,7 @@ const headOf = family((root: string) => {
     commitOf.retain([ref]);
 
     return get(commitOf(ref));
-  });
+  }, owned);
 });
 
 /**

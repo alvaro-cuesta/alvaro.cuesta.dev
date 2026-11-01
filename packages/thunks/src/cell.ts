@@ -7,8 +7,8 @@ import { brand, read, thunk, type Thunk } from "./thunk.ts";
  *
  * Invalidating it only affects later reads: promises it already gave keep their value.
  *
- * Disposing it stops what invalidates it, if it was given a {@link Subscribe}. It still gives the
- * last promise it made, but that never changes again.
+ * Disposing it stops what invalidates it, if it was given a {@link Subscribe}, and lets go of its
+ * value (see {@link Thunk}).
  */
 export type Cell<T> = Thunk<T> &
   Disposable & {
@@ -57,19 +57,18 @@ export function cell<T>(
   };
 
   let subscription: Disposable | Promise<Disposable> | undefined;
-  let disposed = false;
 
   return Object.assign(
-    brand(() => {
-      if (subscribe !== undefined && subscription === undefined && !disposed) {
-        subscription = subscribe(invalidate);
-      }
-      return read(current);
-    }),
-    {
-      invalidate,
-      [Symbol.dispose]: () => {
-        disposed = true;
+    brand(
+      () => {
+        // Never once disposed: reads don't get here then.
+        if (subscribe !== undefined && subscription === undefined) {
+          subscription = subscribe(invalidate);
+        }
+        return read(current);
+      },
+      () => {
+        current[Symbol.dispose]();
 
         if (subscription instanceof Promise) {
           // Its rejection is already left unhandled on `subscription` itself,
@@ -82,6 +81,7 @@ export function cell<T>(
           subscription?.[Symbol.dispose]();
         }
       },
-    },
+    ),
+    { invalidate },
   );
 }

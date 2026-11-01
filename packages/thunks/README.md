@@ -16,10 +16,16 @@ take it as one.
   again. It's for values that come from outside, like files, which only whoever watches them knows
   have changed. `subscribe` starts that watcher on the first read, handing it `invalidate`, and
   disposing the cell stops it.
-- `derived(make)` makes its value from other thunks, read through `get`, and runs `make` again once
-  any of them gives a new promise. It can't be invalidated: it only changes when what it read does.
+- `derived(make, owned?)` makes its value from other thunks, read through `get`, and runs `make`
+  again once any of them gives a new promise. It can't be invalidated: it only changes when what it
+  read does. Disposing it disposes `owned`, e.g. the cells it made to read.
 - `family(make)` makes thunks one per key, and gives the same one for the same key every time.
-  `retain(keys)` drops the rest, disposing the ones that are `Disposable`.
+  `retain(keys)` drops the rest, disposing them, and disposing the family disposes them all.
+
+Every thunk is `Disposable`, and whoever made it owns it: disposing it lets go of its value and
+stops whatever it watches. Reads after that reject with a `ReferenceError`, so a thunk kept past its
+owner's lifetime fails loudly instead of giving a value that never changes again. What only reads a
+thunk gets a `Thunk`, which can't be disposed.
 
 A thunk can't be called. It's read either through `get`, inside a derived thunk's `make`, which
 tracks the read, or through `read(thunk)`, which doesn't. `read` is for the edge: code that runs

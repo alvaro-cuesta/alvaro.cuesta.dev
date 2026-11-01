@@ -49,7 +49,7 @@ describe("family", () => {
     expect(getValue("b")).not.toBe(b);
   });
 
-  it("disposes the disposable thunks it drops", () => {
+  it("disposes the thunks it drops", () => {
     const dispose = vi.fn();
     const getValue = family((key: string) =>
       Object.assign(
@@ -64,5 +64,36 @@ describe("family", () => {
 
     expect(dispose).toHaveBeenCalledOnce();
     expect(dispose).toHaveBeenCalledWith("b");
+  });
+
+  it("disposes every thunk once disposed, even if one fails to", () => {
+    const dispose = vi.fn((key: string) => {
+      if (key === "a") throw new Error("nope");
+    });
+    const getValue = family((key: string) =>
+      Object.assign(
+        cell(async () => key),
+        { [Symbol.dispose]: () => dispose(key) },
+      ),
+    );
+
+    getValue("a");
+    getValue("b");
+
+    expect(() => getValue[Symbol.dispose]()).toThrow("nope");
+    expect(dispose).toHaveBeenCalledTimes(2);
+
+    getValue[Symbol.dispose]();
+
+    expect(dispose).toHaveBeenCalledTimes(2);
+  });
+
+  it("can't be used once disposed", () => {
+    const getValue = family((key: string) => thunk(async () => key));
+
+    getValue[Symbol.dispose]();
+
+    expect(() => getValue("a")).toThrow(ReferenceError);
+    expect(() => getValue.retain([])).toThrow(ReferenceError);
   });
 });

@@ -28,7 +28,7 @@ type ContentLoaderOptions<TModuleParsed> = {
 
 export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   options: ContentLoaderOptions<TModuleParsed>,
-): Thunk<AnalyzedItems<TModuleParsed>> {
+): Thunk<AnalyzedItems<TModuleParsed>> & Disposable {
   const {
     contentFolderPath,
     contentFolderUrl,
@@ -47,6 +47,12 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   const fileFor = family((filename: string) =>
     contentFile(new URL(filename, contentFolderUrl).href),
   );
+
+  // Disposed along with the loader, which stops watching the folder and its
+  // files: nothing else reads them.
+  const owned = new DisposableStack();
+  owned.use(files);
+  owned.use(fileFor);
 
   return derived(async (get) => {
     const filelist = await get(files);
@@ -70,5 +76,5 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
     );
 
     return analyzeItems(filteredItems, analyzeOptions);
-  });
+  }, owned);
 }

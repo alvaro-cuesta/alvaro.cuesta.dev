@@ -42,15 +42,17 @@ export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
     return import(importUrl);
   });
 
-  return Object.assign(
-    derived(async (get) => {
-      const [fileModule, gitDates] = await Promise.all([
-        get(module),
-        get(gitFileDates(filePath)),
-      ]);
+  // Disposed along with the content file: nothing else reads them.
+  const owned = new DisposableStack();
+  owned.use(mtime);
+  owned.use(module);
 
-      return { module: fileModule, gitDates };
-    }),
-    { [Symbol.dispose]: () => mtime[Symbol.dispose]() },
-  );
+  return derived(async (get) => {
+    const [fileModule, gitDates] = await Promise.all([
+      get(module),
+      get(gitFileDates(filePath)),
+    ]);
+
+    return { module: fileModule, gitDates };
+  }, owned);
 }

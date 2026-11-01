@@ -102,10 +102,26 @@ describe("cell", () => {
 
     read(getValue);
     getValue[Symbol.dispose]();
+    getValue[Symbol.dispose]();
 
     expect(dispose).toHaveBeenCalledOnce();
-    expect(await read(getValue)).toBe(1);
+    await expect(read(getValue)).rejects.toThrow(ReferenceError);
     expect(subscribe).toHaveBeenCalledOnce();
+  });
+
+  it("rejects every read once disposed, with the same promise, without running again", async () => {
+    const make = vi.fn(() => Promise.resolve(1));
+    const getValue = cell(make);
+
+    expect(await read(getValue)).toBe(1);
+
+    getValue[Symbol.dispose]();
+    getValue.invalidate();
+    const first = read(getValue);
+
+    await expect(first).rejects.toThrow(ReferenceError);
+    expect(read(getValue)).toBe(first);
+    expect(make).toHaveBeenCalledOnce();
   });
 
   it("stops what it's subscribed to once it has started, if disposed before then", async () => {
@@ -132,7 +148,7 @@ describe("cell", () => {
     const getValue = cell(() => Promise.resolve(1), subscribe);
 
     getValue[Symbol.dispose]();
-    read(getValue);
+    read(getValue).catch(() => {});
 
     expect(subscribe).not.toHaveBeenCalled();
   });

@@ -153,4 +153,33 @@ describe("derived", () => {
 
     expect(await read(getValue)).toBe(2);
   });
+
+  it("rejects every read once disposed, with the same promise, without running again", async () => {
+    const source = cell(() => Promise.resolve(1));
+    const make = vi.fn(async (get: Get) => (await get(source)) * 2);
+    const getValue = derived(make);
+
+    expect(await read(getValue)).toBe(2);
+
+    getValue[Symbol.dispose]();
+    source.invalidate();
+    const first = read(getValue);
+
+    await expect(first).rejects.toThrow(ReferenceError);
+    expect(read(getValue)).toBe(first);
+    expect(make).toHaveBeenCalledOnce();
+  });
+
+  it("disposes what it owns, but not what it read", async () => {
+    const source = cell(() => Promise.resolve(1));
+    const owned = { [Symbol.dispose]: vi.fn() };
+    const getValue = derived(async (get) => (await get(source)) * 2, owned);
+
+    await read(getValue);
+    getValue[Symbol.dispose]();
+    getValue[Symbol.dispose]();
+
+    expect(owned[Symbol.dispose]).toHaveBeenCalledOnce();
+    expect(await read(source)).toBe(1);
+  });
 });

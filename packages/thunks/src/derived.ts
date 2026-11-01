@@ -28,11 +28,19 @@ type Reads = Map<Thunk<unknown>, Promise<unknown>>;
  *
  * Running again only affects later reads: promises it already gave keep their value.
  *
+ * Disposing it lets go of its value and of what it read (see {@link Thunk}), and disposes `owned`.
+ * Not what it read: whoever made those owns them, and others may read them too.
+ *
  * @param make Makes the promise from what it reads through `get`, the first time the thunk is
  *   read and again after something it read changed.
+ * @param owned What it owns, to dispose along with it: e.g. thunks it made for `make` to read,
+ *   that nothing else does. A `DisposableStack` for more than one.
  * @returns The thunk.
  */
-export function derived<T>(make: (get: Get) => Promise<T>): Thunk<T> {
+export function derived<T>(
+  make: (get: Get) => Promise<T>,
+  owned?: Disposable,
+): Thunk<T> & Disposable {
   // What the last run read. Nothing before the first run, so the first read just runs.
   let reads: Reads = new Map();
 
@@ -56,10 +64,17 @@ export function derived<T>(make: (get: Get) => Promise<T>): Thunk<T> {
     return promise;
   });
 
-  return brand(() => {
-    if (![...reads].every(([thunk, promise]) => read(thunk) === promise)) {
-      value.invalidate();
-    }
-    return read(value);
-  });
+  return brand(
+    () => {
+      if (![...reads].every(([thunk, promise]) => read(thunk) === promise)) {
+        value.invalidate();
+      }
+      return read(value);
+    },
+    () => {
+      value[Symbol.dispose]();
+      reads = new Map();
+      owned?.[Symbol.dispose]();
+    },
+  );
 }

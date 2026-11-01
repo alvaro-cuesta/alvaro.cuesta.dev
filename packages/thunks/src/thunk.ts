@@ -13,20 +13,52 @@ const thunkBrand: unique symbol = Symbol("thunk");
  *
  * Whoever reads it doesn't know or care where the value comes from, whether it's cached, or
  * whether it can change: that's the business of whoever made the thunk.
+ *
+ * Whoever made it owns it, and disposes it once they're done with it, which lets go of its value
+ * and stops whatever it watches. Every read after that gets a promise that rejects with a
+ * `ReferenceError`, so a thunk someone kept past its owner's lifetime fails loudly instead of
+ * giving a value that never changes again. A `Thunk` can't be disposed itself: that's only for
+ * whoever has what its maker returned.
  */
 export type Thunk<T> = { readonly [thunkBrand]: () => Promise<T> };
 
 /**
- * Makes a thunk that `get` reads.
+ * Makes a thunk that `get` reads, until it's disposed.
  *
  * Only for this package's thunk makers: they're what make sure `get` keeps giving the same
  * promise until the value changes.
  *
+ * Disposing it runs `dispose`, the first time only. Every read after that gets the same rejected
+ * promise, without calling `get` (see {@link Thunk}).
+ *
  * @param get Gives the promise.
+ * @param dispose Lets go of what the thunk holds.
  * @returns The thunk.
  */
-export function brand<T>(get: () => Promise<T>): Thunk<T> {
-  return { [thunkBrand]: get };
+export function brand<T>(
+  get: () => Promise<T>,
+  dispose: () => void,
+): Thunk<T> & Disposable {
+  let isDisposed = false;
+  let disposedRead: Promise<T> | undefined;
+
+  return {
+    [thunkBrand]: () => {
+      if (!isDisposed) return get();
+      // Made on the first read, not on disposal, so it's only reported as
+      // unhandled when a read doesn't handle it. The same one every time, like
+      // any thunk's promise while its value doesn't change. A `ReferenceError`,
+      // like `DisposableStack`'s when it's used after it's disposed.
+      return (disposedRead ??= Promise.reject(
+        new ReferenceError("Read a thunk after it was disposed"),
+      ));
+    },
+    [Symbol.dispose]: () => {
+      if (isDisposed) return;
+      isDisposed = true;
+      dispose();
+    },
+  };
 }
 
 /**
@@ -53,10 +85,17 @@ export function read<T>(thunk: Thunk<T>): Promise<T> {
  *
  * The promise never changes, not even after it rejects, which is what React's `use()` needs.
  *
+ * Disposing it lets go of the promise (see {@link Thunk}).
+ *
  * @param make Makes the promise, the first time the thunk is read.
  * @returns The thunk.
  */
-export function thunk<T>(make: () => Promise<T>): Thunk<T> {
+export function thunk<T>(make: () => Promise<T>): Thunk<T> & Disposable {
   let promise: Promise<T> | undefined;
-  return brand(() => (promise ??= make()));
+  return brand(
+    () => (promise ??= make()),
+    () => {
+      promise = undefined;
+    },
+  );
 }
