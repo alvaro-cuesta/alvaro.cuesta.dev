@@ -55,8 +55,10 @@
     "@xenon-ssg/express": "workspace:^"
   },
   "devDependencies": {
+    "@types/express": "catalog:",
     "@types/node": "catalog:",
     "@xenon-ssg/express": "workspace:*",
+    "express": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

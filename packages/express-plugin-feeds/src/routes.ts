@@ -71,10 +71,9 @@ export function getFeedFormatRoute(
  * Build the Express pathname pattern for paginated feed documents of a
  * format. The `:page` param is left unconstrained because
  * `path-to-regexp` v8 (shipped in Express 5) no longer supports inline
- * regex constraints like `:page(\d+)`. The request handler validates
- * that `req.params.page` parses as an integer ≥ 2 and falls through to
- * `next()` otherwise, so non-numeric matches behave the same as
- * before — they just hit the validation one frame later.
+ * regex constraints like `:page(\d+)`. The request handler checks that
+ * `req.params.page` is a page number ≥ 2 written the way this module
+ * writes it, and falls through to `next()` otherwise.
  */
 export function getPaginatedFeedFormatRoutePath(
   mountPointFragments: string[],

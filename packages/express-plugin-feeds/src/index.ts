@@ -50,6 +50,8 @@ const DEFAULT_GENERATOR: FeedGeneratorConfig = {
   version: packageJson.version,
 };
 const SITEMAP_COUNT_BASE_URL = "https://feeds.invalid";
+// How `getFeedFormatRoute` writes a page number: no sign or leading zeros.
+const PAGE_NUMBER_PATTERN = /^[1-9][0-9]*$/;
 
 export type FeedGeneratorConfig = {
   name: string;
@@ -357,11 +359,13 @@ export function feedsPlugin<
         for (const format of resolvedFormats) {
           app.get(
             getFeedFormatRoute(mountPointFragments, 1, format).pathname,
-            async (_req, res) => {
+            async (_req, res, next) => {
               const firstPage = await sendFeedPage(1);
 
+              // Not a 404 of its own: the build writes no file here, so it's
+              // whatever the site serves for any other missing file.
               if (!firstPage) {
-                res.status(404).end();
+                next();
                 return;
               }
 
@@ -387,16 +391,19 @@ export function feedsPlugin<
                 return;
               }
 
-              const pageNumber = Number.parseInt(page, 10);
-              if (!Number.isFinite(pageNumber) || pageNumber < 2) {
+              // Only page numbers as the build writes them (e.g. not `02` or
+              // `2x`), and not page 1, which has no number in its name.
+              if (!PAGE_NUMBER_PATTERN.test(page) || page === "1") {
                 next();
                 return;
               }
 
-              const feedPage = await sendFeedPage(pageNumber);
+              const feedPage = await sendFeedPage(Number(page));
 
+              // Past the last page: like for the first one, the build writes
+              // no file here.
               if (!feedPage) {
-                res.status(404).end();
+                next();
                 return;
               }
 
