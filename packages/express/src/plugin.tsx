@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Router } from "express";
 import type { XenonExpressSiteMeta } from "./index.tsx";
 import type { ReactNode } from "react";
 import type { XenonGeneratedPage } from "@xenon-ssg/core/generate/generate";
@@ -8,10 +8,10 @@ import { toServedHref } from "@xenon-ssg/core/url";
 /**
  * Attaches the plugin's routes for dev mode.
  *
- * `app` is served at the site's root, wherever that is: routes are site paths
- * (e.g. `/feed.rss`), without the base path.
+ * `router` is mounted at the site's root, wherever that is: routes are site
+ * paths (e.g. `/feed.rss`), without the base path.
  */
-export type PluginAttachToExpressFunction = (app: Express) => void;
+export type PluginAttachToExpressFunction = (router: Router) => void;
 
 export type PluginBuildPreOptions = {
   siteMeta: XenonExpressSiteMeta;
@@ -100,7 +100,7 @@ export type PluginGetInjectableFunctionOptions<BuildPreResult> = {
  *
  * **Lifecycle contract:**
  *
- * - **Dev mode**: called by `makeXenonDevExpressApp`'s render wrapper on
+ * - **Dev mode**: called by `makeXenonDevRouter`'s render wrapper on
  *   *every* request. Returning a `Promise` is allowed — the middleware
  *   awaits before rendering. Returning a different array (by reference or
  *   by content) on different calls is also allowed: that's how a plugin

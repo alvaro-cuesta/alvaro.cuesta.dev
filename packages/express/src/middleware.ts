@@ -7,8 +7,9 @@ import type { UnknownRecord } from "type-fest";
 
 type XenonMiddlewareOptions = {
   /**
-   * Where the middleware's app is served (e.g. `/repo`), which its requests'
-   * paths are relative to, as Express makes them in a mounted app.
+   * Where the site is publicly served (e.g. `/repo`), for the URLs it writes.
+   * Requests' paths are site paths, relative to wherever the middleware is
+   * mounted, as Express makes them.
    */
   basepath: string;
   renderToStreamOptions?: RenderToStreamOptions | undefined;

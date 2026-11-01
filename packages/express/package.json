@@ -31,6 +31,11 @@
       "types": "./dist/dev.d.ts",
       "default": "./dist/dev.js"
     },
+    "./dev-router": {
+      "@xenon-ssg/source": "./src/dev-router.ts",
+      "types": "./dist/dev-router.d.ts",
+      "default": "./dist/dev-router.js"
+    },
     "./plugin": {
       "@xenon-ssg/source": "./src/plugin.tsx",
       "types": "./dist/plugin.d.ts",

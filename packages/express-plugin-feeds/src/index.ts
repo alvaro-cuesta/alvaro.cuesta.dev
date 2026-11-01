@@ -334,7 +334,7 @@ export function feedsPlugin<
         return { pages };
       };
 
-      const attachToExpress: PluginAttachToExpressFunction = (app) => {
+      const attachToExpress: PluginAttachToExpressFunction = (router) => {
         const sendFeedPage = async (
           pageNumber: number,
         ): Promise<SerializedFeedPage | undefined> => {
@@ -357,7 +357,7 @@ export function feedsPlugin<
         };
 
         for (const format of resolvedFormats) {
-          app.get(
+          router.get(
             getFeedFormatRoute(mountPointFragments, 1, format).pathname,
             async (_req, res, next) => {
               const firstPage = await sendFeedPage(1);
@@ -376,7 +376,7 @@ export function feedsPlugin<
             },
           );
 
-          app.get(
+          router.get(
             getPaginatedFeedFormatRoutePath(mountPointFragments, format),
             async (req, res, next) => {
               const page = req.params["page"];

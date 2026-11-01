@@ -250,8 +250,8 @@ export const faviconPlugin = ({
     return { response, filesByName, parsedHtmlDev };
   });
 
-  const attachToExpress: PluginAttachToExpressFunction = (app) => {
-    app.use(
+  const attachToExpress: PluginAttachToExpressFunction = (router) => {
+    router.use(
       `/${mountPointFragments.join("/")}`,
       async (req, res, next) => {
         const pathFragments = req.path.split("/");

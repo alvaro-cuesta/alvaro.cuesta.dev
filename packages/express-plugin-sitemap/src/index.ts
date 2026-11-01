@@ -93,8 +93,8 @@ export const sitemapPlugin =
       }
     };
 
-    const attachToExpress: PluginAttachToExpressFunction = (app) => {
-      app.get(pathname, async (_req, res) => {
+    const attachToExpress: PluginAttachToExpressFunction = (router) => {
+      router.get(pathname, async (_req, res) => {
         res
           .status(404)
           .contentType("text/plain")
@@ -108,7 +108,7 @@ export const sitemapPlugin =
       });
 
       if (servedRobotsTxtContent) {
-        app.get("/robots.txt", async (_req, res) => {
+        router.get("/robots.txt", async (_req, res) => {
           res.status(200).contentType("text/plain").end(robotsTxtContent);
         });
       }

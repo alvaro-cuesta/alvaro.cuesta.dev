@@ -1,8 +1,9 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import express, { type Express } from "express";
+import express from "express";
 import type {
   Plugin,
+  PluginAttachToExpressFunction,
   PluginBuildPreFunction,
   PluginGetInjectableFunction,
 } from "@xenon-ssg/express/plugin";
@@ -46,8 +47,8 @@ export const staticFilePlugin =
   () => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
 
-    const attachToExpress = (app: Express) => {
-      app.use(pathname, express.static(inputFilepath));
+    const attachToExpress: PluginAttachToExpressFunction = (router) => {
+      router.use(pathname, express.static(inputFilepath));
     };
 
     const buildPre: PluginBuildPreFunction<

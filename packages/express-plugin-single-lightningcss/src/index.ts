@@ -53,8 +53,8 @@ export const singleLightningCssPlugin =
       return Buffer.from(outputCode);
     };
 
-    const attachToExpress: PluginAttachToExpressFunction = (app) => {
-      app.get(pathname, async (req, res) => {
+    const attachToExpress: PluginAttachToExpressFunction = (router) => {
+      router.get(pathname, async (req, res) => {
         // Weak ETag from `size + mtime`, matching the `express.static`
         // convention. A single `fs.stat` (~0.05 ms regardless of file
         // size) lets us short-circuit before touching the source file at

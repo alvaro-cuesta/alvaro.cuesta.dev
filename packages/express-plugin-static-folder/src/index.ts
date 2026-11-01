@@ -20,8 +20,8 @@ export const staticFolderPlugin =
   () => {
     const pathname = `/${mountPointFragments.join("/")}`;
 
-    const attachToExpress: PluginAttachToExpressFunction = (app) => {
-      app.use(pathname, express.static(inputFolder));
+    const attachToExpress: PluginAttachToExpressFunction = (router) => {
+      router.use(pathname, express.static(inputFolder));
     };
 
     const buildPre: PluginBuildPreFunction = async ({
