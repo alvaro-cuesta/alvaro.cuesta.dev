@@ -70,6 +70,11 @@ export type RenderToStreamOptions = {
    * - If not provided, the rendering process will not have a timeout.
    */
   timeoutMsecs?: number;
+  /**
+   * Aborts the render, like the timeout does, e.g. when whoever asked for the page no longer
+   * wants it. Combined with the timeout, if there's one.
+   */
+  signal?: AbortSignal | undefined;
 };
 
 /**
@@ -102,7 +107,10 @@ export const renderToStream = (
   });
 
   prerenderToNodeStream(reactNode, {
-    signal: controller.signal,
+    signal:
+      options.signal === undefined
+        ? controller.signal
+        : AbortSignal.any([controller.signal, options.signal]),
     onError(error) {
       // We inject the error into the stream so the stream consumers notice it
       const streamError =

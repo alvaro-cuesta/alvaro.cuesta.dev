@@ -4,6 +4,11 @@ import { makeXenonMiddleware } from "./middleware.ts";
 import { getTagsFromInjectableRaw } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
 
+type XenonDevRouterOptions = {
+  /** Aborts the pages it renders (see `makeXenonDevRouter`). */
+  signal?: AbortSignal | undefined;
+};
+
 /**
  * Create an Express router that serves a Xenon site in development mode:
  * plugins' routes, then a page for any other request.
@@ -31,10 +36,16 @@ import type { UnknownRecord } from "type-fest";
  *
  * Logs nothing: that's up to whoever owns the server, which may serve more
  * than one site.
+ *
+ * Once `signal` aborts, so do the pages it's rendering, and any it starts
+ * rendering after: e.g. once a newer version of the site replaces it. They
+ * fail before anything is sent, so whoever owns the server can serve them
+ * again with the newer one. Plugins' routes aren't aborted.
  */
 export function makeXenonDevRouter<PageMetadata extends UnknownRecord>(
   site: XenonExpressSite<PageMetadata>,
   siteMeta: XenonExpressSiteMeta,
+  { signal }: XenonDevRouterOptions = {},
 ): Router {
   const router = express.Router();
 
@@ -72,10 +83,17 @@ export function makeXenonDevRouter<PageMetadata extends UnknownRecord>(
     });
   };
 
+  // The site's own signal, if it has one, still counts.
+  const signals = [site.renderToStreamOptions?.signal, signal].filter(
+    (x) => x !== undefined,
+  );
   router.use(
     makeXenonMiddleware(render, {
       basepath: siteMeta.basepath,
-      renderToStreamOptions: site.renderToStreamOptions,
+      renderToStreamOptions: {
+        ...site.renderToStreamOptions,
+        signal: signals.length === 0 ? undefined : AbortSignal.any(signals),
+      },
     }),
   );
 

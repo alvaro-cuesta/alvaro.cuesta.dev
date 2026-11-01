@@ -1,7 +1,8 @@
 import { describe, test, expect } from "vitest";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { StripReactComments } from "./render.ts";
+import { createElement, use } from "react";
+import { StripReactComments, renderToString } from "./render.ts";
 
 const strip = async (chunks: string[]): Promise<string> => {
   const input = Readable.from(chunks);
@@ -167,5 +168,38 @@ describe("StripReactComments", () => {
     test("< in normal content near chunk boundary", async () => {
       expect(await strip(["<b>x</b>", "<i>y</i>"])).toBe("<b>x</b><i>y</i>");
     });
+  });
+});
+
+describe("renderToString", () => {
+  const forever = new Promise<never>(() => {});
+  const Pending = () => use(forever);
+
+  test("fails once its signal aborts", async () => {
+    const controller = new AbortController();
+    const rendering = renderToString(createElement(Pending), {
+      signal: controller.signal,
+    });
+
+    controller.abort(new Error("Not wanted anymore"));
+
+    await expect(rendering).rejects.toThrow();
+  });
+
+  test("fails right away with a signal that already aborted", async () => {
+    await expect(
+      renderToString(createElement("div"), {
+        signal: AbortSignal.abort(new Error("Not wanted anymore")),
+      }),
+    ).rejects.toThrow();
+  });
+
+  test("still times out with a signal", async () => {
+    await expect(
+      renderToString(createElement(Pending), {
+        timeoutMsecs: 10,
+        signal: new AbortController().signal,
+      }),
+    ).rejects.toThrow();
   });
 });
