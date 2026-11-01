@@ -69,18 +69,21 @@
   },
   "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express#readme",
   "dependencies": {
-    "@types/express": "catalog:",
-    "express": "catalog:",
     "morgan": "^1.10.0",
     "type-fest": "catalog:"
   },
   "peerDependencies": {
     "@xenon-ssg/core": "workspace:^",
+    "express": "catalog:",
     "react": "catalog:",
+    "@types/express": "catalog:",
     "@types/node": ">=26",
     "@types/react": "catalog:"
   },
   "peerDependenciesMeta": {
+    "@types/express": {
+      "optional": true
+    },
     "@types/node": {
       "optional": true
     },
@@ -89,10 +92,12 @@
     }
   },
   "devDependencies": {
+    "@types/express": "catalog:",
     "@types/morgan": "^1.9.9",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@xenon-ssg/core": "workspace:*",
+    "express": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:"
   }

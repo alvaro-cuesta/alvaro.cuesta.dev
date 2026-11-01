@@ -43,16 +43,15 @@
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
   "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express-plugin-static-folder#readme",
-  "dependencies": {
-    "@types/express": "catalog:",
+  "peerDependencies": {
+    "@xenon-ssg/express": "workspace:^",
     "express": "catalog:"
   },
-  "peerDependencies": {
-    "@xenon-ssg/express": "workspace:^"
-  },
   "devDependencies": {
+    "@types/express": "catalog:",
     "@types/node": "catalog:",
     "@xenon-ssg/express": "workspace:*",
+    "express": "catalog:",
     "typescript": "catalog:"
   }
 }
