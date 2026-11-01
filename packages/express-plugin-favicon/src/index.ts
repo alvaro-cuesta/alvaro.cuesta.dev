@@ -25,14 +25,22 @@ import { toServedHref } from "@xenon-ssg/core/url";
 const LINK_REGEX =
   /<link\s+rel="(?<rel>.+?)"\s+(?:type="(?<type>.+?)"\s+)?(?:sizes="(?<sizes>.+?)"\s+)?(?:media="(?<media>.+?)"\s+)?href="(?<href>.+?)">/;
 
-const META_REGEX = /<meta\s+name="(?<name>.+?)"\s+content="(?<content>.+?)">/;
+// `favicons` leaves `content` out when there's nothing to put in it, e.g.
+// `application-name` without an `appName`.
+const META_REGEX =
+  /<meta\s+name="(?<name>.+?)"(?:\s+content="(?<content>.*?)")?>/;
 
-const parseHtmlTag = (tag: string): PluginInjectableTag => {
+/**
+ * The tag `favicons` gives as HTML, or `undefined` for a meta tag without
+ * content, which would say nothing.
+ */
+const parseHtmlTag = (tag: string): PluginInjectableTag | undefined => {
   const linkResult = LINK_REGEX.exec(tag);
   if (linkResult !== null) {
     return {
       tagType: "link" as const,
       rel: linkResult.groups!["rel"]!, // `!` is fine because it's marked as non-optional group in the regex
+      type: linkResult.groups!["type"],
       sizes: linkResult.groups!["sizes"],
       media: linkResult.groups!["media"],
       href: linkResult.groups!["href"]!, // `!` is fine because it's marked as non-optional group in the regex
@@ -41,15 +49,22 @@ const parseHtmlTag = (tag: string): PluginInjectableTag => {
 
   const metaResult = META_REGEX.exec(tag);
   if (metaResult !== null) {
+    const content = metaResult.groups!["content"];
+    if (content === undefined || content === "") return undefined;
+
     return {
       tagType: "meta" as const,
       name: metaResult.groups!["name"]!, // `!` is fine because it's marked as non-optional group in the regex
-      content: metaResult.groups!["content"]!, // `!` is fine because it's marked as non-optional group in the regex
+      content,
     };
   }
 
   throw new Error(`Unknown tag: ${tag}`);
 };
+
+/** The tags `favicons` gives as HTML (see `parseHtmlTag`). */
+const parseHtmlTags = (tags: string[]): PluginInjectableTag[] =>
+  tags.map(parseHtmlTag).filter((tag) => tag !== undefined);
 
 /**
  * Serves the site paths `favicons` writes in some meta tags' content (e.g.
@@ -198,8 +213,9 @@ type FaviconDerivedState = {
 /**
  * Generates favicons, and the tags that link to them, from one SVG.
  *
- * Disposing it lets go of the favicons it made (see `@xenon-ssg/thunks`), but
- * not of a thunk it's given as `inputFile`.
+ * Disposing it lets go of the favicons it keeps in memory (see
+ * `@xenon-ssg/thunks`), but not of a thunk it's given as `inputFile`. `cache`
+ * keeps them for later runs.
  */
 export const faviconPlugin = ({
   inputFile,
@@ -258,7 +274,7 @@ export const faviconPlugin = ({
         response.files.map((file) => [file.name, file.contents]),
       ),
     };
-    const parsedHtmlDev = response.html.map(parseHtmlTag);
+    const parsedHtmlDev = parseHtmlTags(response.html);
     return { response, filesByName, parsedHtmlDev };
   }, ownedByState);
 
@@ -372,16 +388,20 @@ export const faviconPlugin = ({
     // indirection.
     const cacheBustingMap = options.buildPreResult.cacheBustingMap;
     return serveMetaContents(
-      response.html.map((htmlTag) => {
-        let cacheBustedHtmlTag = htmlTag;
-        for (const [name, cacheBustedName] of Object.entries(cacheBustingMap)) {
-          cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
-            name,
-            cacheBustedName,
-          );
-        }
-        return parseHtmlTag(cacheBustedHtmlTag);
-      }),
+      parseHtmlTags(
+        response.html.map((htmlTag) => {
+          let cacheBustedHtmlTag = htmlTag;
+          for (const [name, cacheBustedName] of Object.entries(
+            cacheBustingMap,
+          )) {
+            cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
+              name,
+              cacheBustedName,
+            );
+          }
+          return cacheBustedHtmlTag;
+        }),
+      ),
       basepath,
     );
   };
