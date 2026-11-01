@@ -190,7 +190,7 @@ const blogFeeds = feedsPlugin({
   authors: ({ baseUrl }) => [
     {
       name: MY_NAME,
-      url: baseUrl,
+      url: `${baseUrl}${routeHome.build({})}`,
     },
   ],
   content: {
@@ -210,7 +210,7 @@ const timelineFeeds = feedsPlugin({
   authors: ({ baseUrl }) => [
     {
       name: MY_NAME,
-      url: baseUrl,
+      url: `${baseUrl}${routeHome.build({})}`,
     },
   ],
   content: {
@@ -246,7 +246,7 @@ const allFeeds = feedsPlugin({
   authors: ({ baseUrl }) => [
     {
       name: MY_NAME,
-      url: baseUrl,
+      url: `${baseUrl}${routeHome.build({})}`,
     },
   ],
   content: {

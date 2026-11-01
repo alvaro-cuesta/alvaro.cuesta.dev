@@ -8,10 +8,10 @@ export type MdxRenderContextValue = {
    */
   pathname: string;
   /**
-   * Set when rendering for feeds, where links must be absolute (see
-   * `makeMdxDefaultComponents`).
+   * Set when rendering for feeds, where links must be absolute: the absolute
+   * URL an href points to (see `makeMdxDefaultComponents`).
    */
-  canonicalizeBaseUrl?: URL | undefined;
+  resolveHref?: ((href: string) => string) | undefined;
   /**
    * The MDX module's `tableOfContents` export, for `<TableOfContents>`.
    *

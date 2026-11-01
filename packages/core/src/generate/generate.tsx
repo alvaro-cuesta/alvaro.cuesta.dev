@@ -34,6 +34,11 @@ type GenerateStaticSiteOptions = {
    */
   outputDir?: string;
   /**
+   * Where `outputDir` will be served, if not at the root of its origin (e.g. `/repo`), so the pages' `Link`s point
+   * there. The files are written at their site paths either way: the base path is where the folder is, not in it.
+   */
+  basepath?: string;
+  /**
    * Options for the `renderToStream` function.
    */
   renderToStreamOptions?: RenderToStreamOptions;
@@ -62,6 +67,7 @@ export async function generateStaticSite<PageMetadata extends UnknownRecord>(
   {
     entryPaths = ["/"],
     outputDir = path.join(process.cwd(), "dist"),
+    basepath = "",
     renderToStreamOptions,
     ignoredPathnames = [],
   }: GenerateStaticSiteOptions = {},
@@ -133,6 +139,7 @@ export async function generateStaticSite<PageMetadata extends UnknownRecord>(
 
     const page = await renderPage(renderFn, pathname, {
       addLink,
+      basepath,
       renderToStreamOptions,
     });
 

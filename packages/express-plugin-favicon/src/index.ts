@@ -20,6 +20,7 @@ import {
   getCacheBustingFragmentContent,
 } from "@xenon-ssg/express/cache-busting";
 import type { XenonCache } from "@xenon-ssg/express/cache";
+import { toServedHref } from "@xenon-ssg/core/url";
 
 const LINK_REGEX =
   /<link\s+rel="(?<rel>.+?)"\s+(?:type="(?<type>.+?)"\s+)?(?:sizes="(?<sizes>.+?)"\s+)?(?:media="(?<media>.+?)"\s+)?href="(?<href>.+?)">/;
@@ -50,6 +51,21 @@ const parseHtmlTag = (tag: string): PluginInjectableTag => {
   throw new Error(`Unknown tag: ${tag}`);
 };
 
+/**
+ * Serves the site paths `favicons` writes in some meta tags' content (e.g.
+ * `msapplication-config`) at the base path. Unlike `href`s, which the host
+ * serves for every plugin, it can't know a meta tag's content is a URL.
+ */
+const serveMetaContents = (
+  tags: PluginInjectableTag[],
+  basepath: string,
+): PluginInjectableTag[] =>
+  tags.map((tag) =>
+    tag.tagType === "meta"
+      ? { ...tag, content: toServedHref(tag.content, basepath) }
+      : tag,
+  );
+
 type FaviconPluginOptions = {
   /**
    * The SVG's path. Read once if it's a `string`.
@@ -60,7 +76,15 @@ type FaviconPluginOptions = {
    * same, and the favicons are made again from it.
    */
   inputFile: string | Thunk<string>;
-  faviconOptions: Omit<FaviconOptions, "cacheBustingQueryParam">;
+  /**
+   * `start_url` and `scope` are site paths (e.g. `/`), or absolute URLs. The
+   * paths in the files are up to the plugin, so they work wherever the site is
+   * served (see `toFaviconOptions`).
+   */
+  faviconOptions: Omit<
+    FaviconOptions,
+    "cacheBustingQueryParam" | "path" | "manifestRelativePaths"
+  >;
   mountPointFragments?: string[];
   /**
    * - `string` to manually control fragment
@@ -76,6 +100,38 @@ type FaviconPluginOptions = {
    * omit) to disable caching.
    */
   cache?: XenonCache | null;
+};
+
+// `favicons`' own default, which is a site path too.
+const DEFAULT_START_URL = "/?homescreen=1";
+
+/**
+ * The options for `favicons`, so that what it makes works wherever the site is
+ * served, without knowing where: the files it makes (e.g. the web app
+ * manifest) have relative URLs, which browsers resolve against the file, and
+ * its tags have site paths, which are served at the base path like any other
+ * injected tag's.
+ */
+const toFaviconOptions = (
+  faviconOptions: FaviconPluginOptions["faviconOptions"],
+  mountPointFragments: string[],
+): FaviconOptions => {
+  // From the folder the files are in to the site's root.
+  const toRoot = "../".repeat(mountPointFragments.length) || "./";
+  const relativeFromFiles = (href: string) =>
+    href.startsWith("/") && !href.startsWith("//")
+      ? `${toRoot}${href.slice(1)}`
+      : href;
+
+  return {
+    ...faviconOptions,
+    path: `/${mountPointFragments.join("/")}`,
+    manifestRelativePaths: true,
+    start_url: relativeFromFiles(faviconOptions.start_url ?? DEFAULT_START_URL),
+    ...(faviconOptions.scope !== undefined
+      ? { scope: relativeFromFiles(faviconOptions.scope) }
+      : {}),
+  };
 };
 
 type FaviconPluginBuildPreResult = {
@@ -118,7 +174,7 @@ const deserializeFaviconResponse = (raw: Buffer): FaviconResponse => {
 
 const getFaviconCacheKey = (
   svgContents: Buffer,
-  faviconOptions: FaviconPluginOptions["faviconOptions"],
+  faviconOptions: FaviconOptions,
 ): string => {
   const payload = Buffer.concat([
     svgContents,
@@ -147,6 +203,12 @@ export const faviconPlugin = ({
 }: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> => {
   const svgPath =
     typeof inputFile === "string" ? thunk(async () => inputFile) : inputFile;
+  // Also what the cache is keyed by, so it never gives favicons made with
+  // other options, e.g. by an older version of this plugin.
+  const resolvedFaviconOptions = toFaviconOptions(
+    faviconOptions,
+    mountPointFragments,
+  );
 
   // `favicons()` and everything made from its response, so `getInjectable`,
   // the request handler and `buildPre` share them. They're made when something
@@ -159,7 +221,7 @@ export const faviconPlugin = ({
     const svgContents = await fs.readFile(await get(svgPath));
     const ns = cache?.namespace("favicon") ?? null;
     const cacheKey = ns
-      ? `${getFaviconCacheKey(svgContents, faviconOptions)}.json`
+      ? `${getFaviconCacheKey(svgContents, resolvedFaviconOptions)}.json`
       : null;
 
     let response: FaviconResponse | null = null;
@@ -170,7 +232,7 @@ export const faviconPlugin = ({
       }
     }
     if (response === null) {
-      response = await favicons(svgContents, faviconOptions);
+      response = await favicons(svgContents, resolvedFaviconOptions);
       if (ns && cacheKey) {
         await ns.set(cacheKey, serializeFaviconResponse(response));
       }
@@ -287,25 +349,29 @@ export const faviconPlugin = ({
     FaviconPluginBuildPreResult
   > = async (options) => {
     const { response, parsedHtmlDev } = await read(state);
-    // Dev: reuse the memoized parsed tag array — stable reference until the
-    // SVG source changes and the watcher resets the cache.
+    const { basepath } = options.siteMeta;
+    // Dev: reuse the memoized parsed tag array, until the SVG changes. Only
+    // its meta contents are served, which is cheap.
     if (!options.isBuild) {
-      return parsedHtmlDev;
+      return serveMetaContents(parsedHtmlDev, basepath);
     }
     // Build: inject the per-build `cacheBustingMap` into every href before
     // parsing. Runs exactly once per build, so memoization isn't worth the
     // indirection.
     const cacheBustingMap = options.buildPreResult.cacheBustingMap;
-    return response.html.map((htmlTag) => {
-      let cacheBustedHtmlTag = htmlTag;
-      for (const [name, cacheBustedName] of Object.entries(cacheBustingMap)) {
-        cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
-          name,
-          cacheBustedName,
-        );
-      }
-      return parseHtmlTag(cacheBustedHtmlTag);
-    });
+    return serveMetaContents(
+      response.html.map((htmlTag) => {
+        let cacheBustedHtmlTag = htmlTag;
+        for (const [name, cacheBustedName] of Object.entries(cacheBustingMap)) {
+          cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
+            name,
+            cacheBustedName,
+          );
+        }
+        return parseHtmlTag(cacheBustedHtmlTag);
+      }),
+      basepath,
+    );
   };
 
   return () => ({

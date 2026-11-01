@@ -3,6 +3,7 @@ import { MdxRenderContext } from "../mdx/MdxRenderContext.tsx";
 import { blogItemDateToTemporalInstant, type BlogItemDate } from "./item-dates.ts";
 import type { FeedSourceItem } from "@xenon-ssg/express-plugin-feeds";
 import { renderToString } from "@xenon-ssg/core/render";
+import { resolveSiteHref } from "@xenon-ssg/core/url";
 import type { MDXContent } from "mdx/types.js";
 import type { AnalyzedItems, Item } from "./analyze.ts";
 import { read, type Thunk } from "@xenon-ssg/thunks";
@@ -18,16 +19,18 @@ export function renderContentItemHtml({
   pathname,
   Component,
 }: RenderContentItemHtmlOptions): Promise<string> {
-  const url = new URL(pathname, baseUrl);
+  // As the page itself would link it, wherever the site is served.
+  const resolveHref = (href: string) =>
+    resolveSiteHref(href, pathname, baseUrl).toString();
 
   return renderToString(
     <MdxRenderContext value={{
       pathname,
-      canonicalizeBaseUrl: url,
+      resolveHref,
     }}>
       <Component
         components={makeMdxDefaultComponents({
-          canonicalizeBaseUrl: url,
+          resolveHref,
           renderAnchor: (props) => <a {...props} />,
           renderHashtag: ({ href, children }) => <a href={href}>#{children}</a>,
         })}

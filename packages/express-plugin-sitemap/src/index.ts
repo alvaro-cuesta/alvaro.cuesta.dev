@@ -10,8 +10,19 @@ import type {
 } from "@xenon-ssg/express/plugin";
 
 type SitemapPluginOptions = {
+  /**
+   * Written to `/robots.txt`, with a `Sitemap:` line for the sitemap.
+   *
+   * Only when the site is at the root of its origin: crawlers only read
+   * `robots.txt` there, so under a base path it's up to whoever serves the
+   * root. The build logs the `Sitemap:` line for them instead.
+   */
   robotsTxtContent?: string;
   outputFilename: string;
+  /**
+   * The folder the sitemap is in. Per the sitemaps protocol, it can only list
+   * URLs in that folder, unless a `robots.txt` points to it.
+   */
   mountPointFragments?: string[];
   disableInjectMetaTag?: boolean;
   additionalPathnames?: string[] | (() => string[] | Promise<string[]>);
@@ -67,14 +78,17 @@ export const sitemapPlugin =
     disableInjectMetaTag,
     additionalPathnames = [],
   }: SitemapPluginOptions): Plugin<void, SitemapPluginMetadata> =>
-  () => {
+  (siteMeta) => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
+    // Only at the origin's root, the one place crawlers read it from.
+    const servedRobotsTxtContent =
+      siteMeta.basepath === "" ? robotsTxtContent : undefined;
 
     const buildPre: PluginBuildPreFunction<void> = async ({
       emitStaticPathname,
     }) => {
       emitStaticPathname(pathname);
-      if (robotsTxtContent) {
+      if (servedRobotsTxtContent) {
         emitStaticPathname("/robots.txt");
       }
     };
@@ -93,7 +107,7 @@ export const sitemapPlugin =
           );
       });
 
-      if (robotsTxtContent) {
+      if (servedRobotsTxtContent) {
         app.get("/robots.txt", async (_req, res) => {
           res.status(200).contentType("text/plain").end(robotsTxtContent);
         });
@@ -169,13 +183,24 @@ export const sitemapPlugin =
 
       await fs.writeFile(outputFilepath, xml);
 
-      if (robotsTxtContent) {
-        const realRobotsTxtContent = `${robotsTxtContent}
-${robotsTxtContent.endsWith("\n") ? "" : "\n"}Sitemap: ${siteMeta.baseUrl}${pathname}\n`;
+      // Absolute, as the robots.txt spec requires.
+      const sitemapLine = `Sitemap: ${siteMeta.baseUrl}${pathname}`;
 
-        const robotsTxtOutputFilepath = path.join(outputFolder, "robots.txt");
+      if (servedRobotsTxtContent) {
+        const realRobotsTxtContent = `${servedRobotsTxtContent}
+${servedRobotsTxtContent.endsWith("\n") ? "" : "\n"}${sitemapLine}\n`;
+
+        // At the site's root, wherever the sitemap is.
+        const robotsTxtOutputFilepath = path.join(
+          baseOutputFolder,
+          "robots.txt",
+        );
         console.debug(`[Sitemap] ${robotsTxtOutputFilepath}`);
         await fs.writeFile(robotsTxtOutputFilepath, realRobotsTxtContent);
+      } else if (robotsTxtContent) {
+        console.warn(
+          `[Sitemap] No robots.txt under a base path (${siteMeta.basepath}): crawlers only read the origin's. Add this to it instead:\n  ${sitemapLine}`,
+        );
       }
     };
 

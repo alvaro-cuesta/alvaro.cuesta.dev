@@ -3,7 +3,14 @@ import type { XenonExpressSiteMeta } from "./index.tsx";
 import type { ReactNode } from "react";
 import type { XenonGeneratedPage } from "@xenon-ssg/core/generate/generate";
 import type { UnknownRecord } from "type-fest";
+import { toServedHref } from "@xenon-ssg/core/url";
 
+/**
+ * Attaches the plugin's routes for dev mode.
+ *
+ * `app` is served at the site's root, wherever that is: routes are site paths
+ * (e.g. `/feed.rss`), without the base path.
+ */
 export type PluginAttachToExpressFunction = (app: Express) => void;
 
 export type PluginBuildPreOptions = {
@@ -40,6 +47,7 @@ export type PluginBuildPostFunction<
 
 export type PluginInjectableStylesheet = {
   tagType: "stylesheet";
+  /** A site path, served at the base path for you, or any other href. */
   href: string;
   cachebust?: boolean;
 };
@@ -51,6 +59,7 @@ export type PluginInjectableLink = {
   title?: string | undefined;
   sizes?: string | undefined;
   media?: string | undefined;
+  /** A site path, served at the base path for you, or any other href. */
   href: string;
   cachebust?: boolean;
 };
@@ -162,10 +171,20 @@ export type Plugin<
   siteMeta: XenonExpressSiteMeta,
 ) => RunnablePlugin<BuildPreResult, PageMetadata> | undefined;
 
-function renderInjectableRaw(tag: PluginInjectableTag, index: number) {
+function renderInjectableRaw(
+  tag: PluginInjectableTag,
+  index: number,
+  basepath: string,
+) {
   switch (tag.tagType) {
     case "stylesheet":
-      return <link key={index} rel="stylesheet" href={tag.href} />;
+      return (
+        <link
+          key={index}
+          rel="stylesheet"
+          href={toServedHref(tag.href, basepath)}
+        />
+      );
 
     case "link":
       return (
@@ -176,7 +195,7 @@ function renderInjectableRaw(tag: PluginInjectableTag, index: number) {
           title={tag.title}
           sizes={tag.sizes}
           media={tag.media}
-          href={tag.href}
+          href={toServedHref(tag.href, basepath)}
         />
       );
 
@@ -189,8 +208,13 @@ function renderInjectableRaw(tag: PluginInjectableTag, index: number) {
   }
 }
 
+/**
+ * The tags for `injectableRaw`, with each `href` served at `basepath` (see
+ * `toServedHref`), so plugins can give site paths.
+ */
 export function getTagsFromInjectableRaw(
   injectableRaw: PluginInjectableTag[],
+  basepath: string,
 ): {
   injectable: ReactNode[];
   injectableCritical: ReactNode[];
@@ -198,9 +222,9 @@ export function getTagsFromInjectableRaw(
   return {
     injectable: injectableRaw
       .filter((x) => !x.critical)
-      .map(renderInjectableRaw),
+      .map((tag, index) => renderInjectableRaw(tag, index, basepath)),
     injectableCritical: injectableRaw
       .filter((x) => x.critical)
-      .map(renderInjectableRaw),
+      .map((tag, index) => renderInjectableRaw(tag, index, basepath)),
   };
 }

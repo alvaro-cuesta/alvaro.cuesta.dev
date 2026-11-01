@@ -14,12 +14,20 @@ export type RenderPageOptions = {
    * can crawl them.
    */
   addLink?: LinkProviderProps["addLink"] | undefined;
+  /**
+   * Where the site is served, if not at the root of its origin (e.g. `/repo`),
+   * so `Link`s point there (see `toServedHref`).
+   */
+  basepath?: LinkProviderProps["basepath"] | undefined;
   renderToStreamOptions?: RenderToStreamOptions | undefined;
 };
 
 export type XenonRenderedPage<PageMetadata extends UnknownRecord> =
   | {
-      /** Where the page is: the pathname with a trailing slash. */
+      /**
+       * Where the page is: the pathname with a trailing slash. A site path,
+       * like `pathname`, so whoever serves it there adds the base path.
+       */
       redirect: string;
     }
   | {
@@ -52,7 +60,11 @@ export type XenonRenderedPage<PageMetadata extends UnknownRecord> =
 export async function renderPage<PageMetadata extends UnknownRecord>(
   render: XenonRenderFunction<PageMetadata>,
   pathname: string,
-  { addLink = doNothing, renderToStreamOptions }: RenderPageOptions = {},
+  {
+    addLink = doNothing,
+    basepath = "",
+    renderToStreamOptions,
+  }: RenderPageOptions = {},
 ): Promise<XenonRenderedPage<PageMetadata>> {
   const { pathname: canonicalPathname } = canonicalizeHref(pathname);
 
@@ -71,7 +83,9 @@ export async function renderPage<PageMetadata extends UnknownRecord>(
 
   return {
     stream: renderToStream(
-      <Root addLink={addLink}>{result.reactNode}</Root>,
+      <Root addLink={addLink} basepath={basepath}>
+        {result.reactNode}
+      </Root>,
       renderToStreamOptions,
     ),
     metadata,

@@ -7,6 +7,7 @@ import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { contentFile } from "../../utils/content-file.ts";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
+import { routeHome } from "../../routes.ts";
 import { read } from "@xenon-ssg/thunks";
 
 type MdxPageModule = {
@@ -75,7 +76,10 @@ export function makeMdxPage(contentFileUrl: string) {
           socialDescription: description,
           openGraph:
             openGraphType === "article"
-              ? { type: "article", authorProfileUrl: siteRenderMeta.baseUrl }
+              ? {
+                  type: "article",
+                  authorProfileUrl: `${siteRenderMeta.baseUrl}${routeHome.build({})}`,
+                }
               : { type: "website" },
         }}
       >

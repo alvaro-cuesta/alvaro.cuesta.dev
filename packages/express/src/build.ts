@@ -12,7 +12,10 @@ type BuildXenonSiteOptions = {
    * until its links point elsewhere.
    */
   origin: string;
-  /** Where in `origin` the build will be deployed, if not at its root. */
+  /**
+   * Where in `origin` the build will be deployed, if not at its root (e.g.
+   * `/repo`). Only the URLs in it change: `outputDir` is what's deployed there.
+   */
   basepath?: string | undefined;
   outputDir?: string;
   entryPaths?: Iterable<string>;
@@ -71,8 +74,10 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
 
   const injectableRaw = injectableRaws.flat();
 
-  const { injectable, injectableCritical } =
-    getTagsFromInjectableRaw(injectableRaw);
+  const { injectable, injectableCritical } = getTagsFromInjectableRaw(
+    injectableRaw,
+    siteMeta.basepath,
+  );
 
   console.debug("\nGenerating static site:");
 
@@ -88,6 +93,7 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
   const generatedPages = await generateStaticSite(render, {
     entryPaths: entryPaths,
     outputDir: outputDir,
+    basepath: siteMeta.basepath,
     renderToStreamOptions: site.renderToStreamOptions,
     ignoredPathnames,
   });

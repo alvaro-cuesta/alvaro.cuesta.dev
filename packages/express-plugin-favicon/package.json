@@ -47,11 +47,13 @@
     "favicons": "^7.2.0"
   },
   "peerDependencies": {
+    "@xenon-ssg/core": "workspace:^",
     "@xenon-ssg/express": "workspace:^",
     "@xenon-ssg/thunks": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@xenon-ssg/core": "workspace:*",
     "@xenon-ssg/express": "workspace:*",
     "@xenon-ssg/thunks": "workspace:*",
     "typescript": "catalog:"

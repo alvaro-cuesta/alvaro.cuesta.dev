@@ -11,7 +11,7 @@ import {
 import type { SiteRenderMeta } from "../../site.tsx";
 import { BlogDateTime } from "../../components/atoms/BlogDateTime.tsx";
 import { Icon } from "../../components/atoms/Icon.tsx";
-import { routeBlogArticle, routeBlogTag } from "../../routes.ts";
+import { routeBlogArticle, routeBlogTag, routeHome } from "../../routes.ts";
 import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
@@ -68,7 +68,7 @@ export async function BlogArticle({
         socialDescription: description,
         openGraph: {
           type: "article",
-          authorProfileUrl: siteRenderMeta.baseUrl,
+          authorProfileUrl: `${siteRenderMeta.baseUrl}${routeHome.build({})}`,
           tags: tagSlugs,
         },
       }}

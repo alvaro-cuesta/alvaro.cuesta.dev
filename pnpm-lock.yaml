@@ -287,6 +287,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
+      '@xenon-ssg/core':
+        specifier: workspace:*
+        version: link:../core
       '@xenon-ssg/express':
         specifier: workspace:*
         version: link:../express

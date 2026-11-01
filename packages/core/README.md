@@ -60,6 +60,10 @@ But... what's **EVEN cooler**, it will also generate `/about/index.html` automat
 even if you didn't specify that route. Any links that use `Link` will be **automatically crawled**
 and statically generated for you!
 
+Deploying somewhere other than the root of a domain, like a GitHub Pages project site at
+`/my-repo/`? Pass `basepath: "/my-repo"` and keep linking to `/about`: `Link` writes it as
+`/my-repo/about`, while the files stay at the same place in the output folder.
+
 But what's the fun in generating your whole website during development? Ugh. That's like, so 90s.
 Render each page when it's requested instead: [`@xenon-ssg/express`](../express) serves a site
 that way, or bring your own server and answer each request with `renderPage` (from

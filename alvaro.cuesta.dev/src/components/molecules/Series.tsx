@@ -35,7 +35,7 @@ export function Series({ tag }: SeriesProps) {
     <SeriesInner
       tag={tag}
       pathname={renderContext.pathname}
-      canonicalizeBaseUrl={renderContext.canonicalizeBaseUrl}
+      resolveHref={renderContext.resolveHref}
     />
   );
 }
@@ -43,13 +43,13 @@ export function Series({ tag }: SeriesProps) {
 type SeriesInnerProps = {
   tag: string;
   pathname: string;
-  canonicalizeBaseUrl?: URL | undefined;
+  resolveHref?: ((href: string) => string) | undefined;
 };
 
 async function SeriesInner({
   tag,
   pathname,
-  canonicalizeBaseUrl,
+  resolveHref,
 }: SeriesInnerProps) {
   const series = SERIES_TAGS[tag];
 
@@ -78,8 +78,8 @@ async function SeriesInner({
   // Feeds can't resolve relative links, nor render `<Link>` (it needs the
   // renderer's link collection)
   const renderLink = (href: string, children: React.ReactNode) =>
-    canonicalizeBaseUrl ? (
-      <a href={new URL(href, canonicalizeBaseUrl).toString()}>{children}</a>
+    resolveHref ? (
+      <a href={resolveHref(href)}>{children}</a>
     ) : (
       <Link href={href}>{children}</Link>
     );

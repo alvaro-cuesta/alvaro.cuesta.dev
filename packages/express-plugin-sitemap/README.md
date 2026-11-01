@@ -1,6 +1,6 @@
 # Xenon SSG Express plugin: Sitemap
 
-A [Xenon SSG Express](../express/) plugin that writes a sitemap of the generated pages, and a robots.txt that points to it.
+A [Xenon SSG Express](../express/) plugin that writes a sitemap of the generated pages, and a robots.txt that points to it. The robots.txt is only written when the site is at the root of its origin, as that's the only place crawlers read one.
 
 ## License
 

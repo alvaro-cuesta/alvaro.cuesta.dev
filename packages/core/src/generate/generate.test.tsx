@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { generateStaticSite } from "./generate.tsx";
+import { Link } from "./Link.tsx";
 import { NeedsTrailingSlashError } from "../index.ts";
 
 let outputDir: string;
@@ -79,6 +80,37 @@ describe("generateStaticSite", () => {
     );
 
     expect(generatedPages).toEqual([{ pathname: "/blog/", metadata: {} }]);
+    expect(
+      await fs.readFile(path.join(outputDir, "blog", "index.html"), "utf-8"),
+    ).toBe("<p>/blog/</p>");
+  });
+
+  test("links to the base path, but crawls and writes site paths", async () => {
+    const generatedPages = await generateStaticSite(
+      (pathname) => ({
+        reactNode:
+          pathname === "/" ? (
+            <>
+              <Link href="/blog/">Blog</Link>
+              <Link href="about/">About</Link>
+              <Link href="https://example.com/">Elsewhere</Link>
+            </>
+          ) : (
+            <p>{pathname}</p>
+          ),
+        metadata: {},
+      }),
+      { outputDir, basepath: "/repo" },
+    );
+
+    expect(generatedPages.map((page) => page.pathname)).toEqual([
+      "/",
+      "/blog/",
+      "/about/",
+    ]);
+    expect(await fs.readFile(path.join(outputDir, "index.html"), "utf-8")).toBe(
+      '<a href="/repo/blog/">Blog</a><a href="about/">About</a><a href="https://example.com/">Elsewhere</a>',
+    );
     expect(
       await fs.readFile(path.join(outputDir, "blog", "index.html"), "utf-8"),
     ).toBe("<p>/blog/</p>");

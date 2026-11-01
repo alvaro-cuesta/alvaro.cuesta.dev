@@ -4,7 +4,6 @@ import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import { blog } from "../blog/promise.ts";
 import { timeline } from "../timeline/promise.ts";
 import { rewriteCustomProtocolHref } from "../utils/href.ts";
-import { canonicalizeHref } from "@xenon-ssg/core/url";
 import { read } from "@xenon-ssg/thunks";
 
 type MdxAnchorProps = ComponentPropsWithoutRef<"a">;
@@ -18,20 +17,20 @@ export type HashtagProps = {
 type MakeMdxDefaultComponentsOptions = {
   /**
    * When provided, the `a` component will rewrite custom protocol hrefs and
-   * canonicalize relative URLs against this base. Used for feed rendering where
-   * `<a>` is used instead of `<Link>`.
+   * make them absolute with this. Used for feed rendering where `<a>` is used
+   * instead of `<Link>`.
    *
    * When omitted, href rewriting is left to the `<Link>` component (the default
    * `renderAnchor`).
    */
-  canonicalizeBaseUrl?: URL;
+  resolveHref?: ((href: string) => string) | undefined;
   showDomain?: boolean;
   renderAnchor?: (props: MdxAnchorProps) => ReactElement;
   renderHashtag?: (props: HashtagProps) => ReactElement;
 };
 
 export const makeMdxDefaultComponents = ({
-  canonicalizeBaseUrl,
+  resolveHref,
   showDomain,
   renderAnchor = (props) => <Link showDomain={showDomain} {...props} />,
   renderHashtag = ({ tag, children }) => {
@@ -45,7 +44,7 @@ export const makeMdxDefaultComponents = ({
     );
   },
 }: MakeMdxDefaultComponentsOptions = {}): MDXComponents => ({
-  a: canonicalizeBaseUrl
+  a: resolveHref
     ? async function MdxAnchorCanonicalized(props) {
         const [blogItems, timelineItems] = await Promise.all([
           read(blog),
@@ -58,7 +57,7 @@ export const makeMdxDefaultComponents = ({
         });
 
         if (href) {
-          href = canonicalizeHref(href, canonicalizeBaseUrl).pathUrl.toString();
+          href = resolveHref(href);
         }
 
         return renderAnchor({ ...props, href });
@@ -66,7 +65,7 @@ export const makeMdxDefaultComponents = ({
     : function MdxAnchor(props) {
         return renderAnchor(props);
       },
-  Hashtag: canonicalizeBaseUrl
+  Hashtag: resolveHref
     ? async function MdxHashtagCanonicalized(props: HashtagProps) {
         const tagName =
           props.tag ??
@@ -83,7 +82,7 @@ export const makeMdxDefaultComponents = ({
         href = rewriteCustomProtocolHref(href, { blogItems, timelineItems });
 
         if (href) {
-          href = canonicalizeHref(href, canonicalizeBaseUrl).pathUrl.toString();
+          href = resolveHref(href);
         }
 
         return renderHashtag({ ...props, href });
