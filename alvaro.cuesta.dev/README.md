@@ -14,6 +14,13 @@
 - Better way to emit URLs to sitemap
   - Currently hardcoded via `feeds.getFeedSitemapPathnames`
   - But maybe there's a way via hooks in plugins?
+- Should we prepare or even move to RSC?
+  - This would eventually allow us to have isolated islands of interactivity within the static site, without bloating the whole page with unnecessary JavaScript for the non-interactive parts.
+  - Problems I foresee:
+    - This might not work well with automated discovery: RSC needs static discovery I think becuase IIUC it needs to know in advance what goes into the RSC common bundle and what doesn't, so this is a circular dependency.
+    - We have to change the architecture. For example, Link won't work with RSC since it relies on React Context which I think is not available in RSCs. Also I'm not sure how async components and RSC tie together.
+- Could we take more modules out of site into reusable packages? E.g. the worker thing might be interesting to keep separate from MDX, or MDX could itself be a plugin of sorts, or content-file/content-loader, or the Git stuff, or the globs, or...
+  - But they should remain independently configurable so that they don't carry site-specific assumptions or dependencies -- they should always be self-contained
 
 ### Features
 
