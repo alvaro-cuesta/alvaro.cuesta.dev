@@ -3,7 +3,7 @@ import path from "node:path";
 import { generateStaticSite } from "@xenon-ssg/core/generate/generate";
 import { createXenonCache } from "./cache.ts";
 import { type XenonExpressSiteModule, makeSiteMeta } from "./index.tsx";
-import { getTagsFromInjectableRaw } from "./plugin.tsx";
+import { getTagsFromInjectableRaw, type PluginStaticFile } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
 
 type BuildXenonSiteOptions = {
@@ -56,33 +56,39 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
   console.debug("Running plugins (pre):");
 
   const buildPreResults: unknown[] = [];
-  const ignoredPathnames: string[] = [];
-  const emitStaticPathname = (pathname: string) => {
-    ignoredPathnames.push(pathname);
-  };
 
-  const injectableRaws = await Promise.all(
+  const buildPreOutputs = await Promise.all(
     plugins.map(async (runnablePlugin, pluginIndex) => {
+      // Per plugin, as their `buildPre`s run at once: `staticFiles` keeps the
+      // plugins' order.
+      const pluginStaticFiles: PluginStaticFile<PageMetadata>[] = [];
+
       const buildPreResult = await runnablePlugin.buildPre?.({
         siteMeta,
         baseOutputFolder: outputDir,
-        emitStaticPathname,
+        emitStaticPathname: (pathname, metadata) => {
+          pluginStaticFiles.push({ pathname, metadata });
+        },
       });
 
       buildPreResults[pluginIndex] = buildPreResult;
 
-      return (
+      const injectableRaw =
         (await runnablePlugin.getInjectable?.({
           isBuild: true,
           siteMeta,
           baseOutputFolder: outputDir,
           buildPreResult,
-        })) ?? []
-      );
+        })) ?? [];
+
+      return { injectableRaw, staticFiles: pluginStaticFiles };
     }),
   );
 
-  const injectableRaw = injectableRaws.flat();
+  const injectableRaw = buildPreOutputs.flatMap(
+    (output) => output.injectableRaw,
+  );
+  const staticFiles = buildPreOutputs.flatMap((output) => output.staticFiles);
 
   const { injectable, injectableCritical } = getTagsFromInjectableRaw(
     injectableRaw,
@@ -105,7 +111,7 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
     outputDir: outputDir,
     basepath: siteMeta.basepath,
     renderToStreamOptions: site.renderToStreamOptions,
-    ignoredPathnames,
+    ignoredPathnames: staticFiles.map((staticFile) => staticFile.pathname),
   });
 
   console.debug("\nRunning plugins (post):");
@@ -116,6 +122,7 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
       siteMeta,
       baseOutputFolder: outputDir,
       generatedPages,
+      staticFiles,
     });
   }
 

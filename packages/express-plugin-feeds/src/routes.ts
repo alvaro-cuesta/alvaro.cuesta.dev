@@ -86,21 +86,3 @@ export function getPaginatedFeedFormatRoutePath(
     `${basename}-page:page${extension}`,
   ].join("/")}`;
 }
-
-/**
- * Build all discoverable feed pathnames to be included in the sitemap.
- */
-export function getFeedSitemapPathnames(
-  totalPages: number,
-  mountPointFragments: string[] = DEFAULT_MOUNT_POINT_FRAGMENTS,
-  formats: readonly FeedFormat[] = ALL_FEED_FORMATS,
-): string[] {
-  return Array.from(
-    { length: totalPages },
-    (_value, index) => index + 1,
-  ).flatMap((page) => {
-    return formats.map((format) => {
-      return getFeedFormatRoute(mountPointFragments, page, format).pathname;
-    });
-  });
-}

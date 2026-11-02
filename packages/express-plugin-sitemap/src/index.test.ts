@@ -59,6 +59,7 @@ describe("sitemapPlugin", () => {
           } satisfies SitemapPluginMetadata,
         },
       ],
+      staticFiles: [],
     });
 
     const sitemapXml = await fs.readFile(
@@ -91,6 +92,7 @@ describe("sitemapPlugin", () => {
       baseOutputFolder,
       buildPreResult: undefined,
       generatedPages: [{ pathname: "/", metadata: {} }],
+      staticFiles: [],
     });
 
     expect(
@@ -98,6 +100,58 @@ describe("sitemapPlugin", () => {
     ).toBe(
       "User-agent: *\nAllow: /\n\nSitemap: https://example.com/sitemaps/sitemap.xml\n",
     );
+  });
+
+  it("only lists static files with an entry", async () => {
+    using virtualFs = vfs.create({ emitExperimentalWarning: false });
+    const baseOutputFolder = virtualFs.mount();
+
+    const siteMeta: XenonExpressSiteMeta = {
+      origin: "https://example.com",
+      basepath: "",
+      baseUrl: "https://example.com",
+    };
+
+    const runnable = sitemapPlugin({ outputFilename: "sitemap.xml" })(
+      siteMeta,
+      NO_CONTEXT,
+    );
+
+    await runnable?.buildPost?.({
+      siteMeta,
+      baseOutputFolder,
+      buildPreResult: undefined,
+      generatedPages: [],
+      staticFiles: [
+        {
+          pathname: "/atom.xml",
+          metadata: {
+            [sitemapPluginKey]: {
+              lastModified: Temporal.Instant.from("2026-03-13T00:00:00Z"),
+              priority: 0.3,
+            },
+          },
+        },
+        {
+          pathname: "/atom-page2.xml",
+          metadata: { [sitemapPluginKey]: { exclude: true } },
+        },
+        { pathname: "/feed.rss", metadata: {} },
+        { pathname: "/style.css", metadata: undefined },
+      ],
+    });
+
+    const sitemapXml = await fs.readFile(
+      path.join(baseOutputFolder, "sitemap.xml"),
+      "utf8",
+    );
+
+    expect(sitemapXml).toContain(
+      "<url><loc>https://example.com/atom.xml</loc><lastmod>2026-03-13T00:00:00Z</lastmod><priority>0.3</priority></url>",
+    );
+    expect(sitemapXml).not.toContain("atom-page2.xml");
+    expect(sitemapXml).not.toContain("feed.rss");
+    expect(sitemapXml).not.toContain("style.css");
   });
 
   it("lists absolute URLs under a base path, and writes no robots.txt", async () => {
@@ -113,7 +167,6 @@ describe("sitemapPlugin", () => {
     const runnable = sitemapPlugin({
       outputFilename: "sitemap.xml",
       robotsTxtContent: "User-agent: *\nAllow: /\n",
-      additionalPathnames: ["/feed.rss"],
     })(siteMeta, NO_CONTEXT);
 
     await runnable?.buildPost?.({
@@ -121,6 +174,9 @@ describe("sitemapPlugin", () => {
       baseOutputFolder,
       buildPreResult: undefined,
       generatedPages: [{ pathname: "/blog/", metadata: {} }],
+      staticFiles: [
+        { pathname: "/feed.rss", metadata: { [sitemapPluginKey]: {} } },
+      ],
     });
 
     const sitemapXml = await fs.readFile(

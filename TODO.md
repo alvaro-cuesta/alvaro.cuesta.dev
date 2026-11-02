@@ -7,9 +7,6 @@
 - Better way to inject metadata for sitemap plugin
   - The page, and not the `render` function, should set its own metadata?
   - Maybe use global React.Context? Or even per-plugin Context?
-- Better way to emit URLs to sitemap
-  - Currently hardcoded via `feeds.getFeedSitemapPathnames`
-  - But maybe there's a way via hooks in plugins?
 - Should we prepare or even move to RSC?
   - This would eventually allow us to have isolated islands of interactivity within the static site, without bloating the whole page with unnecessary JavaScript for the non-interactive parts.
   - Problems I foresee:

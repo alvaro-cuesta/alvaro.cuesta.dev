@@ -28,13 +28,14 @@ import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
+  type SitemapPluginStaticFileMetadata,
 } from "@xenon-ssg/express-plugin-sitemap";
 import {
   routeBlogArticleList,
   routeHome,
   routeTimelineList,
 } from "./routes.ts";
-import { feedsPlugin } from "@xenon-ssg/express-plugin-feeds";
+import { feedsPlugin, type FeedFormat } from "@xenon-ssg/express-plugin-feeds";
 import { getBlogFeedSourceItems } from "./blog/feed-source.tsx";
 import { getTimelineFeedSourceItems } from "./timeline/feed-source.tsx";
 import { makeTitle } from "./utils/meta.ts";
@@ -181,6 +182,17 @@ const starryNightCss = singleLightningCssPlugin({
   critical: true,
 });
 
+// Only one format, as the others are the same feed.
+const feedFileMetadata = ({
+  format,
+}: {
+  format: FeedFormat;
+}): SitemapPluginMetadata | undefined =>
+  format === "atom"
+    ? // `satisfies`, so the feeds plugin still takes the site's metadata type.
+      ({ [sitemapPluginKey]: {} } satisfies SitemapPluginStaticFileMetadata)
+    : undefined;
+
 const blogFeeds = feedsPlugin({
   getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
   homePagePathname: routeBlogArticleList.build({ page: null }),
@@ -198,7 +210,7 @@ const blogFeeds = feedsPlugin({
     text: "none",
   },
   linkRelFormats: ["atom"],
-  sitemapFormats: ["atom"],
+  fileMetadata: feedFileMetadata,
 });
 
 const timelineFeeds = feedsPlugin({
@@ -219,7 +231,7 @@ const timelineFeeds = feedsPlugin({
     htmlToText: htmlToPlainText,
   },
   linkRelFormats: ["atom"],
-  sitemapFormats: ["atom"],
+  fileMetadata: feedFileMetadata,
 });
 
 const allFeeds = feedsPlugin({
@@ -254,7 +266,7 @@ const allFeeds = feedsPlugin({
     text: "none",
   },
   linkRelFormats: ["atom"],
-  sitemapFormats: ["atom"],
+  fileMetadata: feedFileMetadata,
 });
 
 const sitemap = sitemapPlugin({
@@ -263,11 +275,6 @@ const sitemap = sitemapPlugin({
     "utf-8",
   ),
   outputFilename: "sitemap.xml",
-  additionalPathnames: async () => [
-    ...(await allFeeds.getFeedSitemapPathnames()),
-    ...(await blogFeeds.getFeedSitemapPathnames()),
-    ...(await timelineFeeds.getFeedSitemapPathnames()),
-  ],
 });
 
 const faviconSvgPath = path.join(import.meta.dirname, "favicon.svg");

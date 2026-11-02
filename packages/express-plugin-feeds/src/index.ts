@@ -19,7 +19,6 @@ import {
   FEED_FORMATS,
   getFeedFormatRoute,
   getPaginatedFeedFormatRoutePath,
-  getFeedSitemapPathnames as getFeedSitemapPathnamesForTotalPages,
   toAbsoluteUrl,
 } from "./routes.ts";
 import { serializeRssDocument } from "./rss.ts";
@@ -36,6 +35,7 @@ export type {
   FeedContentInclusionMode,
   FeedContentOptions,
   FeedFormat,
+  FeedPage,
   FeedSourceItem,
 } from "./types.ts";
 
@@ -49,7 +49,6 @@ const DEFAULT_GENERATOR: FeedGeneratorConfig = {
   name: packageJson.name,
   version: packageJson.version,
 };
-const SITEMAP_COUNT_BASE_URL = "https://feeds.invalid";
 // How `getFeedFormatRoute` writes a page number: no sign or leading zeros.
 const PAGE_NUMBER_PATTERN = /^[1-9][0-9]*$/;
 
@@ -86,6 +85,10 @@ type FeedItemsResolver<TMetadata = unknown> = (
 export type FeedsPluginOptions<
   TFormat extends FeedFormat = FeedFormat,
   TMetadata = unknown,
+  PageMetadata extends Record<PropertyKey, unknown> = Record<
+    PropertyKey,
+    unknown
+  >,
 > = {
   getItems: FeedItemsResolver<TMetadata>;
   homePagePathname: FeedValueResolver<string>;
@@ -101,23 +104,25 @@ export type FeedsPluginOptions<
   formats?: readonly TFormat[];
   /** Which feed formats to inject as `<link rel="alternate">`. Must be a subset of `formats`. Defaults to `formats`. */
   linkRelFormats?: readonly TFormat[];
-  /** Which feed formats to include in the sitemap. Must be a subset of `formats`. Defaults to `formats`. */
-  sitemapFormats?: readonly TFormat[];
+  /**
+   * Metadata for each feed document the build writes, like a page's: e.g. a
+   * sitemap entry (see `emitStaticPathname`).
+   */
+  fileMetadata?: (file: {
+    format: TFormat;
+    page: FeedPage;
+  }) => PageMetadata | undefined;
 };
 
-export type FeedSitemapPathnamesOptions = {
-  mountPointFragments?: string[];
-  itemsPerPage?: number;
-  totalItems?: number;
-  getTotalItems?: () => Promise<number>;
-  formats?: readonly FeedFormat[];
+export type FeedsPlugin<
+  TFormat extends FeedFormat = FeedFormat,
+  PageMetadata extends Record<PropertyKey, unknown> = Record<
+    PropertyKey,
+    unknown
+  >,
+> = Plugin<FeedsBuildPreResult, PageMetadata> & {
+  relativeUrls: Record<TFormat, string>;
 };
-
-export type FeedsPlugin<TFormat extends FeedFormat = FeedFormat> =
-  Plugin<FeedsBuildPreResult> & {
-    getFeedSitemapPathnames: () => Promise<string[]>;
-    relativeUrls: Record<TFormat, string>;
-  };
 
 function resolveContextValue<T>(
   value: FeedValueResolver<T>,
@@ -126,25 +131,6 @@ function resolveContextValue<T>(
   return typeof value === "function"
     ? (value as (context: FeedContext) => T)(context)
     : value;
-}
-
-/** Compute sitemap pathnames for all feed pages based on feed item counts. */
-async function resolveFeedSitemapPathnames({
-  mountPointFragments = DEFAULT_MOUNT_POINT_FRAGMENTS,
-  itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
-  totalItems,
-  getTotalItems,
-  formats = ALL_FEED_FORMATS,
-}: FeedSitemapPathnamesOptions = {}): Promise<string[]> {
-  const resolvedTotalItems =
-    totalItems ?? (getTotalItems ? await getTotalItems() : 0);
-  const totalPages = Math.ceil(resolvedTotalItems / itemsPerPage);
-
-  return getFeedSitemapPathnamesForTotalPages(
-    totalPages,
-    mountPointFragments,
-    formats,
-  );
 }
 
 /** Serialize one page model into the requested feed document formats. */
@@ -232,6 +218,10 @@ async function compileFeeds<TMetadata = unknown>({
 export function feedsPlugin<
   const TFormat extends FeedFormat = FeedFormat,
   TMetadata = unknown,
+  PageMetadata extends Record<PropertyKey, unknown> = Record<
+    PropertyKey,
+    unknown
+  >,
 >({
   getItems,
   homePagePathname,
@@ -245,14 +235,15 @@ export function feedsPlugin<
   generator = DEFAULT_GENERATOR,
   formats,
   linkRelFormats,
-  sitemapFormats,
-}: FeedsPluginOptions<TFormat, TMetadata>): FeedsPlugin<TFormat> {
+  fileMetadata,
+}: FeedsPluginOptions<TFormat, TMetadata, PageMetadata>): FeedsPlugin<
+  TFormat,
+  PageMetadata
+> {
   const resolvedFormats: readonly TFormat[] =
     formats ?? (ALL_FEED_FORMATS as readonly TFormat[]);
   const resolvedLinkRelFormats: readonly TFormat[] =
     linkRelFormats ?? resolvedFormats;
-  const resolvedSitemapFormats: readonly TFormat[] =
-    sitemapFormats ?? resolvedFormats;
 
   const invalidLinkRel = resolvedLinkRelFormats.filter(
     (format) => !resolvedFormats.includes(format),
@@ -263,35 +254,13 @@ export function feedsPlugin<
     );
   }
 
-  const invalidSitemap = resolvedSitemapFormats.filter(
-    (format) => !resolvedFormats.includes(format),
-  );
-  if (invalidSitemap.length > 0) {
-    throw new Error(
-      `feedsPlugin: sitemapFormats contains formats not listed in formats: ${invalidSitemap.join(", ")}`,
-    );
-  }
-
   const relativeUrls = Object.fromEntries(
     resolvedFormats.map((format) => [
       format,
       getFeedFormatRoute(mountPointFragments, 1, format).pathname,
     ]),
   ) as Record<TFormat, string>;
-  const getConfiguredFeedSitemapPathnames = async (): Promise<string[]> => {
-    return resolveFeedSitemapPathnames({
-      mountPointFragments,
-      itemsPerPage,
-      formats: resolvedSitemapFormats,
-      totalItems: (
-        await getItems({
-          baseUrl: SITEMAP_COUNT_BASE_URL,
-        })
-      ).length,
-    });
-  };
-
-  const plugin: FeedsPlugin<TFormat> = Object.assign(
+  const plugin: FeedsPlugin<TFormat, PageMetadata> = Object.assign(
     ({ baseUrl }: { baseUrl: string }) => {
       const context = { baseUrl };
       const resolvedContent: Required<FeedContentOptions> = {
@@ -304,9 +273,10 @@ export function feedsPlugin<
       );
       const resolvedAuthors = resolveContextValue(authors, context);
 
-      const buildPre: PluginBuildPreFunction<FeedsBuildPreResult> = async ({
-        emitStaticPathname,
-      }) => {
+      const buildPre: PluginBuildPreFunction<
+        FeedsBuildPreResult,
+        PageMetadata
+      > = async ({ emitStaticPathname }) => {
         const pages = await compileFeeds({
           baseUrl,
           getItems,
@@ -327,7 +297,10 @@ export function feedsPlugin<
         // React pages.
         for (const serializedPage of pages) {
           for (const format of resolvedFormats) {
-            emitStaticPathname(serializedPage.page.routes[format].pathname);
+            emitStaticPathname(
+              serializedPage.page.routes[format].pathname,
+              fileMetadata?.({ format, page: serializedPage.page }),
+            );
           }
         }
 
@@ -418,7 +391,7 @@ export function feedsPlugin<
 
       const buildPost: PluginBuildPostFunction<
         FeedsBuildPreResult,
-        Record<string, unknown>
+        PageMetadata
       > = async ({ baseOutputFolder, buildPreResult }) => {
         for (const serializedPage of buildPreResult.pages) {
           for (const format of resolvedFormats) {
@@ -470,7 +443,6 @@ export function feedsPlugin<
       };
     },
     {
-      getFeedSitemapPathnames: getConfiguredFeedSitemapPathnames,
       relativeUrls,
     },
   );

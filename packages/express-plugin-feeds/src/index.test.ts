@@ -1,55 +1,55 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { feedsPlugin } from "./index.ts";
+import { describe, expect, it } from "vitest";
+import { feedsPlugin, type FeedSourceItem } from "./index.ts";
 
-describe("getFeedSitemapPathnames", () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
+function makeItems(count: number): FeedSourceItem[] {
+  return Array.from({ length: count }, (_value, index) => ({
+    pathname: `/blog/post-${index + 1}/`,
+    title: `Post ${index + 1}`,
+    render: () => `<p>Post ${index + 1}</p>`,
+    datePublished: Temporal.Instant.from("2026-03-13T00:00:00Z"),
+  }));
+}
 
-  it("infers configured sitemap pathnames from the configured item resolver", async () => {
-    const getItems = vi.fn().mockResolvedValue(new Array(21).fill(null));
+describe("fileMetadata", () => {
+  it("gives each feed document the build writes its metadata", async () => {
     const feeds = feedsPlugin({
-      getItems,
+      getItems: async () => makeItems(11),
       homePagePathname: "/blog/",
       title: "Blog",
       description: "Description",
       mountPointFragments: ["blog"],
       itemsPerPage: 10,
+      formats: ["atom", "rss"],
+      fileMetadata: ({ format, page }) =>
+        format === "atom" ? { page: page.currentPage } : undefined,
     });
 
-    await expect(feeds.getFeedSitemapPathnames()).resolves.toEqual([
-      "/blog/feed.rss",
-      "/blog/feed.json",
-      "/blog/atom.xml",
-      "/blog/feed-page2.rss",
-      "/blog/feed-page2.json",
-      "/blog/atom-page2.xml",
-      "/blog/feed-page3.rss",
-      "/blog/feed-page3.json",
-      "/blog/atom-page3.xml",
-    ]);
-
-    expect(getItems).toHaveBeenCalledTimes(1);
-    expect(getItems).toHaveBeenCalledWith({
-      baseUrl: "https://feeds.invalid",
-    });
-  });
-
-  it("respects the configured itemsPerPage", async () => {
-    const getItems = vi.fn().mockResolvedValue(new Array(1).fill(null));
-    const feeds = feedsPlugin({
-      getItems,
-      homePagePathname: "/blog/",
-      title: "Blog",
-      description: "Description",
-      mountPointFragments: ["blog"],
-      itemsPerPage: 10,
+    const emitted: [string, unknown][] = [];
+    await feeds(
+      {
+        origin: "https://example.com",
+        basepath: "",
+        baseUrl: "https://example.com",
+      },
+      // No host cache: nothing here is slow to make.
+      { cache: undefined },
+    )?.buildPre?.({
+      siteMeta: {
+        origin: "https://example.com",
+        basepath: "",
+        baseUrl: "https://example.com",
+      },
+      baseOutputFolder: "/unused",
+      emitStaticPathname: (pathname, metadata) => {
+        emitted.push([pathname, metadata]);
+      },
     });
 
-    await expect(feeds.getFeedSitemapPathnames()).resolves.toEqual([
-      "/blog/feed.rss",
-      "/blog/feed.json",
-      "/blog/atom.xml",
+    expect(emitted).toEqual([
+      ["/blog/atom.xml", { page: 1 }],
+      ["/blog/feed.rss", undefined],
+      ["/blog/atom-page2.xml", { page: 2 }],
+      ["/blog/feed-page2.rss", undefined],
     ]);
   });
 });

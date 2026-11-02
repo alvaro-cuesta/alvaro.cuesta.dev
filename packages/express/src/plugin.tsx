@@ -15,20 +15,32 @@ import { assertNever } from "@xenon-ssg/core/assert";
  */
 export type PluginAttachToExpressFunction = (router: Router) => void;
 
-export type PluginBuildPreOptions = {
+export type PluginBuildPreOptions<
+  PageMetadata extends UnknownRecord = UnknownRecord,
+> = {
   siteMeta: XenonExpressSiteMeta;
   baseOutputFolder: string;
   /**
    * Declare a pathname as emitted by this plugin as a static file (e.g.
    * feed documents, sitemaps, css bundles). The link crawler will skip
    * these when rendering pages — they're not React-rendered routes.
+   *
+   * `metadata` is like a page's, for other plugins to read in `buildPost`'s
+   * `staticFiles` (e.g. the sitemap's entry for the file).
    */
-  emitStaticPathname: (pathname: string) => void;
+  emitStaticPathname: (pathname: string, metadata?: PageMetadata) => void;
 };
 
-export type PluginBuildPreFunction<BuildPreResult = unknown> = (
-  options: PluginBuildPreOptions,
-) => Promise<BuildPreResult>;
+export type PluginBuildPreFunction<
+  BuildPreResult = unknown,
+  PageMetadata extends UnknownRecord = UnknownRecord,
+> = (options: PluginBuildPreOptions<PageMetadata>) => Promise<BuildPreResult>;
+
+/** A static file a plugin declared with `emitStaticPathname`. */
+export type PluginStaticFile<PageMetadata extends UnknownRecord> = {
+  pathname: string;
+  metadata: PageMetadata | undefined;
+};
 
 export type PluginBuildPostOptions<
   BuildPreResult,
@@ -38,6 +50,8 @@ export type PluginBuildPostOptions<
   baseOutputFolder: string;
   buildPreResult: BuildPreResult;
   generatedPages: XenonGeneratedPage<PageMetadata>[];
+  /** Every plugin's, in the plugins' order. */
+  staticFiles: PluginStaticFile<PageMetadata>[];
 };
 
 export type PluginBuildPostFunction<
@@ -149,7 +163,7 @@ export type RunnablePlugin<
    * This is where plugins should declare the pathnames they emit as static
    * files via the `emitStaticPathname` callback on the options.
    */
-  buildPre?: PluginBuildPreFunction<BuildPreResult> | undefined;
+  buildPre?: PluginBuildPreFunction<BuildPreResult, PageMetadata> | undefined;
 
   /**
    * Injectable tags that can be used by the plugin.

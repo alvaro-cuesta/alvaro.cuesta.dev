@@ -25,49 +25,55 @@ type SitemapPluginOptions = {
    */
   mountPointFragments?: string[];
   disableInjectMetaTag?: boolean;
-  additionalPathnames?: string[] | (() => string[] | Promise<string[]>);
 };
 
+/**
+ * A page's or a static file's sitemap entry.
+ *
+ * Pages are listed unless they're excluded. Static files are only listed with
+ * an entry, as most aren't for search results (e.g. images or stylesheets).
+ */
 export type SitemapPluginMetadata = {
+  [sitemapPluginKey]?: SitemapEntry | undefined;
+};
+
+type SitemapEntry = {
+  exclude?: boolean;
+  lastModified?: Temporal.Instant | undefined;
+  changeFrequency?:
+    | "always"
+    | "hourly"
+    | "daily"
+    | "weekly"
+    | "monthly"
+    | "yearly"
+    | "never";
+  priority?: number | undefined;
+};
+
+/**
+ * A static file's sitemap entry.
+ *
+ * It can't be excluded, as having no entry already leaves the file out.
+ */
+export type SitemapPluginStaticFileMetadata = {
   [sitemapPluginKey]?:
-    | {
-        exclude?: boolean;
-        lastModified?: Temporal.Instant | undefined;
-        changeFrequency?:
-          | "always"
-          | "hourly"
-          | "daily"
-          | "weekly"
-          | "monthly"
-          | "yearly"
-          | "never";
-        priority?: number | undefined;
-      }
+    | (Omit<SitemapEntry, "exclude"> & {
+        // `Extract`, not just `Omit`: a value typed as a page's entry can't
+        // sneak an `exclude: true` in.
+        exclude?: Extract<SitemapEntry["exclude"], false>;
+      })
     | undefined;
 };
 
 export const sitemapPluginKey: unique symbol = Symbol("SitemapPlugin");
 
-const ABSOLUTE_URL_PATTERN = /^[a-z][a-z\d+.-]*:\/\//i;
-
-const toSitemapLoc = (baseUrl: string, pathOrUrl: string): string => {
-  const trimmed = pathOrUrl.trim();
-
-  if (!trimmed) {
-    throw new Error("[Sitemap] Path must not be empty.");
+const toSitemapLoc = (baseUrl: string, pathname: string): string => {
+  if (!pathname.startsWith("/")) {
+    throw new Error(`[Sitemap] Pathname must start with "/": ${pathname}`);
   }
 
-  if (ABSOLUTE_URL_PATTERN.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (!trimmed.startsWith("/")) {
-    throw new Error(
-      `[Sitemap] Path must start with \"/\" or be an absolute URL: ${pathOrUrl}`,
-    );
-  }
-
-  return `${baseUrl}${trimmed}`;
+  return `${baseUrl}${pathname}`;
 };
 
 export const sitemapPlugin =
@@ -76,7 +82,6 @@ export const sitemapPlugin =
     outputFilename,
     mountPointFragments = [],
     disableInjectMetaTag,
-    additionalPathnames = [],
   }: SitemapPluginOptions): Plugin<void, SitemapPluginMetadata> =>
   (siteMeta) => {
     const pathname = `/${[...mountPointFragments, outputFilename].join("/")}`;
@@ -118,16 +123,10 @@ export const sitemapPlugin =
       }
     };
 
-    const resolveAdditionalPathnames = async (): Promise<string[]> => {
-      return typeof additionalPathnames === "function"
-        ? await additionalPathnames()
-        : additionalPathnames;
-    };
-
     const buildPost: PluginBuildPostFunction<
       void,
       SitemapPluginMetadata
-    > = async ({ siteMeta, baseOutputFolder, generatedPages }) => {
+    > = async ({ siteMeta, baseOutputFolder, generatedPages, staticFiles }) => {
       const outputFolder = path.join(baseOutputFolder, ...mountPointFragments);
       await fs.mkdir(outputFolder, { recursive: true });
 
@@ -140,47 +139,36 @@ export const sitemapPlugin =
         xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9",
       });
 
-      for (const generatedPage of generatedPages) {
-        if (generatedPage.metadata[sitemapPluginKey]?.exclude) {
-          continue;
-        }
-
+      const addUrl = (pathname: string, entry: SitemapEntry | undefined) => {
         const url = urlset.ele("url");
 
-        url
-          .ele("loc")
-          .txt(toSitemapLoc(siteMeta.baseUrl, generatedPage.pathname));
+        url.ele("loc").txt(toSitemapLoc(siteMeta.baseUrl, pathname));
 
-        if (
-          generatedPage.metadata[sitemapPluginKey]?.lastModified !== undefined
-        ) {
-          url
-            .ele("lastmod")
-            .txt(
-              generatedPage.metadata[sitemapPluginKey].lastModified.toString(),
-            );
+        if (entry?.lastModified !== undefined) {
+          url.ele("lastmod").txt(entry.lastModified.toString());
         }
 
-        if (
-          generatedPage.metadata[sitemapPluginKey]?.changeFrequency !==
-          undefined
-        ) {
-          url
-            .ele("changefreq")
-            .txt(generatedPage.metadata[sitemapPluginKey].changeFrequency);
+        if (entry?.changeFrequency !== undefined) {
+          url.ele("changefreq").txt(entry.changeFrequency);
         }
 
-        if (generatedPage.metadata[sitemapPluginKey]?.priority !== undefined) {
-          url
-            .ele("priority")
-            .txt(generatedPage.metadata[sitemapPluginKey].priority.toString());
+        if (entry?.priority !== undefined) {
+          url.ele("priority").txt(entry.priority.toString());
         }
+      };
+
+      for (const generatedPage of generatedPages) {
+        const entry = generatedPage.metadata[sitemapPluginKey];
+        if (entry?.exclude) continue;
+
+        addUrl(generatedPage.pathname, entry);
       }
 
-      for (const additionalPathname of await resolveAdditionalPathnames()) {
-        const url = urlset.ele("url");
+      for (const staticFile of staticFiles) {
+        const entry = staticFile.metadata?.[sitemapPluginKey];
+        if (entry === undefined || entry.exclude) continue;
 
-        url.ele("loc").txt(toSitemapLoc(siteMeta.baseUrl, additionalPathname));
+        addUrl(staticFile.pathname, entry);
       }
 
       const xml = root.end();
