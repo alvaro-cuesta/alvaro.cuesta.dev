@@ -1,11 +1,14 @@
 import favicons, {
   type FaviconFile,
+  type FaviconHtmlTag,
   type FaviconImage,
   type FaviconOptions,
   type FaviconResponse,
 } from "favicons";
 import type { XenonExpressSiteMeta } from "@xenon-ssg/express";
 import type {
+  PluginInjectableLink,
+  PluginInjectableMeta,
   PluginInjectableTag,
   Plugin,
   PluginAttachToExpressFunction,
@@ -24,50 +27,115 @@ import {
 } from "@xenon-ssg/express/cache-busting";
 import type { XenonCache } from "@xenon-ssg/express/cache";
 import { toServedHref } from "@xenon-ssg/core/url";
-
-const LINK_REGEX =
-  /<link\s+rel="(?<rel>.+?)"\s+(?:type="(?<type>.+?)"\s+)?(?:sizes="(?<sizes>.+?)"\s+)?(?:media="(?<media>.+?)"\s+)?href="(?<href>.+?)">/;
-
-// `favicons` leaves `content` out when there's nothing to put in it, e.g.
-// `application-name` without an `appName`.
-const META_REGEX =
-  /<meta\s+name="(?<name>.+?)"(?:\s+content="(?<content>.*?)")?>/;
+import { assertNever } from "@xenon-ssg/core/assert";
 
 /**
- * The tag `favicons` gives as HTML, or `undefined` for a meta tag without
- * content, which would say nothing.
+ * The attributes of a tag `favicons` gives, of those named.
+ *
+ * Throws on any other attribute, or a bare one (`true`): the injected tag
+ * couldn't carry it, and leaving it out would change what the tag does.
  */
-const parseHtmlTag = (tag: string): PluginInjectableTag | undefined => {
-  const linkResult = LINK_REGEX.exec(tag);
-  if (linkResult !== null) {
-    return {
-      tagType: "link" as const,
-      rel: linkResult.groups!["rel"]!, // `!` is fine because it's marked as non-optional group in the regex
-      type: linkResult.groups!["type"],
-      sizes: linkResult.groups!["sizes"],
-      media: linkResult.groups!["media"],
-      href: linkResult.groups!["href"]!, // `!` is fine because it's marked as non-optional group in the regex
-    };
+const getAttributes = <const Name extends string>(
+  htmlTag: FaviconHtmlTag,
+  names: readonly Name[],
+): Partial<Record<Name, string>> => {
+  const isNamed = (name: string): name is Name =>
+    (names as readonly string[]).includes(name);
+
+  const attributes: Partial<Record<Name, string>> = {};
+  for (const [name, value] of Object.entries(htmlTag.attrs)) {
+    // `false` is how `favicons` leaves one out (its own HTML skips it), e.g. the
+    // manifest link's `crossOrigin` without credentials. Not the string "false".
+    if (value === false || value === undefined) continue;
+
+    if (!isNamed(name) || value === true) {
+      throw new Error(
+        `Unsupported attribute \`${name}\` in ${JSON.stringify(htmlTag)}`,
+      );
+    }
+
+    attributes[name] = value;
   }
-
-  const metaResult = META_REGEX.exec(tag);
-  if (metaResult !== null) {
-    const content = metaResult.groups!["content"];
-    if (content === undefined || content === "") return undefined;
-
-    return {
-      tagType: "meta" as const,
-      name: metaResult.groups!["name"]!, // `!` is fine because it's marked as non-optional group in the regex
-      content,
-    };
-  }
-
-  throw new Error(`Unknown tag: ${tag}`);
+  return attributes;
 };
 
-/** The tags `favicons` gives as HTML (see `parseHtmlTag`). */
-const parseHtmlTags = (tags: string[]): PluginInjectableTag[] =>
-  tags.map(parseHtmlTag).filter((tag) => tag !== undefined);
+/** The tags `favicons` gives, as injectable tags. */
+type FaviconInjectableTag = PluginInjectableLink | PluginInjectableMeta;
+
+/**
+ * The tag `favicons` gives, or `undefined` for a meta tag without content,
+ * which would say nothing.
+ */
+const toInjectableTag = (
+  htmlTag: FaviconHtmlTag,
+): FaviconInjectableTag | undefined => {
+  switch (htmlTag.tag) {
+    case "link": {
+      // What `PluginInjectableLink` carries.
+      const { rel, type, title, sizes, media, crossOrigin, href } =
+        getAttributes(htmlTag, [
+          "rel",
+          "type",
+          "title",
+          "sizes",
+          "media",
+          "crossOrigin",
+          "href",
+        ]);
+
+      if (rel === undefined || href === undefined) {
+        throw new Error(
+          `Link without \`rel\` or \`href\`: ${JSON.stringify(htmlTag)}`,
+        );
+      }
+
+      // The values `PluginInjectableLink` takes.
+      if (
+        crossOrigin !== undefined &&
+        crossOrigin !== "anonymous" &&
+        crossOrigin !== "use-credentials"
+      ) {
+        throw new Error(
+          `Unsupported \`crossOrigin\` in ${JSON.stringify(htmlTag)}`,
+        );
+      }
+
+      return {
+        tagType: "link",
+        rel,
+        type,
+        title,
+        sizes,
+        media,
+        crossOrigin,
+        href,
+      };
+    }
+
+    case "meta": {
+      const { name, content } = getAttributes(htmlTag, ["name", "content"]);
+
+      if (name === undefined) {
+        throw new Error(
+          `Meta tag without \`name\`: ${JSON.stringify(htmlTag)}`,
+        );
+      }
+
+      // `favicons` leaves `content` out when there's nothing to put in it, e.g.
+      // `application-name` without an `appName`.
+      if (content === undefined || content === "") return undefined;
+
+      return {
+        tagType: "meta",
+        name,
+        content,
+      };
+    }
+
+    default:
+      throw new Error(`Unsupported tag in ${JSON.stringify(htmlTag)}`);
+  }
+};
 
 /**
  * Serves the site paths `favicons` writes in some meta tags' content (e.g.
@@ -151,12 +219,15 @@ type FaviconPluginBuildPreResult = {
 
 // The parts of favicons' response the plugin uses. Only those are cached, so a
 // cached response has fewer than favicons gives.
-type UsedFaviconResponse = Pick<FaviconResponse, "images" | "files" | "html">;
+type UsedFaviconResponse = Pick<
+  FaviconResponse,
+  "images" | "files" | "htmlTags"
+>;
 
 type CachedFaviconResponse = {
   images: { name: string; contents: string /* base64 */ }[];
   files: { name: string; contents: string }[];
-  html: string[];
+  htmlTags: FaviconHtmlTag[];
 };
 
 const serializeFaviconResponse = (response: UsedFaviconResponse): string => {
@@ -169,7 +240,7 @@ const serializeFaviconResponse = (response: UsedFaviconResponse): string => {
       name: file.name,
       contents: file.contents,
     })),
-    html: [...response.html],
+    htmlTags: [...response.htmlTags],
   };
   return JSON.stringify(serializable);
 };
@@ -184,7 +255,7 @@ const deserializeFaviconResponse = (raw: Buffer): UsedFaviconResponse => {
     name: file.name,
     contents: file.contents,
   }));
-  return { images, files, html: cached.html };
+  return { images, files, htmlTags: cached.htmlTags };
 };
 
 // Part of the cache key: another version of `favicons` can make other favicons
@@ -196,11 +267,17 @@ const FAVICONS_VERSION = (
   ) as { version: string }
 ).version;
 
+// Part of the cache key too: bump it when `CachedFaviconResponse` changes, so
+// entries in its older shape aren't read as the new one.
+const CACHED_RESPONSE_VERSION = 2;
+
 const getFaviconCacheKey = (
   svgContents: Buffer,
   faviconOptions: FaviconOptions,
 ): string => {
   const payload = Buffer.concat([
+    Buffer.from(String(CACHED_RESPONSE_VERSION)),
+    Buffer.from("\0"),
     Buffer.from(FAVICONS_VERSION),
     Buffer.from("\0"),
     svgContents,
@@ -214,10 +291,9 @@ type FaviconDerivedState = {
   response: UsedFaviconResponse;
   /** Merged images + files lookup, precomputed once per version of the SVG. */
   filesByName: Record<string, Buffer | string>;
-  /** Parsed `<link>` / `<meta>` tags for dev-mode injection. Build mode has
-   * to rewrite hrefs against the cacheBustingMap per invocation and so
-   * reparses from `response.html` itself. */
-  parsedHtmlDev: PluginInjectableTag[];
+  /** The tags to inject, with the files' names before the build's cache
+   * busting. */
+  tags: FaviconInjectableTag[];
 };
 
 /**
@@ -291,8 +367,10 @@ export const faviconPlugin = ({
         response.files.map((file) => [file.name, file.contents]),
       ),
     };
-    const parsedHtmlDev = parseHtmlTags(response.html);
-    return { response, filesByName, parsedHtmlDev };
+    const tags = response.htmlTags
+      .map(toInjectableTag)
+      .filter((tag) => tag !== undefined);
+    return { response, filesByName, tags };
   }, ownedByState);
 
   const attachToExpress: PluginAttachToExpressFunction = (router) => {
@@ -393,32 +471,35 @@ export const faviconPlugin = ({
   const getInjectable: PluginGetInjectableFunction<
     FaviconPluginBuildPreResult
   > = async (options) => {
-    const { response, parsedHtmlDev } = await read(state);
+    const { tags } = await read(state);
     const { basepath } = options.siteMeta;
-    // Dev: reuse the memoized parsed tag array, until the SVG changes. Only
-    // its meta contents are served, which is cheap.
+    // Dev: the tags as made, until the SVG changes. Only its meta contents are
+    // served, which is cheap.
     if (!options.isBuild) {
-      return serveMetaContents(parsedHtmlDev, basepath);
+      return serveMetaContents(tags, basepath);
     }
-    // Build: inject the per-build `cacheBustingMap` into every href before
-    // parsing. Runs exactly once per build, so memoization isn't worth the
+    // Build: the files' cache-busted names, in the only attributes that hold
+    // URLs. Runs exactly once per build, so memoization isn't worth the
     // indirection.
     const cacheBustingMap = options.buildPreResult.cacheBustingMap;
+    const cacheBust = (url: string) => {
+      let cacheBustedUrl = url;
+      for (const [name, cacheBustedName] of Object.entries(cacheBustingMap)) {
+        cacheBustedUrl = cacheBustedUrl.replaceAll(name, cacheBustedName);
+      }
+      return cacheBustedUrl;
+    };
     return serveMetaContents(
-      parseHtmlTags(
-        response.html.map((htmlTag) => {
-          let cacheBustedHtmlTag = htmlTag;
-          for (const [name, cacheBustedName] of Object.entries(
-            cacheBustingMap,
-          )) {
-            cacheBustedHtmlTag = cacheBustedHtmlTag.replaceAll(
-              name,
-              cacheBustedName,
-            );
-          }
-          return cacheBustedHtmlTag;
-        }),
-      ),
+      tags.map((tag) => {
+        switch (tag.tagType) {
+          case "link":
+            return { ...tag, href: cacheBust(tag.href) };
+          case "meta":
+            return { ...tag, content: cacheBust(tag.content) };
+          default:
+            return assertNever(tag);
+        }
+      }),
       basepath,
     );
   };
