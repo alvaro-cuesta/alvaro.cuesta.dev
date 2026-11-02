@@ -65,4 +65,7 @@ audit:
     - GHSA-g3hv-75wg-m249
 
 patchedDependencies:
+  # Its entry point imports every grammar (about 0.5 s, against 50 ms for the
+  # common ones the site uses), and nothing else exports `createStarryNight`.
+  # Still so in 3.11.0.
   "@wooorm/starry-night": patches/@wooorm__starry-night.patch
