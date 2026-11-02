@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express-plugin-single-lightningcss#readme",
   "dependencies": {
-    "lightningcss": "^1.25.1"
+    "lightningcss": "^1.33.0"
   },
   "peerDependencies": {
     "@xenon-ssg/express": "workspace:^"

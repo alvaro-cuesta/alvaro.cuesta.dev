@@ -38,10 +38,10 @@ peerDependencyRules:
 catalog:
   "@types/express": ^5.0.6
   "@types/node": ^26.6.4
-  "@types/react": ^19.2.5
+  "@types/react": ^19.3.0
   "@types/react-dom": ^19.2.3
   express: ^5.3.0
-  react: ^19.2.5
+  react: ^19.3.1
   react-dom: ^19.2.5
   type-fest: ^5.5.0
   typescript: ^7.0.2

@@ -6,7 +6,7 @@
     "lint:tsc": "tsc -b"
   },
   "devDependencies": {
-    "prettier": "^3.3.3",
+    "prettier": "^3.9.10",
     "typescript": "catalog:",
     "typescript6": "npm:typescript@^6.0.2"
   }
