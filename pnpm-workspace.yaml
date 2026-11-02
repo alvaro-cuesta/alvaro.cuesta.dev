@@ -57,5 +57,12 @@ overrides:
   # touch what they use. Not 0.19, which changes what `strict` reports.
   katex: ^0.18.2
 
+audit:
+  ignore:
+    # minimatch's denial of service on crafted patterns: only serve-handler (from
+    # serve) uses it, at 3.1.5, which predates the vulnerable code. Its patterns
+    # come from serve's config, not requests, and the fix (11) breaks its API.
+    - GHSA-g3hv-75wg-m249
+
 patchedDependencies:
   "@wooorm/starry-night": patches/@wooorm__starry-night.patch
