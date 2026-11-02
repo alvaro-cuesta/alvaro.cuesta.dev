@@ -20,6 +20,24 @@ You are probably interested in one of these packages:
 
 - [alvaro.cuesta.dev](./alvaro.cuesta.dev/) — The actual source code for my website at https://alvaro.cuesta.dev
 
+## Initialization
+
+Install any pnpm from v10 on (e.g. `npm install --global pnpm`, or any other way from
+[its installation guide](https://pnpm.io/installation)). It then switches itself to the version pinned in
+[`package.json`](./package.json)'s `packageManager`, so the version installed doesn't matter:
+
+```sh
+pnpm i
+```
+
+## Usage
+
+```sh
+pnpm -F <package-name> <command>
+```
+
+For example, `pnpm -F alvaro.cuesta.dev dev` starts the website's dev server.
+
 ## License
 
 The code in this repository is © 2024-2026 Álvaro Cuesta, licensed under the
