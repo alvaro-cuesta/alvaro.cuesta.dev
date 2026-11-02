@@ -1,0 +1,30 @@
+version: 2
+
+updates:
+  # The whole pnpm workspace, catalog included: Dependabot reads it from the root.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # A version a week old, so a compromised release is likelier to be caught (and pulled) before it gets here.
+    # Security updates don't wait.
+    cooldown:
+      default-days: 7
+    groups:
+      # One PR for everything that shouldn't break. Majors get one each, to read their changes.
+      npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # As for npm: a compromised action would run with the workflow's token, which can deploy the site.
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
