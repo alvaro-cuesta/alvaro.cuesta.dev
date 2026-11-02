@@ -4,10 +4,12 @@ import favicons, {
   type FaviconOptions,
   type FaviconResponse,
 } from "favicons";
+import type { XenonExpressSiteMeta } from "@xenon-ssg/express";
 import type {
   PluginInjectableTag,
   Plugin,
   PluginAttachToExpressFunction,
+  PluginContext,
   PluginGetInjectableFunction,
   PluginBuildPreFunction,
 } from "@xenon-ssg/express/plugin";
@@ -108,14 +110,6 @@ type FaviconPluginOptions = {
    * - `undefined` to calculate from input file hash
    */
   cacheBustingFragment?: string | false | undefined;
-  /**
-   * Optional shared cache from `createXenonCache(...)`. When provided, the
-   * expensive `favicons()` call is memoized to disk under
-   * `<siteRoot>/node_modules/.cache/@xenon-ssg/express/favicon/`, keyed by a
-   * hash of the input SVG contents plus the `faviconOptions`. Pass `null` (or
-   * omit) to disable caching.
-   */
-  cache?: XenonCache | null;
 };
 
 // `favicons`' own default, which is a site path too.
@@ -213,17 +207,24 @@ type FaviconDerivedState = {
 /**
  * Generates favicons, and the tags that link to them, from one SVG.
  *
+ * Making them is slow, so it keeps them in the host's cache, if it has one
+ * (see `PluginContext`), keyed by the SVG's contents and the options: later
+ * runs, and restarts, reuse them.
+ *
  * Disposing it lets go of the favicons it keeps in memory (see
- * `@xenon-ssg/thunks`), but not of a thunk it's given as `inputFile`. `cache`
- * keeps them for later runs.
+ * `@xenon-ssg/thunks`), but not of a thunk it's given as `inputFile`, nor of
+ * what's in the cache.
  */
 export const faviconPlugin = ({
   inputFile,
   faviconOptions,
   mountPointFragments = [],
   cacheBustingFragment,
-  cache,
 }: FaviconPluginOptions): Plugin<FaviconPluginBuildPreResult> & Disposable => {
+  // From its runs, as only the host knows where it is. Every run in a process
+  // gets the same one, and the favicons are only made once something runs, so
+  // it's there by then.
+  let cache: XenonCache | undefined;
   // The path's thunk, if it's made here from a `string`: a thunk the plugin is
   // given is whoever made it's to dispose.
   const ownedByState = new DisposableStack();
@@ -407,11 +408,14 @@ export const faviconPlugin = ({
   };
 
   return Object.assign(
-    () => ({
-      attachToExpress,
-      buildPre,
-      getInjectable,
-    }),
+    (_siteMeta: XenonExpressSiteMeta, context: PluginContext) => {
+      cache = context.cache;
+      return {
+        attachToExpress,
+        buildPre,
+        getInjectable,
+      };
+    },
     { [Symbol.dispose]: () => state[Symbol.dispose]() },
   );
 };

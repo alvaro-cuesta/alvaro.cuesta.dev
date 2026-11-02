@@ -1,4 +1,5 @@
 import type { Router } from "express";
+import type { XenonCache } from "./cache.ts";
 import type { XenonExpressSiteMeta } from "./index.tsx";
 import type { ReactNode } from "react";
 import type { XenonGeneratedPage } from "@xenon-ssg/core/generate/generate";
@@ -161,6 +162,19 @@ export type RunnablePlugin<
 };
 
 /**
+ * What the host gives each run of a plugin, along with where the site is: what only the host knows, as it's the
+ * same for every plugin, and the site shouldn't have to hand it to each.
+ */
+export type PluginContext = {
+  /**
+   * Where to keep what's slow to make, across runs and restarts (e.g. favicons), if the host keeps a cache: the
+   * same one for every run in a process. Namespace it (`cache.namespace("favicon")`), so plugins' keys don't
+   * collide.
+   */
+  cache: XenonCache | undefined;
+};
+
+/**
  * Can return `undefined` if the plugin doesn't need to do anything. Useful if you want to disable the plugin with some
  * specific options for example.
  *
@@ -173,6 +187,7 @@ export type Plugin<
   PageMetadata extends UnknownRecord = UnknownRecord,
 > = (
   siteMeta: XenonExpressSiteMeta,
+  context: PluginContext,
 ) => RunnablePlugin<BuildPreResult, PageMetadata> | undefined;
 
 function renderInjectableRaw(

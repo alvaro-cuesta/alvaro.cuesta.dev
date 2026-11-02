@@ -1,4 +1,5 @@
 import express, { type Router } from "express";
+import type { XenonCache } from "./cache.ts";
 import type { XenonExpressSite, XenonExpressSiteMeta } from "./index.tsx";
 import { makeXenonMiddleware } from "./middleware.ts";
 import { getTagsFromInjectableRaw } from "./plugin.tsx";
@@ -7,6 +8,11 @@ import type { UnknownRecord } from "type-fest";
 type XenonDevRouterOptions = {
   /** Aborts the pages it renders (see `makeXenonDevRouter`). */
   signal?: AbortSignal | undefined;
+  /**
+   * The cache the site's plugins keep what's slow to make in (see
+   * `PluginContext`), e.g. from `createXenonCache`. None if not given.
+   */
+  cache?: XenonCache | undefined;
 };
 
 /**
@@ -45,12 +51,12 @@ type XenonDevRouterOptions = {
 export function makeXenonDevRouter<PageMetadata extends UnknownRecord>(
   site: XenonExpressSite<PageMetadata>,
   siteMeta: XenonExpressSiteMeta,
-  { signal }: XenonDevRouterOptions = {},
+  { signal, cache }: XenonDevRouterOptions = {},
 ): Router {
   const router = express.Router();
 
   const plugins = site.plugins
-    .map((plugin) => plugin(siteMeta))
+    .map((plugin) => plugin(siteMeta, { cache }))
     .filter((x) => x !== undefined);
 
   // We attach in reverse because middlewares are applied back-to-front and we want this to have the same priority as

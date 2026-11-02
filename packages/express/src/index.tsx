@@ -29,6 +29,13 @@ export type XenonExpressSite<
   render: XenonExpressRenderFunction<PageMetadata>;
   renderToStreamOptions: RenderToStreamOptions;
   plugins: Plugins;
+  /**
+   * The site module's `import.meta.url`, to keep the plugins' cache (see
+   * `PluginContext`) in the site's `node_modules/.cache` (see
+   * `createXenonCache`): the dev server and the build both find it from here,
+   * so they share it. Without it, plugins cache nothing.
+   */
+  callerUrl?: string | undefined;
 };
 
 /**

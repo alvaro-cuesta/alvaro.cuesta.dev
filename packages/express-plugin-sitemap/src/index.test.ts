@@ -3,11 +3,15 @@ import path from "node:path";
 import vfs from "node:vfs";
 import { describe, expect, it } from "vitest";
 import type { XenonExpressSiteMeta } from "@xenon-ssg/express";
+import type { PluginContext } from "@xenon-ssg/express/plugin";
 import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
 } from "./index.ts";
+
+// No host cache: nothing here is slow to make.
+const NO_CONTEXT: PluginContext = { cache: undefined };
 
 // Missing from `@types/node` (as of 26.6.6).
 declare module "node:vfs" {
@@ -30,7 +34,10 @@ describe("sitemapPlugin", () => {
       baseUrl: "https://example.com",
     };
 
-    const runnable = sitemapPlugin({ outputFilename: "sitemap.xml" })(siteMeta);
+    const runnable = sitemapPlugin({ outputFilename: "sitemap.xml" })(
+      siteMeta,
+      NO_CONTEXT,
+    );
 
     if (!runnable?.buildPost) {
       throw new Error("Sitemap plugin did not expose buildPost.");
@@ -77,7 +84,7 @@ describe("sitemapPlugin", () => {
       outputFilename: "sitemap.xml",
       mountPointFragments: ["sitemaps"],
       robotsTxtContent: "User-agent: *\nAllow: /\n",
-    })(siteMeta);
+    })(siteMeta, NO_CONTEXT);
 
     await runnable?.buildPost?.({
       siteMeta,
@@ -107,7 +114,7 @@ describe("sitemapPlugin", () => {
       outputFilename: "sitemap.xml",
       robotsTxtContent: "User-agent: *\nAllow: /\n",
       additionalPathnames: ["/feed.rss"],
-    })(siteMeta);
+    })(siteMeta, NO_CONTEXT);
 
     await runnable?.buildPost?.({
       siteMeta,

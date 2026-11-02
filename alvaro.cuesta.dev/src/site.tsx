@@ -18,7 +18,6 @@ import { singleLightningCssPlugin } from "@xenon-ssg/express-plugin-single-light
 import path from "node:path";
 import url from "node:url";
 import { faviconPlugin } from "@xenon-ssg/express-plugin-favicon";
-import { createXenonCache } from "@xenon-ssg/express/cache";
 import { cell } from "@xenon-ssg/thunks";
 import { moduleStack, watchInDev } from "@xenon-ssg/hot-reload";
 import pkg from "../package.json" with { type: "json" };
@@ -163,8 +162,6 @@ export const staticFolder = staticFolderPlugin({
   inputFolder: STATIC_FOLDER,
 });
 
-const cache = await createXenonCache({ callerUrl: import.meta.url });
-
 const INDEX_CSS_PATH = path.join(import.meta.dirname, "index.css");
 const indexCss = singleLightningCssPlugin({
   inputFilepath: INDEX_CSS_PATH,
@@ -285,7 +282,6 @@ const favicon = moduleOwned.use(
         (invalidate) => watchInDev(faviconSvgPath, invalidate),
       ),
     ),
-    cache,
     faviconOptions: {
       appName: SITE_TITLE,
       appShortName: SITE_TITLE,
@@ -312,6 +308,8 @@ export function makeSite(): XenonExpressSite<SitemapPluginMetadata> {
   return {
     render,
     renderToStreamOptions: RENDER_TO_STREAM_OPTIONS,
+    // For the plugins' cache, in this site's `node_modules`.
+    callerUrl: import.meta.url,
     plugins: [
       favicon,
       staticFolder,

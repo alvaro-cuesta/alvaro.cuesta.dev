@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { generateStaticSite } from "@xenon-ssg/core/generate/generate";
+import { createXenonCache } from "./cache.ts";
 import { type XenonExpressSiteModule, makeSiteMeta } from "./index.tsx";
 import { getTagsFromInjectableRaw } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
@@ -44,8 +45,12 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
   });
 
   const siteMeta = makeSiteMeta(origin, basepath);
+  const cache =
+    site.callerUrl === undefined
+      ? undefined
+      : await createXenonCache({ callerUrl: site.callerUrl });
   const plugins = site.plugins
-    .map((plugin) => plugin(siteMeta))
+    .map((plugin) => plugin(siteMeta, { cache }))
     .filter((x) => x !== undefined);
 
   console.debug("Running plugins (pre):");

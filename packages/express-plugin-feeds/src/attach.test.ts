@@ -47,11 +47,15 @@ async function serveFeeds(itemCount: number): Promise<string> {
   });
 
   const app = express();
-  feeds({
-    origin: "https://example.com",
-    basepath: "",
-    baseUrl: "https://example.com",
-  })?.attachToExpress?.(app);
+  feeds(
+    {
+      origin: "https://example.com",
+      basepath: "",
+      baseUrl: "https://example.com",
+    },
+    // No host cache: nothing here is slow to make.
+    { cache: undefined },
+  )?.attachToExpress?.(app);
   app.use((_req, res) => {
     res.status(404).end(FALLBACK_BODY);
   });

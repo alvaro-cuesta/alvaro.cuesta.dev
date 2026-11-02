@@ -9,6 +9,7 @@ import morgan from "morgan";
 import { hotImport } from "@xenon-ssg/hot-reload";
 import { dumpModuleGraph, watchForReload } from "@xenon-ssg/hot-reload/reload";
 import type { UnknownRecord } from "type-fest";
+import { createXenonCache, type XenonCache } from "./cache.ts";
 import {
   type XenonExpressSiteMeta,
   type XenonExpressSiteModule,
@@ -44,6 +45,13 @@ export async function serveXenonExpressSite<PageMetadata extends UnknownRecord>(
   // bound to isn't `port` when that's 0.
   const served = Promise.withResolvers<XenonExpressSiteMeta>();
 
+  // The plugins' cache, for every version of the site that says where it is
+  // (see `XenonExpressSite`): made again only if a version moves it, as what's
+  // in it doesn't depend on the version (plugins key it by what they make
+  // from).
+  let cacheUrl: string | undefined;
+  let cache: Promise<XenonCache | undefined> = Promise.resolve(undefined);
+
   const load = async (signal: AbortSignal) => {
     // Only imports the site once it listens: that blocks the thread for a
     // while, and requests can wait for it then instead of failing to connect.
@@ -52,7 +60,18 @@ export async function serveXenonExpressSite<PageMetadata extends UnknownRecord>(
       devRouter.load(),
       site.load(),
     ]);
-    return makeXenonDevRouter(makeSite(), siteMeta, { signal });
+    const xenonSite = makeSite();
+    if (xenonSite.callerUrl !== cacheUrl) {
+      cacheUrl = xenonSite.callerUrl;
+      cache =
+        cacheUrl === undefined
+          ? Promise.resolve(undefined)
+          : createXenonCache({ callerUrl: cacheUrl });
+    }
+    return makeXenonDevRouter(xenonSite, siteMeta, {
+      signal,
+      cache: await cache,
+    });
   };
 
   const loadVersion = (reason: string | undefined): SiteVersion => {
