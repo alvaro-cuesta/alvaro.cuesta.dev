@@ -4,6 +4,8 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
+    // For `checkMdx`: an .mdx file is checked as the JavaScript it maps to.
+    "allowJs": true,
     "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.package.tsbuildinfo",
     "types": ["node", "mdx", "@xenon-ssg/import-url/types"]
   },
@@ -19,10 +21,21 @@
     {
       "package": "mdx-content-mapper",
       "extensions": [".mdx"],
-      "options": {}
+      "options": {
+        "checkMdx": true,
+        // The syntax ones the site compiles with (see `mdxCompiler.mts`), so
+        // e.g. `$\frac{a}{b}$` is math, not JavaScript expressions.
+        "remarkPlugins": ["remark-gfm", "remark-math"]
+      }
     }
   ],
-  "include": ["bin/**/*", "src/**/*", "config.ts"],
+  "include": [
+    "bin/**/*",
+    "src/**/*",
+    "blog/**/*",
+    "timeline/**/*",
+    "config.ts"
+  ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "references": [
     { "path": "../packages/core/tsconfig.package.json" },

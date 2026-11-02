@@ -1,8 +1,12 @@
+import { BlogDateTime } from "#components/atoms/BlogDateTime";
+// A statement must follow it, as the MDX checker drops a comment after a
+// block's last one.
+// @todo Drop this once https://github.com/remcohaszing/mdx-content-mapper/issues/3
+// is fixed.
+/** @import { MdxPageContentProps as Props } from "#components/molecules/MdxPage" */
 export const title = "Bookmarks";
 export const description =
   "A collection of links Álvaro Cuesta has bookmarked.";
-
-import { BlogDateTime } from "#components/atoms/BlogDateTime";
 
 A collection of links I've found worth keeping around — articles, tools, references, and other things that deserve more than a tab left open forever.
 

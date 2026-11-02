@@ -6,7 +6,10 @@ import { makeTitle } from "../../utils/meta.ts";
 import { MDX_DEFAULT_COMPONENTS } from "../../mdx/mdx.tsx";
 import { MdxRenderContext } from "../../mdx/MdxRenderContext.tsx";
 import { contentFile } from "../../utils/content-file.ts";
-import { instantToBlogItemDate } from "../../utils/item-dates.ts";
+import {
+  instantToBlogItemDate,
+  type BlogItemDate,
+} from "../../utils/item-dates.ts";
 import { routeHome } from "../../routes.ts";
 import { read } from "@xenon-ssg/thunks";
 import type { FileUrl } from "@xenon-ssg/import-url";
@@ -16,6 +19,21 @@ import {
   assertOptionalString,
   assertRequiredArray,
 } from "../../utils/item-module-assertions.ts";
+
+/**
+ * What a page's content gets as `props`.
+ *
+ * A page types its `props` with it by importing it as `Props`, the name the MDX checker looks for, in a comment before
+ * one of its `import`/`export` statements:
+ * `/** @import { MdxPageContentProps as Props } from "#components/molecules/MdxPage" *\/`.
+ *
+ * @todo Drop "before one of its statements" once the checker keeps a comment after the last one too:
+ * https://github.com/remcohaszing/mdx-content-mapper/issues/3
+ */
+export type MdxPageContentProps = {
+  /** When the page was last updated, as git says. */
+  lastModified: BlogItemDate;
+};
 
 type MdxPageModule = {
   default: MDXContent;
