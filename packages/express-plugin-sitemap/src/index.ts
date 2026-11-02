@@ -94,6 +94,10 @@ export const sitemapPlugin =
     };
 
     const attachToExpress: PluginAttachToExpressFunction = (router) => {
+      // Still answers, so the plugin isn't invisible in dev.
+      // @todo Crawl the dev site when it's requested (in a cell, if that's
+      // slow), so dev serves the same sitemap the build writes, from the same
+      // code.
       router.get(pathname, async (_req, res) => {
         res
           .status(404)
