@@ -26,7 +26,7 @@ Xenon SSG is not...
 - ...a framework.
 - ...client-side enabled. Like, at all.
 - ...going to support dynamic Server-Side Rendering.
-- ...a princess. That's in another castle.
+- ...a princess. She's in another castle.
 - ...going to explode. Hopefully.
 
 ## Minimal examples
