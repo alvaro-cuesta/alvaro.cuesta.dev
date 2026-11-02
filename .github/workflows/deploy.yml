@@ -55,26 +55,19 @@ jobs:
     steps:
       - &checkout
         name: Check out Git repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         # We need the full history for "last modified" dates in blog posts
         with:
           fetch-depth: 0
 
-      - &setup_pnpm
-        name: Set up pnpm
-        uses: pnpm/action-setup@v4
-
-      - &setup_node
-        name: Set up Node.js
-        uses: actions/setup-node@v6
+      # pnpm at the version `package.json` pins, Node.js at `.nvmrc`'s, then the dependencies.
+      - &setup
+        name: Set up pnpm, Node.js and dependencies
+        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - &install_deps
-        name: Install dependencies
-        shell: bash
-        run: pnpm install --frozen-lockfile
+          cache: true
+          # pnpm already won't change the lockfile in CI, but without one it would resolve from the registry.
+          require-lockfile: true
 
       # From the workspace root, to check every package.
       - name: Run ${{ matrix.linter.name }}
@@ -91,12 +84,11 @@ jobs:
           - packages/core
           - packages/express-plugin-feeds
           - packages/express-plugin-sitemap
+          - packages/hot-reload
           - packages/thunks
     steps:
       - *checkout
-      - *setup_pnpm
-      - *setup_node
-      - *install_deps
+      - *setup
 
       - name: Run tests
         run: pnpm test
@@ -111,13 +103,11 @@ jobs:
     timeout-minutes: 1
     steps:
       - *checkout
-      - *setup_pnpm
-      - *setup_node
-      - *install_deps
+      - *setup
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Build with Xenon SSG
         env:
@@ -169,7 +159,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ${{ env.BUILD_PATH }}/dist
 
@@ -186,4 +176,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
