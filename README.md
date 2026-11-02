@@ -33,6 +33,11 @@ Install any pnpm from v10 on (e.g. `npm install --global pnpm`, or any other way
 pnpm i
 ```
 
+In VS Code, install the recommended extensions and pick the workspace's TypeScript once (TypeScript 7:
+Select Version, then Use Custom Version). For MDX files, VS Code needs a `node` on its own PATH, not
+only in a shell's (with fnm, its `aliases/default` folder), as the content mapper runs on it
+([microsoft/TypeScript#65114](https://github.com/microsoft/TypeScript/issues/65114)).
+
 ## Usage
 
 ```sh
