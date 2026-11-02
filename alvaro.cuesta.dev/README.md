@@ -28,8 +28,7 @@
 - Latest blog posts in frontpage (or timeline posts, or both?)
 - Wiki
 - Sitemap improvements
-  - Add last modified that I am already injecting in `<meta>` tags
-  - Add last modified to feeds? Inferred from latest post last-modified
+  - Add last modified to feeds? Inferred from latest post last-modified?
   - Add priority to feeds?
 - Blog posts
   - Comments from GH issues?
@@ -38,6 +37,8 @@
     - https://github.com/PaulieScanlon/mdx-embed
     - https://mdxjs.com/guides/embed/
   - Extract to mdx and blog packages
+    - If possible, separate the blog plugin fully from the MDX and feeds plugins, so those are pluggable in the blog plugin too
+    - Or maybe just a content plugin or something?
   - Can we infer OG embed image from first image in MDX?
 - `ld+json` (e.g. a `BlogPosting`)
   ```
