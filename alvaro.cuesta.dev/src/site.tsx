@@ -23,28 +23,18 @@ import { moduleStack, watchInDev } from "@xenon-ssg/hot-reload";
 import pkg from "../package.json" with { type: "json" };
 const version = pkg.version;
 import type { PluginInjectableLink } from "@xenon-ssg/express/plugin";
-import {
-  getPaginatedSitemapPriority,
-  resolvePage,
-  SITEMAP_PRIORITY,
-  type PageDates,
-} from "./Root.tsx";
+import { resolvePage, type PageDates } from "./Root.tsx";
 import {
   sitemapPlugin,
   sitemapPluginKey,
   type SitemapPluginMetadata,
-  type SitemapPluginStaticFileMetadata,
 } from "@xenon-ssg/express-plugin-sitemap";
 import {
   routeBlogArticleList,
   routeHome,
   routeTimelineList,
 } from "./routes.ts";
-import {
-  feedsPlugin,
-  type FeedFormat,
-  type FeedPage,
-} from "@xenon-ssg/express-plugin-feeds";
+import { feedsPlugin } from "@xenon-ssg/express-plugin-feeds";
 import { getBlogFeedSourceItems } from "./blog/feed-source.tsx";
 import { getTimelineFeedSourceItems } from "./timeline/feed-source.tsx";
 import { makeTitle } from "./utils/meta.ts";
@@ -191,28 +181,6 @@ const starryNightCss = singleLightningCssPlugin({
   critical: true,
 });
 
-// Only one format, as the others are the same feed.
-const feedFileMetadata = ({
-  format,
-  page,
-}: {
-  format: FeedFormat;
-  page: FeedPage;
-}): SitemapPluginMetadata | undefined =>
-  format === "atom"
-    ? // `satisfies`, so the feeds plugin still takes the site's metadata type.
-      ({
-        [sitemapPluginKey]: {
-          lastModified: page.updated,
-          // Low, as feeds are for feed readers rather than search results.
-          priority: getPaginatedSitemapPriority(
-            page.currentPage,
-            SITEMAP_PRIORITY.genericRoute,
-          ),
-        },
-      } satisfies SitemapPluginStaticFileMetadata)
-    : undefined;
-
 const blogFeeds = feedsPlugin({
   getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
   homePagePathname: routeBlogArticleList.build({ page: null }),
@@ -230,7 +198,6 @@ const blogFeeds = feedsPlugin({
     text: "none",
   },
   linkRelFormats: ["atom"],
-  fileMetadata: feedFileMetadata,
 });
 
 const timelineFeeds = feedsPlugin({
@@ -251,7 +218,6 @@ const timelineFeeds = feedsPlugin({
     htmlToText: htmlToPlainText,
   },
   linkRelFormats: ["atom"],
-  fileMetadata: feedFileMetadata,
 });
 
 const allFeeds = feedsPlugin({
@@ -286,7 +252,6 @@ const allFeeds = feedsPlugin({
     text: "none",
   },
   linkRelFormats: ["atom"],
-  fileMetadata: feedFileMetadata,
 });
 
 const sitemap = sitemapPlugin({
