@@ -8,6 +8,12 @@ on:
       - "**/README.md"
       - "**/TODO.md"
 
+  # Lints, tests and builds, to catch breakage before merging. Doesn't deploy.
+  pull_request:
+    paths-ignore:
+      - "**/README.md"
+      - "**/TODO.md"
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -17,11 +23,18 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Whole runs, not just the deploy job: builds can finish out of order, so an older run's deploy could overwrite a
+# newer one's.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  # One run at a time, and one waiting: a newer push replaces the waiting run, so the last push always runs last.
+  # Per ref, so a pull request's runs never replace a deploy waiting on master.
+  group: pages-${{ github.ref }}
+  # Pull requests: a newer push makes the older runs pointless.
+  # Not master:
+  # - the newer run may fail, and the older one would have deployed something newer than what's live;
+  # - pushing faster than a run takes would cancel every run, and nothing would deploy;
+  # - cancelling deploy-pages midway isn't safe (GitHub's Pages starter workflow warns against it).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   BUILD_PATH: alvaro.cuesta.dev
@@ -110,15 +123,60 @@ jobs:
         env:
           XENON_ORIGIN: ${{ steps.pages.outputs.origin }}
           XENON_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-        run: pnpm run build
+        # Runs with `-o pipefail`, so the build failing still fails the step despite the `tee`.
+        shell: bash
+        # The log goes outside the checkout, so the clean repository check below doesn't trip on it.
+        run: pnpm run build 2>&1 | tee "$RUNNER_TEMP/build-output.log"
         working-directory: ${{ env.BUILD_PATH }}
+
+      - name: Add build log to the run summary
+        # Also when the build fails, which is when its log matters most.
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          {
+            echo "# Build"
+            echo ""
+            echo "- **Node.js:** $(node --version)"
+            echo "- **pnpm:** $(pnpm --version)"
+            echo ""
+            # Tildes, not backticks: code in the output can have backticks, but a build log won't start a line with tildes.
+            echo "~~~~~~~~"
+            # Strip ANSI colors
+            sed 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/build-output.log" || echo "(no build log)"
+            echo "~~~~~~~~"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # A build that changes tracked files (or leaves files Git doesn't ignore) works here, but not from a clean checkout
+      # of the same commit.
+      - name: Verify the build left the repository clean
+        shell: bash
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "::error::The build changed the repository. Commit or ignore these files:"
+            git status --porcelain
+
+            {
+              echo "> [!CAUTION]"
+              echo "> The build changed the repository. Commit or ignore these files:"
+              echo ""
+              echo '~~~~~~~~'
+              git status --porcelain
+              echo '~~~~~~~~'
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: ${{ env.BUILD_PATH }}/dist
 
+  # Not grouped on its own: see `concurrency`.
   deploy:
+    # Only master is the site: pull requests and manual runs on other branches stop after the build.
+    if: ${{ github.ref == 'refs/heads/master' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
