@@ -20,6 +20,9 @@ Everything else keeps its instance, and its state.
   - `moduleStack(import.meta)` is a `DisposableStack` for what a copy of a module owns, e.g. the
     thunks it makes at its top level. Once a change evaluates the module again, the dev server
     disposes the old copy's, as soon as nothing uses it.
+  - `declineInDev(import.meta)` restarts the dev server instead of evaluating the module again,
+    whenever a change reaches it: for modules a second copy of would break, e.g. one that holds a
+    port it can't let go of.
 - `@xenon-ssg/hot-reload/supervisor` runs the dev server, and restarts it when what can't be
   reloaded changes. `superviseDevServer({ serve })` runs the calling script again in a child process
   with the hooks, like `node:cluster`, where it calls `serve`, and restarts it when its own modules

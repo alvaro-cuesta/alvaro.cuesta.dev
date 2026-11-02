@@ -1,4 +1,5 @@
 import path from "node:path";
+import { isDeclined } from "./decline.ts";
 import { isDevelopment } from "./env.ts";
 import {
   invalidate,
@@ -53,8 +54,9 @@ const isDebug = Boolean(process.env["DEBUG"]);
  * calls it counts as an importer of what it resolves.
  *
  * A change to a module that isn't versioned (the dev server's own, and what
- * they import) exits with `RESTART_EXIT_CODE` instead, for
- * `superviseDevServer` to restart the dev server.
+ * they import), or that reaches one `declineInDev` declined, exits with
+ * `RESTART_EXIT_CODE` instead, for `superviseDevServer` to restart the dev
+ * server.
  *
  * Each change hands `onRetire` what the copies it made out of date own (see
  * `moduleStack`), after calling the hot imports' subscribers, for the dev
@@ -97,6 +99,14 @@ export function watchForReload(
     }
 
     const invalidated = invalidate(changedModules);
+    // Not only the changed modules: evaluating a declined module again because
+    // of what it imports would make a second copy of it too.
+    const declined = [...invalidated].find(isDeclined);
+    if (declined !== undefined) {
+      restartDevServer(
+        `Restarting: ${relativePath(declined)} can't be reloaded, and ${reason}`,
+      );
+    }
     const retired = retireModules(invalidated, versionOf);
     const hotImports = hotImportsOf(invalidated);
 
