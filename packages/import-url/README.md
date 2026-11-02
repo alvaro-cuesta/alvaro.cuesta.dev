@@ -27,5 +27,16 @@ declare module "*.mdx" with { type: "url" } {
 }
 ```
 
+A declaration only types a kind of file, not each file by its own module: TypeScript can't refer to
+the module a pattern matched ([microsoft/TypeScript#65109](https://github.com/microsoft/TypeScript/issues/65109)).
+Until it can, `withModule` says it, by repeating the path in a type (which doesn't load the module),
+and unchecked:
+
+```ts
+import post from "./post.mdx" with { type: "url" };
+
+const typedPost = withModule<typeof import("./post.mdx")>(post);
+```
+
 A file isn't a dependency of the module that names it: with `@xenon-ssg/hot-reload`, editing it
 doesn't evaluate that module again. Whatever loads it from its URL handles that (e.g. a hot import).

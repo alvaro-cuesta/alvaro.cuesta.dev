@@ -26,3 +26,21 @@ export type FileUrl<Module = unknown> = URL & {
 export const toFileUrl = (url: URL): FileUrl =>
   // Sound, as any import gives `unknown`.
   url as FileUrl;
+
+/**
+ * The file, typed by its module, which its import can't type yet.
+ *
+ * Unchecked: nothing ties `Module` to the file, so write it as
+ * `typeof import(...)` of the same path, e.g.
+ * `withModule<typeof import("./post.mdx")>(post)`. That only names the types:
+ * it doesn't load the module.
+ *
+ * @todo Drop it once the import types the file by its module (see
+ * `types.d.ts`).
+ *
+ * @param file The file.
+ * @returns The same file.
+ */
+export const withModule = <Module>(file: FileUrl): FileUrl<Module> =>
+  // Unsound: the caller's word, as nothing can check it yet.
+  file as FileUrl<Module>;

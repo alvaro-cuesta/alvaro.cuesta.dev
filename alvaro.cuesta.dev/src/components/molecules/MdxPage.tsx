@@ -1,4 +1,4 @@
-import type { MDXContent } from "mdx/types.js";
+import type { JSX } from "react";
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
 import { Template } from "../Template.tsx";
 import type { SiteRenderMeta } from "../../site.tsx";
@@ -13,12 +13,6 @@ import {
 import { routeHome } from "../../routes.ts";
 import { read } from "@xenon-ssg/thunks";
 import type { FileUrl } from "@xenon-ssg/import-url";
-import {
-  assertHasMdxDefaultExport,
-  assertIsModule,
-  assertOptionalString,
-  assertRequiredArray,
-} from "../../utils/item-module-assertions.ts";
 
 /**
  * What a page's content gets as `props`.
@@ -35,36 +29,48 @@ export type MdxPageContentProps = {
   lastModified: BlogItemDate;
 };
 
-type MdxPageModule = {
-  default: MDXContent;
-  title?: string | undefined;
-  description?: string | undefined;
+/** What a page's module exports, as its own types say (see `makeMdxPage`). */
+export type MdxPageModule = {
+  /** The content, which must take no props but these. */
+  default: (
+    props: MdxPageContentProps & { components: typeof MDX_DEFAULT_COMPONENTS },
+  ) => JSX.Element;
+  title: string;
+  description: string;
   /**
    * The page's `og:type`.
    *
    * `"website"` (the default) or `"article"`.
    */
-  openGraphType?: string | undefined;
-  tableOfContents: Toc;
+  openGraphType?: "website" | "article";
 };
 
-function assertIsMdxPageModule(
-  module: unknown,
-  label: string,
-): asserts module is MdxPageModule {
-  assertIsModule(module, label);
-  assertHasMdxDefaultExport(module, label);
-  assertOptionalString(module, "title", label);
-  assertOptionalString(module, "description", label);
-  assertOptionalString(module, "openGraphType", label);
-  assertRequiredArray(module, "tableOfContents", label);
-}
+// A rehype plugin exports it from every page, and the MDX checker doesn't run
+// them: so it's declared, unchecked, as a module augmentation would declare it.
+//
+// @todo Type it from the page. A `declare module "*.mdx"` can't add it, as the
+// checked file wins over a pattern: it takes the MDX checker knowing the plugin
+// (https://github.com/remcohaszing/mdx-content-mapper/issues/4), or TypeScript
+// letting a wildcard augmentation add to the files it matches
+// (https://github.com/microsoft/TypeScript/issues/65118).
+type WithTableOfContents = { tableOfContents: Toc };
 
 type MdxPageProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export function makeMdxPage(file: FileUrl) {
+/**
+ * A page made from an MDX file.
+ *
+ * Its module's exports are checked by their types, from the file itself (see `MdxPageModule`), except the table of
+ * contents, which a plugin adds to every page and is taken on trust (see `WithTableOfContents`).
+ *
+ * @param file The page's file.
+ * @returns The page, and when it was last updated.
+ */
+export function makeMdxPage<Module extends MdxPageModule>(
+  file: FileUrl<Module>,
+) {
   const page = contentFile(file);
 
   // A page that was never edited was last updated when it was created. No git history means it isn't committed yet,
@@ -78,7 +84,6 @@ export function makeMdxPage(file: FileUrl) {
 
   async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const { module } = await read(page);
-    assertIsMdxPageModule(module, `MdxPage module at ${file.href}`);
 
     const {
       default: Content,
@@ -86,23 +91,10 @@ export function makeMdxPage(file: FileUrl) {
       description,
       openGraphType = "website",
       tableOfContents,
-    } = module;
-
-    if (title === undefined) {
-      throw new Error(
-        `MdxPage module at ${file.href} is missing required \`title\` export.`,
-      );
-    }
-    if (description === undefined) {
-      throw new Error(
-        `MdxPage module at ${file.href} is missing required \`description\` export.`,
-      );
-    }
-    if (openGraphType !== "website" && openGraphType !== "article") {
-      throw new Error(
-        `MdxPage module at ${file.href} has an unknown \`openGraphType\` export: ${openGraphType}.`,
-      );
-    }
+    } =
+      // Sound while `mdxCompiler.mts` runs both table of contents plugins: the
+      // first always makes one (`[]` if no headings), the second exports it.
+      module as typeof module & WithTableOfContents;
 
     const lastUpdated = instantToBlogItemDate(await getLastUpdated());
 

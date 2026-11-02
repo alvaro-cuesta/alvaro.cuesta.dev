@@ -5,8 +5,8 @@ import type { FileUrl } from "@xenon-ssg/import-url";
 import { gitFileDates, type GitFileDates } from "./git.ts";
 
 /** A content file: the module it compiles to, and when git says it was created and last modified. */
-export type ContentFile = {
-  module: unknown;
+export type ContentFile<Module = unknown> = {
+  module: Module;
   gitDates: GitFileDates | null;
 };
 
@@ -23,12 +23,17 @@ export type ContentFile = {
  * @param file The file.
  * @returns The content file.
  */
-export function contentFile(file: FileUrl): Thunk<ContentFile> & Disposable {
+export function contentFile<Module>(
+  file: FileUrl<Module>,
+): Thunk<ContentFile<Module>> & Disposable {
   const filePath = url.fileURLToPath(file);
 
   // Only this cell is invalidated when the file changes, instead of the module
   // that makes the content file, and the whole site with it.
-  const module = cell(hotImport(() => import(file.href)));
+  const module = cell(
+    // Typed by the file: importing it by URL types it `any`.
+    hotImport((): Promise<Module> => import(file.href)),
+  );
 
   // Disposed along with the content file: nothing else reads it.
   return derived(async (get) => {

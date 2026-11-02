@@ -41,15 +41,23 @@ import {
   type BlogItemDate,
 } from "./utils/item-dates.ts";
 import { read } from "@xenon-ssg/thunks";
+import { withModule } from "@xenon-ssg/import-url";
 // Files, not modules: so a page's module and git dates start from it at once,
 // and editing it doesn't evaluate this module again (see `contentFile`).
 import nowFile from "./pages/Now.mdx" with { type: "url" };
 import bookmarksFile from "./pages/Bookmarks.mdx" with { type: "url" };
 import licensesFile from "./pages/Licenses.mdx" with { type: "url" };
 
-const Now = makeMdxPage(nowFile);
-const Bookmarks = makeMdxPage(bookmarksFile);
-const Licenses = makeMdxPage(licensesFile);
+// Typed by their modules, so their exports are checked here and not as they
+// load. @todo Drop `withModule` once the imports type them (see
+// `@xenon-ssg/import-url/types`).
+const Now = makeMdxPage(withModule<typeof import("./pages/Now.mdx")>(nowFile));
+const Bookmarks = makeMdxPage(
+  withModule<typeof import("./pages/Bookmarks.mdx")>(bookmarksFile),
+);
+const Licenses = makeMdxPage(
+  withModule<typeof import("./pages/Licenses.mdx")>(licensesFile),
+);
 
 /**
  * When a page was published and last modified, for its meta tags and the sitemap.
