@@ -14,6 +14,7 @@ import type {
   PluginBuildPreFunction,
 } from "@xenon-ssg/express/plugin";
 import crypto from "node:crypto";
+import { findPackageJSON } from "node:module";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { derived, read, thunk, type Thunk } from "@xenon-ssg/thunks";
@@ -186,11 +187,22 @@ const deserializeFaviconResponse = (raw: Buffer): UsedFaviconResponse => {
   return { images, files, html: cached.html };
 };
 
+// Part of the cache key: another version of `favicons` can make other favicons
+// from the same SVG and options. Found through Node, as `favicons` doesn't
+// export its `package.json`.
+const FAVICONS_VERSION = (
+  JSON.parse(
+    await fs.readFile(findPackageJSON("favicons", import.meta.url)!, "utf-8"), // `!` is fine because `favicons` is imported above
+  ) as { version: string }
+).version;
+
 const getFaviconCacheKey = (
   svgContents: Buffer,
   faviconOptions: FaviconOptions,
 ): string => {
   const payload = Buffer.concat([
+    Buffer.from(FAVICONS_VERSION),
+    Buffer.from("\0"),
     svgContents,
     Buffer.from("\0"),
     Buffer.from(JSON.stringify(faviconOptions)),
@@ -212,8 +224,8 @@ type FaviconDerivedState = {
  * Generates favicons, and the tags that link to them, from one SVG.
  *
  * Making them is slow, so it keeps them in the host's cache, if it has one
- * (see `PluginContext`), keyed by the SVG's contents and the options: later
- * runs, and restarts, reuse them.
+ * (see `PluginContext`), keyed by the SVG's contents, the options and the
+ * version of `favicons`: later runs, and restarts, reuse them.
  *
  * Disposing it lets go of the favicons it keeps in memory (see
  * `@xenon-ssg/thunks`), but not of a thunk it's given as `inputFile`, nor of
