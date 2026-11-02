@@ -14,31 +14,31 @@ describe("derived", () => {
   it("gives every read the same promise while what it read gives the same promises", async () => {
     const source = cell(() => Promise.resolve(1));
     const make = vi.fn(async (get: Get) => (await get(source)) * 2);
-    const getValue = derived(make);
+    const result = derived(make);
 
-    const first = read(getValue);
+    const first = read(result);
 
-    expect(read(getValue)).toBe(first);
+    expect(read(result)).toBe(first);
     expect(await first).toBe(2);
-    expect(read(getValue)).toBe(first);
+    expect(read(result)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
   it("runs again once a thunk it read gives a new promise", async () => {
     let value = 1;
     const source = cell(() => Promise.resolve(value));
-    const getValue = derived(async (get) => (await get(source)) * 2);
+    const result = derived(async (get) => (await get(source)) * 2);
 
-    const first = read(getValue);
+    const first = read(result);
     expect(await first).toBe(2);
 
     value = 2;
     source.invalidate();
 
-    const second = read(getValue);
+    const second = read(result);
 
     expect(second).not.toBe(first);
-    expect(read(getValue)).toBe(second);
+    expect(read(result)).toBe(second);
     expect(await second).toBe(4);
     expect(await first).toBe(2);
   });
@@ -47,30 +47,30 @@ describe("derived", () => {
     let value = 1;
     const source = cell(() => Promise.resolve(value));
     const doubled = derived(async (get) => (await get(source)) * 2);
-    const getValue = derived(async (get) => (await get(doubled)) + 1);
+    const result = derived(async (get) => (await get(doubled)) + 1);
 
-    expect(await read(getValue)).toBe(3);
+    expect(await read(result)).toBe(3);
 
     value = 2;
     source.invalidate();
 
-    expect(await read(getValue)).toBe(5);
+    expect(await read(result)).toBe(5);
   });
 
   it("tracks reads made after an await", async () => {
     let value = 1;
     const first = cell(() => Promise.resolve(1));
     const second = cell(() => Promise.resolve(value));
-    const getValue = derived(
+    const result = derived(
       async (get) => (await get(first)) + (await get(second)),
     );
 
-    expect(await read(getValue)).toBe(2);
+    expect(await read(result)).toBe(2);
 
     value = 2;
     second.invalidate();
 
-    expect(await read(getValue)).toBe(3);
+    expect(await read(result)).toBe(3);
   });
 
   it("only tracks what the last run read", async () => {
@@ -81,22 +81,22 @@ describe("derived", () => {
     const make = vi.fn(async (get: Get) =>
       (await get(choice)) ? get(a) : get(b),
     );
-    const getValue = derived(make);
+    const result = derived(make);
 
-    expect(await read(getValue)).toBe("a");
+    expect(await read(result)).toBe("a");
 
     b.invalidate();
-    read(getValue);
+    read(result);
 
     expect(make).toHaveBeenCalledOnce();
 
     useA = false;
     choice.invalidate();
 
-    expect(await read(getValue)).toBe("b");
+    expect(await read(result)).toBe("b");
 
     a.invalidate();
-    read(getValue);
+    read(result);
 
     expect(make).toHaveBeenCalledTimes(2);
   });
@@ -110,12 +110,12 @@ describe("derived", () => {
       source.invalidate();
       return before + (await get(source));
     });
-    const getValue = derived(make);
+    const result = derived(make);
 
-    expect(await read(getValue)).toBe(3);
+    expect(await read(result)).toBe(3);
 
     // The value used both promises, so it's out of date with either.
-    expect(await read(getValue)).toBe(4);
+    expect(await read(result)).toBe(4);
     expect(make).toHaveBeenCalledTimes(2);
   });
 
@@ -126,12 +126,12 @@ describe("derived", () => {
       lateGet = get;
       return 0;
     });
-    const getValue = derived(make);
+    const result = derived(make);
 
-    await read(getValue);
+    await read(result);
     await lateGet?.(source);
     source.invalidate();
-    read(getValue);
+    read(result);
 
     expect(make).toHaveBeenCalledOnce();
   });
@@ -141,43 +141,43 @@ describe("derived", () => {
     const source = cell(() =>
       fails ? Promise.reject(new Error("nope")) : Promise.resolve(1),
     );
-    const getValue = derived(async (get) => (await get(source)) * 2);
+    const result = derived(async (get) => (await get(source)) * 2);
 
-    const first = read(getValue);
+    const first = read(result);
 
     await expect(first).rejects.toThrow("nope");
-    expect(read(getValue)).toBe(first);
+    expect(read(result)).toBe(first);
 
     fails = false;
     source.invalidate();
 
-    expect(await read(getValue)).toBe(2);
+    expect(await read(result)).toBe(2);
   });
 
   it("rejects every read once disposed, with the same promise, without running again", async () => {
     const source = cell(() => Promise.resolve(1));
     const make = vi.fn(async (get: Get) => (await get(source)) * 2);
-    const getValue = derived(make);
+    const result = derived(make);
 
-    expect(await read(getValue)).toBe(2);
+    expect(await read(result)).toBe(2);
 
-    getValue[Symbol.dispose]();
+    result[Symbol.dispose]();
     source.invalidate();
-    const first = read(getValue);
+    const first = read(result);
 
     await expect(first).rejects.toThrow(ReferenceError);
-    expect(read(getValue)).toBe(first);
+    expect(read(result)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
   it("disposes what it owns, but not what it read", async () => {
     const source = cell(() => Promise.resolve(1));
     const owned = { [Symbol.dispose]: vi.fn() };
-    const getValue = derived(async (get) => (await get(source)) * 2, owned);
+    const result = derived(async (get) => (await get(source)) * 2, owned);
 
-    await read(getValue);
-    getValue[Symbol.dispose]();
-    getValue[Symbol.dispose]();
+    await read(result);
+    result[Symbol.dispose]();
+    result[Symbol.dispose]();
 
     expect(owned[Symbol.dispose]).toHaveBeenCalledOnce();
     expect(await read(source)).toBe(1);

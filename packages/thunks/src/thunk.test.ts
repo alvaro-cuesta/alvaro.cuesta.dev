@@ -36,44 +36,44 @@ describe("thunk", () => {
 
   it("gives every read the same promise", async () => {
     const make = vi.fn(() => Promise.resolve(1));
-    const getValue = thunk(make);
+    const value = thunk(make);
 
-    const first = read(getValue);
+    const first = read(value);
 
-    expect(read(getValue)).toBe(first);
+    expect(read(value)).toBe(first);
     expect(await first).toBe(1);
-    expect(read(getValue)).toBe(first);
+    expect(read(value)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
   it("keeps a rejected promise", async () => {
     const make = vi.fn(() => Promise.reject(new Error("nope")));
-    const getValue = thunk(make);
+    const value = thunk(make);
 
-    const first = read(getValue);
+    const first = read(value);
 
     await expect(first).rejects.toThrow("nope");
-    expect(read(getValue)).toBe(first);
+    expect(read(value)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
   it("rejects every read once disposed, with the same promise, without running", async () => {
     const make = vi.fn(() => Promise.resolve(1));
-    const getValue = thunk(make);
+    const value = thunk(make);
 
-    getValue[Symbol.dispose]();
-    const first = read(getValue);
+    value[Symbol.dispose]();
+    const first = read(value);
 
     await expect(first).rejects.toThrow(ReferenceError);
-    expect(read(getValue)).toBe(first);
+    expect(read(value)).toBe(first);
     expect(make).not.toHaveBeenCalled();
   });
 
   it("keeps the promises it gave before it was disposed", async () => {
-    const getValue = thunk(async () => 1);
+    const value = thunk(async () => 1);
 
-    const before = read(getValue);
-    getValue[Symbol.dispose]();
+    const before = read(value);
+    value[Symbol.dispose]();
 
     expect(await before).toBe(1);
   });

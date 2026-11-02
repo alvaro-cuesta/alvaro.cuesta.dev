@@ -13,19 +13,19 @@ describe("cell", () => {
   it("gives every read the same promise until it's invalidated", async () => {
     let value = 1;
     const make = vi.fn(() => Promise.resolve(value));
-    const getValue = cell(make);
+    const current = cell(make);
 
-    const first = read(getValue);
+    const first = read(current);
 
-    expect(read(getValue)).toBe(first);
+    expect(read(current)).toBe(first);
     expect(await first).toBe(1);
 
     value = 2;
-    getValue.invalidate();
-    const second = read(getValue);
+    current.invalidate();
+    const second = read(current);
 
     expect(second).not.toBe(first);
-    expect(read(getValue)).toBe(second);
+    expect(read(current)).toBe(second);
     expect(await second).toBe(2);
     expect(await first).toBe(1);
     expect(make).toHaveBeenCalledTimes(2);
@@ -33,15 +33,15 @@ describe("cell", () => {
 
   it("doesn't run again when invalidated, only when read after", () => {
     const make = vi.fn(() => Promise.resolve(1));
-    const getValue = cell(make);
+    const current = cell(make);
 
-    read(getValue);
-    getValue.invalidate();
-    getValue.invalidate();
+    read(current);
+    current.invalidate();
+    current.invalidate();
 
     expect(make).toHaveBeenCalledOnce();
 
-    read(getValue);
+    read(current);
 
     expect(make).toHaveBeenCalledTimes(2);
   });
@@ -51,27 +51,27 @@ describe("cell", () => {
     const make = vi.fn(() =>
       fails ? Promise.reject(new Error("nope")) : Promise.resolve(1),
     );
-    const getValue = cell(make);
+    const current = cell(make);
 
-    const first = read(getValue);
+    const first = read(current);
 
     await expect(first).rejects.toThrow("nope");
-    expect(read(getValue)).toBe(first);
+    expect(read(current)).toBe(first);
 
     fails = false;
-    getValue.invalidate();
+    current.invalidate();
 
-    expect(await read(getValue)).toBe(1);
+    expect(await read(current)).toBe(1);
   });
 
   it("isn't subscribed until it's read, and then only once", () => {
     const subscribe = vi.fn(() => ({ [Symbol.dispose]: () => {} }));
-    const getValue = cell(() => Promise.resolve(1), subscribe);
+    const current = cell(() => Promise.resolve(1), subscribe);
 
     expect(subscribe).not.toHaveBeenCalled();
 
-    read(getValue);
-    read(getValue);
+    read(current);
+    read(current);
 
     expect(subscribe).toHaveBeenCalledOnce();
   });
@@ -79,7 +79,7 @@ describe("cell", () => {
   it("runs again once what it's subscribed to invalidates it", async () => {
     let value = 1;
     let invalidate = () => {};
-    const getValue = cell(
+    const current = cell(
       () => Promise.resolve(value),
       (newInvalidate) => {
         invalidate = newInvalidate;
@@ -87,18 +87,18 @@ describe("cell", () => {
       },
     );
 
-    expect(await read(getValue)).toBe(1);
+    expect(await read(current)).toBe(1);
 
     value = 2;
     invalidate();
 
-    expect(await read(getValue)).toBe(2);
+    expect(await read(current)).toBe(2);
   });
 
   it("can be made from a source that loads its value and invalidates it", async () => {
     let value = 1;
     let invalidate = () => {};
-    const getValue = cell({
+    const current = cell({
       load: () => Promise.resolve(value),
       subscribe: (newInvalidate) => {
         invalidate = newInvalidate;
@@ -106,53 +106,53 @@ describe("cell", () => {
       },
     });
 
-    expect(await read(getValue)).toBe(1);
+    expect(await read(current)).toBe(1);
 
     value = 2;
     invalidate();
 
-    expect(await read(getValue)).toBe(2);
+    expect(await read(current)).toBe(2);
   });
 
   it("stops what it's subscribed to once disposed, and isn't subscribed again", async () => {
     const dispose = vi.fn();
     const subscribe = vi.fn(() => ({ [Symbol.dispose]: dispose }));
-    const getValue = cell(() => Promise.resolve(1), subscribe);
+    const current = cell(() => Promise.resolve(1), subscribe);
 
-    read(getValue);
-    getValue[Symbol.dispose]();
-    getValue[Symbol.dispose]();
+    read(current);
+    current[Symbol.dispose]();
+    current[Symbol.dispose]();
 
     expect(dispose).toHaveBeenCalledOnce();
-    await expect(read(getValue)).rejects.toThrow(ReferenceError);
+    await expect(read(current)).rejects.toThrow(ReferenceError);
     expect(subscribe).toHaveBeenCalledOnce();
   });
 
   it("rejects every read once disposed, with the same promise, without running again", async () => {
     const make = vi.fn(() => Promise.resolve(1));
-    const getValue = cell(make);
+    const current = cell(make);
 
-    expect(await read(getValue)).toBe(1);
+    expect(await read(current)).toBe(1);
 
-    getValue[Symbol.dispose]();
-    getValue.invalidate();
-    const first = read(getValue);
+    current[Symbol.dispose]();
+    current.invalidate();
+    const first = read(current);
 
     await expect(first).rejects.toThrow(ReferenceError);
-    expect(read(getValue)).toBe(first);
+    expect(read(current)).toBe(first);
     expect(make).toHaveBeenCalledOnce();
   });
 
   it("stops what it's subscribed to once it has started, if disposed before then", async () => {
     const dispose = vi.fn();
     const started = Promise.withResolvers<Disposable>();
-    const getValue = cell(
+    const current = cell(
       () => Promise.resolve(1),
       () => started.promise,
     );
 
-    read(getValue);
-    getValue[Symbol.dispose]();
+    read(current);
+    current[Symbol.dispose]();
 
     expect(dispose).not.toHaveBeenCalled();
 
@@ -164,10 +164,10 @@ describe("cell", () => {
 
   it("is never subscribed if disposed before it's read", () => {
     const subscribe = vi.fn(() => ({ [Symbol.dispose]: () => {} }));
-    const getValue = cell(() => Promise.resolve(1), subscribe);
+    const current = cell(() => Promise.resolve(1), subscribe);
 
-    getValue[Symbol.dispose]();
-    read(getValue).catch(() => {});
+    current[Symbol.dispose]();
+    read(current).catch(() => {});
 
     expect(subscribe).not.toHaveBeenCalled();
   });

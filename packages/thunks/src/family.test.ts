@@ -13,54 +13,54 @@ describe("family", () => {
 
   it("gives the same thunk for the same key", () => {
     const make = vi.fn((key: string) => thunk(async () => key));
-    const getValue = family(make);
+    const byKey = family(make);
 
-    expect(getValue("a")).toBe(getValue("a"));
+    expect(byKey("a")).toBe(byKey("a"));
     expect(make).toHaveBeenCalledOnce();
   });
 
   it("gives each key its own thunk", async () => {
-    const getValue = family((key: string) => thunk(async () => key));
+    const byKey = family((key: string) => thunk(async () => key));
 
-    expect(getValue("a")).not.toBe(getValue("b"));
-    expect(await read(getValue("a"))).toBe("a");
-    expect(await read(getValue("b"))).toBe("b");
+    expect(byKey("a")).not.toBe(byKey("b"));
+    expect(await read(byKey("a"))).toBe("a");
+    expect(await read(byKey("b"))).toBe("b");
   });
 
   it("makes a new thunk for a key it dropped", () => {
     const make = vi.fn((key: string) => thunk(async () => key));
-    const getValue = family(make);
+    const byKey = family(make);
 
-    const first = getValue("a");
-    getValue.retain([]);
+    const first = byKey("a");
+    byKey.retain([]);
 
-    expect(getValue("a")).not.toBe(first);
+    expect(byKey("a")).not.toBe(first);
     expect(make).toHaveBeenCalledTimes(2);
   });
 
   it("keeps the thunks of the keys it retains", () => {
-    const getValue = family((key: string) => thunk(async () => key));
+    const byKey = family((key: string) => thunk(async () => key));
 
-    const a = getValue("a");
-    const b = getValue("b");
-    getValue.retain(["a"]);
+    const a = byKey("a");
+    const b = byKey("b");
+    byKey.retain(["a"]);
 
-    expect(getValue("a")).toBe(a);
-    expect(getValue("b")).not.toBe(b);
+    expect(byKey("a")).toBe(a);
+    expect(byKey("b")).not.toBe(b);
   });
 
   it("disposes the thunks it drops", () => {
     const dispose = vi.fn();
-    const getValue = family((key: string) =>
+    const byKey = family((key: string) =>
       Object.assign(
         cell(async () => key),
         { [Symbol.dispose]: () => dispose(key) },
       ),
     );
 
-    getValue("a");
-    getValue("b");
-    getValue.retain(["a"]);
+    byKey("a");
+    byKey("b");
+    byKey.retain(["a"]);
 
     expect(dispose).toHaveBeenCalledOnce();
     expect(dispose).toHaveBeenCalledWith("b");
@@ -70,30 +70,30 @@ describe("family", () => {
     const dispose = vi.fn((key: string) => {
       if (key === "a") throw new Error("nope");
     });
-    const getValue = family((key: string) =>
+    const byKey = family((key: string) =>
       Object.assign(
         cell(async () => key),
         { [Symbol.dispose]: () => dispose(key) },
       ),
     );
 
-    getValue("a");
-    getValue("b");
+    byKey("a");
+    byKey("b");
 
-    expect(() => getValue[Symbol.dispose]()).toThrow("nope");
+    expect(() => byKey[Symbol.dispose]()).toThrow("nope");
     expect(dispose).toHaveBeenCalledTimes(2);
 
-    getValue[Symbol.dispose]();
+    byKey[Symbol.dispose]();
 
     expect(dispose).toHaveBeenCalledTimes(2);
   });
 
   it("can't be used once disposed", () => {
-    const getValue = family((key: string) => thunk(async () => key));
+    const byKey = family((key: string) => thunk(async () => key));
 
-    getValue[Symbol.dispose]();
+    byKey[Symbol.dispose]();
 
-    expect(() => getValue("a")).toThrow(ReferenceError);
-    expect(() => getValue.retain([])).toThrow(ReferenceError);
+    expect(() => byKey("a")).toThrow(ReferenceError);
+    expect(() => byKey.retain([])).toThrow(ReferenceError);
   });
 });
