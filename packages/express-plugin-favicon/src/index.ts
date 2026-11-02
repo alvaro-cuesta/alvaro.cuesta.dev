@@ -148,13 +148,17 @@ type FaviconPluginBuildPreResult = {
   cacheBustingMap: Record<string, string>;
 };
 
+// The parts of favicons' response the plugin uses. Only those are cached, so a
+// cached response has fewer than favicons gives.
+type UsedFaviconResponse = Pick<FaviconResponse, "images" | "files" | "html">;
+
 type CachedFaviconResponse = {
   images: { name: string; contents: string /* base64 */ }[];
   files: { name: string; contents: string }[];
   html: string[];
 };
 
-const serializeFaviconResponse = (response: FaviconResponse): string => {
+const serializeFaviconResponse = (response: UsedFaviconResponse): string => {
   const serializable: CachedFaviconResponse = {
     images: response.images.map((img) => ({
       name: img.name,
@@ -169,7 +173,7 @@ const serializeFaviconResponse = (response: FaviconResponse): string => {
   return JSON.stringify(serializable);
 };
 
-const deserializeFaviconResponse = (raw: Buffer): FaviconResponse => {
+const deserializeFaviconResponse = (raw: Buffer): UsedFaviconResponse => {
   const cached = JSON.parse(raw.toString("utf-8")) as CachedFaviconResponse;
   const images: FaviconImage[] = cached.images.map((img) => ({
     name: img.name,
@@ -195,7 +199,7 @@ const getFaviconCacheKey = (
 };
 
 type FaviconDerivedState = {
-  response: FaviconResponse;
+  response: UsedFaviconResponse;
   /** Merged images + files lookup, precomputed once per version of the SVG. */
   filesByName: Record<string, Buffer | string>;
   /** Parsed `<link>` / `<meta>` tags for dev-mode injection. Build mode has
@@ -253,7 +257,7 @@ export const faviconPlugin = ({
       ? `${getFaviconCacheKey(svgContents, resolvedFaviconOptions)}.json`
       : null;
 
-    let response: FaviconResponse | null = null;
+    let response: UsedFaviconResponse | null = null;
     if (ns && cacheKey) {
       const cached = await ns.get(cacheKey);
       if (cached !== null) {
