@@ -46,7 +46,7 @@
     "express": "catalog:",
     "fontawesome-free": "^1.0.4",
     "hast-util-to-string": "^3.0.1",
-    "html-to-text": "^9.0.5",
+    "html-to-text": "^10.0.1",
     "levenshtein-edit-distance": "^3.0.1",
     "path-to-regexp": "^8.2.0",
     "react": "catalog:",
