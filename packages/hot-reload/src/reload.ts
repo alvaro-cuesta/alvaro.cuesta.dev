@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { isDeclined } from "./decline.ts";
 import { isDevelopment } from "./env.ts";
 import {
@@ -7,11 +8,14 @@ import {
   isOutOfDate,
   isShellModule,
   isVersionedModule,
+  moduleGraph,
+  type ModuleGraphModule,
   onHotImportSettled,
   onModulePath,
 } from "./hooks.ts";
 import { hotImportsOf } from "./hot-import.ts";
-import { retireCopies } from "./module-stack.ts";
+import { hasStack, retireCopies } from "./module-stack.ts";
+import { VERSION_PARAM } from "./version.ts";
 import { restartDevServer } from "./supervisor.ts";
 import { watchInDev } from "./watch.ts";
 
@@ -181,4 +185,44 @@ export function watchForReload(
     const retired = retireCopies((url) => isOutOfDate(url) || !inUse.has(url));
     if (retired !== undefined) onRetire(retired);
   });
+}
+
+// E.g. `src/site.tsx?v=2`, instead of its whole URL.
+const describeCopy = (url: string) =>
+  `${relativePath(fileURLToPath(url))}?${VERSION_PARAM}=${new URL(url).searchParams.get(VERSION_PARAM)}`;
+
+/**
+ * For debugging the dev server: every module the app or the dev server
+ * imported, and every copy of the app's modules, with whether it's in use and
+ * whether its `moduleStack` is still to be retired. Paths are relative to the
+ * working directory.
+ *
+ * Copies are never forgotten, as Node never frees them: one that's out of use
+ * shows as such.
+ */
+export function dumpModuleGraph(): {
+  modules: ModuleGraphModule[];
+  copies: {
+    copy: string;
+    inUse: boolean;
+    hasStack: boolean;
+    imports: string[];
+    hotImports: string[];
+  }[];
+} {
+  const { modules, copies } = moduleGraph();
+  return {
+    modules: modules.map((module) => ({
+      ...module,
+      path: relativePath(module.path),
+      importers: module.importers.map(relativePath),
+    })),
+    copies: copies.map(({ url, inUse, imports, hotImports }) => ({
+      copy: describeCopy(url),
+      inUse,
+      hasStack: hasStack(url),
+      imports: imports.map(describeCopy),
+      hotImports: hotImports.map(describeCopy),
+    })),
+  };
 }

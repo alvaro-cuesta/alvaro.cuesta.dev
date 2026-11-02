@@ -7,13 +7,17 @@ import express, {
 } from "express";
 import morgan from "morgan";
 import { hotImport } from "@xenon-ssg/hot-reload";
-import { watchForReload } from "@xenon-ssg/hot-reload/reload";
+import { dumpModuleGraph, watchForReload } from "@xenon-ssg/hot-reload/reload";
 import type { UnknownRecord } from "type-fest";
 import {
   type XenonExpressSiteMeta,
   type XenonExpressSiteModule,
   makeSiteMeta,
 } from "./index.tsx";
+
+// Where the dev server tells what hot reload knows of the modules, to debug
+// it. At the origin's root, not under the base path, so a site can't take it.
+const MODULE_GRAPH_PATH = "/_xenon/hot-reload";
 
 /** A version of the site, from when it starts loading. */
 type SiteVersion = {
@@ -138,6 +142,10 @@ export async function serveXenonExpressSite<PageMetadata extends UnknownRecord>(
 
   app.use(morgan("dev"));
 
+  app.get(MODULE_GRAPH_PATH, (_req, res) => {
+    res.json(dumpModuleGraph());
+  });
+
   // At the base path, where the site's root is.
   app.use(basepath || "/", (req, res, next) => {
     void serve(current, req, res, next);
@@ -170,6 +178,9 @@ export async function serveXenonExpressSite<PageMetadata extends UnknownRecord>(
       const { port: boundPort } = server.address() as AddressInfo;
       const siteMeta = makeSiteMeta(`http://localhost:${boundPort}`, basepath);
       console.log(`Listening on ${siteMeta.baseUrl}/`);
+      console.log(
+        `Hot reload's module graph: http://localhost:${boundPort}${MODULE_GRAPH_PATH}`,
+      );
       served.resolve(siteMeta);
       resolve();
     });

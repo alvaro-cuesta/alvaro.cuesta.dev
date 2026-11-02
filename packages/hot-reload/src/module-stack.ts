@@ -99,3 +99,6 @@ export function retireCopies(
   }
   return retired;
 }
+
+/** For debugging: whether the copy at `url` has a stack it hasn't retired. */
+export const hasStack = (url: string): boolean => stacks.has(url);

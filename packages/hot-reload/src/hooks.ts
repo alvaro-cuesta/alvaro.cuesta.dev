@@ -348,6 +348,68 @@ export const onHotImportSettled = (listener: () => void): void => {
   settledListeners.add(listener);
 };
 
+/** A module, as {@link moduleGraph} describes it. */
+export type ModuleGraphModule = {
+  path: string;
+  /** Whether the shell imports it (so it isn't reloaded), or the app does. */
+  kind: "shell" | "app" | "both";
+  /** The version the next import of it gets, if it's the app's. */
+  version: number | undefined;
+  /** The app's modules that import it, but for its hot imports. */
+  importers: string[];
+};
+
+/** A copy of a module, as {@link moduleGraph} describes it. */
+export type ModuleGraphCopy = {
+  url: string;
+  inUse: boolean;
+  /** The copies it imports, but for its hot imports'. */
+  imports: string[];
+  /** The copies its hot imports use, or are loading. */
+  hotImports: string[];
+};
+
+/**
+ * For debugging: every module the app or the shell imported, and every copy of
+ * the app's that hasn't been forgotten (they never are).
+ */
+export const moduleGraph = (): {
+  modules: ModuleGraphModule[];
+  copies: ModuleGraphCopy[];
+} => {
+  const inUse = copiesInUse();
+  const modulePaths = new Set([...shellPaths, ...versions.keys()]);
+  const importerUrls = [
+    ...loadedHotImports.keys(),
+    ...loadingHotImports.keys(),
+  ];
+  const copyUrls = new Set([
+    ...copyImports.keys(),
+    ...[...copyImports.values()].flatMap((urls) => [...urls]),
+    ...importerUrls.filter(isVersionedParent),
+    ...importerUrls.flatMap(hotImportsFrom),
+  ]);
+
+  return {
+    modules: [...modulePaths].sort().map((modulePath) => {
+      const isShell = shellPaths.has(modulePath);
+      const isApp = versions.has(modulePath);
+      return {
+        path: modulePath,
+        kind: isShell ? (isApp ? "both" : "shell") : "app",
+        version: versions.get(modulePath),
+        importers: [...(importers.get(modulePath) ?? [])].sort(),
+      };
+    }),
+    copies: [...copyUrls].sort().map((url) => ({
+      url,
+      inUse: inUse.has(url),
+      imports: [...(copyImports.get(url) ?? [])].sort(),
+      hotImports: hotImportsFrom(url).sort(),
+    })),
+  };
+};
+
 /**
  * Bumps the versions of the modules at `modulePaths` and of every module that
  * imports them, directly or not, so importing them again evaluates them again.
