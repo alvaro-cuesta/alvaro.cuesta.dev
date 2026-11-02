@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import type { XenonGeneratedPage } from "@xenon-ssg/core/generate/generate";
 import type { UnknownRecord } from "type-fest";
 import { toServedHref } from "@xenon-ssg/core/url";
+import { assertNever } from "@xenon-ssg/core/assert";
 
 /**
  * Attaches the plugin's routes for dev mode.
@@ -222,8 +223,7 @@ function renderInjectableRaw(
       return <meta key={index} name={tag.name} content={tag.content} />;
 
     default:
-      // @ts-expect-error This should never happen
-      throw new Error(`Unknown injectable tag type: ${tag.type}`);
+      return assertNever(tag);
   }
 }
 

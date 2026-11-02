@@ -21,6 +21,11 @@
       "types": "./dist/url.d.ts",
       "default": "./dist/url.js"
     },
+    "./assert": {
+      "@xenon-ssg/source": "./src/assert.ts",
+      "types": "./dist/assert.d.ts",
+      "default": "./dist/assert.js"
+    },
     "./page": {
       "@xenon-ssg/source": "./src/page.tsx",
       "types": "./dist/page.d.ts",
