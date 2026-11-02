@@ -12,26 +12,52 @@ type MakeRouteOptions = {
   exact?: boolean;
 };
 
+/**
+ * The params of a path the route's pattern matches, or `null` when they aren't
+ * the route's after all (e.g. a page that isn't a number), as path-to-regexp's
+ * patterns can't say what a param holds.
+ */
+type ParseParams<Params, ParsedParams> = (
+  params: Params,
+) => ParsedParams | null;
+
 export function makeRoute<Params extends ParamData>(
   path: string,
   options?: MakeRouteOptions,
 ): Route<Params>;
+export function makeRoute<Params extends ParamData>(
+  path: string,
+  parse: ParseParams<Params, Params>,
+  options?: MakeRouteOptions,
+): Route<Params>;
 export function makeRoute<Params extends ParamData, ParsedParams>(
   path: string,
-  parse: (params: Params) => ParsedParams,
+  parse: ParseParams<Params, ParsedParams>,
   serialize: (params: ParsedParams) => Params,
   options?: MakeRouteOptions,
 ): Route<ParsedParams>;
 export function makeRoute<Params extends ParamData, ParsedParams>(
   path: string,
-  parseOrOptions?: ((params: Params) => ParsedParams) | MakeRouteOptions,
-  serialize?: (params: ParsedParams) => Params,
+  parseOrOptions?: ParseParams<Params, ParsedParams> | MakeRouteOptions,
+  serializeOrOptions?: ((params: ParsedParams) => Params) | MakeRouteOptions,
   options?: MakeRouteOptions,
 ): Route<ParsedParams> {
   const parse =
     typeof parseOrOptions === "function" ? parseOrOptions : undefined;
+  const serialize =
+    typeof serializeOrOptions === "function" ? serializeOrOptions : undefined;
   const resolvedOptions =
-    typeof parseOrOptions === "object" ? parseOrOptions : options;
+    typeof parseOrOptions === "object"
+      ? parseOrOptions
+      : typeof serializeOrOptions === "object"
+        ? serializeOrOptions
+        : options;
+
+  const parseMatched = (params: Params) =>
+    parse
+      ? parse(params)
+      : // `as` here should be safe because the only way `parse` is not provided is if `ParsedParams` is `Params`
+        (params as unknown as ParsedParams);
 
   const matchFn = match<Params>(path);
   const matchWithoutTrailingFn = path.endsWith("/")
@@ -52,24 +78,27 @@ export function makeRoute<Params extends ParamData, ParsedParams>(
       const matched = matchFn(requestedPath);
 
       if (matched === false) {
-        if (matchWithoutTrailingFn && matchWithoutTrailingFn(requestedPath)) {
+        const matchedWithoutTrailing = matchWithoutTrailingFn?.(requestedPath);
+        // Only for a path that would be the route's with the slash, so a bad
+        // param doesn't redirect to another miss.
+        if (
+          matchedWithoutTrailing &&
+          parseMatched(matchedWithoutTrailing.params) !== null
+        ) {
           throw new NeedsTrailingSlashError(path);
         }
 
         return null;
       }
 
-      return parse
-        ? parse(matched.params)
-        : // `as` here should be safe because the only way `parse` is not proided is if `ParsedParams` is `Params`
-          (matched.params as unknown as ParsedParams);
+      return parseMatched(matched.params);
     },
 
     build: (params: ParsedParams, { hash } = {}) => {
       const path = buildFn(
         serialize
           ? serialize(params)
-          : // `as` here should be safe because the only way `serialize` is not proided is if `ParsedParams` is `Params`
+          : // `as` here should be safe because the only way `serialize` is not provided is if `ParsedParams` is `Params`
             (params as unknown as Params),
       );
 

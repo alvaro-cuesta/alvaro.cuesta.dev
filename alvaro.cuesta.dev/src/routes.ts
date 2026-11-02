@@ -1,4 +1,29 @@
 import { makeRoute } from "./utils/routes.ts";
+import { VALID_SLUG_REGEX } from "./utils/slug.ts";
+
+// Param parsers for the routes' `parse`: `undefined` when the param isn't one,
+// so the path isn't the route's. They only take what `build` writes, so each
+// page has one path.
+
+/**
+ * A page past the first, or `null` for the first, which has no page in its
+ * path.
+ */
+const parsePage = (page: string | undefined): number | null | undefined => {
+  if (page === undefined) return null;
+  // Plainly written, as `toString` does: not e.g. `02` or `2e0`.
+  if (!/^[1-9][0-9]*$/.test(page)) return undefined;
+
+  const number = parseInt(page, 10);
+  // The first page's path has no page.
+  return number > 1 ? number : undefined;
+};
+
+const parseYear = (year: string): number | undefined =>
+  /^[0-9]{4}$/.test(year) ? parseInt(year, 10) : undefined;
+
+const parseSlug = (slug: string): string | undefined =>
+  VALID_SLUG_REGEX.test(slug) ? slug : undefined;
 
 // META PAGES
 export const route404 = makeRoute<{}>("/404.html");
@@ -24,11 +49,11 @@ export const routeBlogArticleList = makeRoute<
   { page?: string },
   { page: number | null }
 >(
-  // TODO:: path-to-regexp no longer supports complex patterns like `(\\d+)` so we need to find a way to make this work
   "/blog{/page/:page}/",
-  (params) => ({
-    page: params.page !== undefined ? parseInt(params.page, 10) : null,
-  }),
+  (params) => {
+    const page = parsePage(params.page);
+    return page === undefined ? null : { page };
+  },
   (params) => ({
     ...(params.page !== null ? { page: params.page.toString() } : {}),
   }),
@@ -36,17 +61,19 @@ export const routeBlogArticleList = makeRoute<
 );
 
 export const routeBlogArticle = makeRoute<{ slug: string }>(
-  // TODO:: path-to-regexp no longer supports complex patterns like `(${VALID_SLUG_REGEX_FRAGMENT})` so we need to find a way to make this work
   `/blog/:slug/`,
+  (params) => {
+    const slug = parseSlug(params.slug);
+    return slug === undefined ? null : { slug };
+  },
 );
 
 // BLOG TAGS
 export const routeBlogTagList = makeRoute<{}>("/blog/tags/");
 
-export const routeBlogTag = makeRoute<{ tag: string }>(
-  // TODO:: path-to-regexp no longer supports complex patterns like `(${VALID_SLUG_REGEX_FRAGMENT})` so we need to find a way to make this work
-  `/blog/tags/:tag/`,
-);
+// Tags aren't checked: they aren't required to be slugs (e.g.
+// `series:oh-my-ssh-keys`).
+export const routeBlogTag = makeRoute<{ tag: string }>(`/blog/tags/:tag/`);
 
 // BLOG YEARS
 export const routeBlogYearList = makeRoute<{}>("/blog/years/");
@@ -57,9 +84,10 @@ export const routeTimelineList = makeRoute<
   { page: number | null }
 >(
   "/timeline{/page/:page}/",
-  (params) => ({
-    page: params.page !== undefined ? parseInt(params.page, 10) : null,
-  }),
+  (params) => {
+    const page = parsePage(params.page);
+    return page === undefined ? null : { page };
+  },
   (params) => ({
     ...(params.page !== null ? { page: params.page.toString() } : {}),
   }),
@@ -67,14 +95,20 @@ export const routeTimelineList = makeRoute<
 );
 
 export const routeBlogYear = makeRoute<{ year: string }, { year: number }>(
-  // TODO:: path-to-regexp no longer supports complex patterns like `(\\d{4})` so we need to find a way to make this work
   "/blog/years/:year/",
-  (params) => ({ year: parseInt(params.year, 10) }),
+  (params) => {
+    const year = parseYear(params.year);
+    return year === undefined ? null : { year };
+  },
   (params) => ({ year: params.year.toString() }),
 );
 
 export const routeTimelinePost = makeRoute<{ slug: string }>(
   `/timeline/:slug/`,
+  (params) => {
+    const slug = parseSlug(params.slug);
+    return slug === undefined ? null : { slug };
+  },
 );
 
 // TIMELINE TAGS
@@ -85,10 +119,10 @@ export const routeTimelineTag = makeRoute<
   { tag: string; page: number | null }
 >(
   `/timeline/tags/:tag{/:page}/`,
-  (params) => ({
-    tag: params.tag,
-    page: params.page !== undefined ? parseInt(params.page, 10) : null,
-  }),
+  (params) => {
+    const page = parsePage(params.page);
+    return page === undefined ? null : { tag: params.tag, page };
+  },
   (params) => ({
     tag: params.tag,
     ...(params.page !== null ? { page: params.page.toString() } : {}),
@@ -103,10 +137,11 @@ export const routeTimelineYear = makeRoute<
   { year: number; page: number | null }
 >(
   "/timeline/years/:year{/:page}/",
-  (params) => ({
-    year: parseInt(params.year, 10),
-    page: params.page !== undefined ? parseInt(params.page, 10) : null,
-  }),
+  (params) => {
+    const year = parseYear(params.year);
+    const page = parsePage(params.page);
+    return year === undefined || page === undefined ? null : { year, page };
+  },
   (params) => ({
     year: params.year.toString(),
     ...(params.page !== null ? { page: params.page.toString() } : {}),
