@@ -9,19 +9,25 @@ import { blogItemToImplicitTimelineItem } from "./implicit-posts.tsx";
 import { analyzeItems, type AnalyzedItems, type Item } from "../utils/analyze.ts";
 import type { BlogItemModuleParsed } from "../blog/item-module.ts";
 import { derived } from "@xenon-ssg/thunks";
+import { moduleStack } from "@xenon-ssg/hot-reload";
+
+// This copy of the module's thunks, disposed once a reload replaces it.
+const moduleOwned = moduleStack(import.meta);
 
 const TIMELINE_FOLDER = path.join(SITE_ROOT_FOLDER, "timeline");
 
-const rawTimeline = createContentLoader({
-  contentFolderPath: TIMELINE_FOLDER,
-  contentFolderUrl: pathToFileURL(TIMELINE_FOLDER + path.sep),
-  parseModule: parseTimelineItemModuleFromImportModule,
-  analyzeOptions: {
-    getSlug: (item) => item.module.slug,
-    getPublicationDate: (item) => item.module.publicationDate,
-    getTags: (item) => item.module.tags,
-  },
-});
+const rawTimeline = moduleOwned.use(
+  createContentLoader({
+    contentFolderPath: TIMELINE_FOLDER,
+    contentFolderUrl: pathToFileURL(TIMELINE_FOLDER + path.sep),
+    parseModule: parseTimelineItemModuleFromImportModule,
+    analyzeOptions: {
+      getSlug: (item) => item.module.slug,
+      getPublicationDate: (item) => item.module.publicationDate,
+      getTags: (item) => item.module.tags,
+    },
+  }),
+);
 
 const ANALYZE_OPTIONS = {
   getSlug: (item: { module: TimelineItemModuleParsed }) => item.module.slug,
@@ -75,13 +81,15 @@ function mergeWithImplicitPosts(
 }
 
 /** The timeline's posts, plus one for each blog article. */
-export const timeline = derived(async (get) => {
-  const [rawItems, blogItems] = await Promise.all([
-    get(rawTimeline),
-    get(blog),
-  ]);
-  return mergeWithImplicitPosts(rawItems, blogItems);
-});
+export const timeline = moduleOwned.use(
+  derived(async (get) => {
+    const [rawItems, blogItems] = await Promise.all([
+      get(rawTimeline),
+      get(blog),
+    ]);
+    return mergeWithImplicitPosts(rawItems, blogItems);
+  }),
+);
 
 // One thunk for all slugs, not one per slug: slugs come from requests, so
 // there'd be no end to them.
@@ -90,16 +98,18 @@ export const timeline = derived(async (get) => {
  *
  * The function throws when there's none.
  */
-export const findTimelineItem = derived(async (get) => {
-  const { bySlug } = await get(timeline);
+export const findTimelineItem = moduleOwned.use(
+  derived(async (get) => {
+    const { bySlug } = await get(timeline);
 
-  return (slug: string) => {
-    const item = bySlug.get(slug);
+    return (slug: string) => {
+      const item = bySlug.get(slug);
 
-    if (item === undefined) {
-      throw new Error(`Timeline post "${slug}" not found`);
-    }
+      if (item === undefined) {
+        throw new Error(`Timeline post "${slug}" not found`);
+      }
 
-    return item;
-  };
-});
+      return item;
+    };
+  }),
+);

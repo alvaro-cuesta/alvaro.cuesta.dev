@@ -42,9 +42,15 @@ import {
 } from "./utils/item-dates.ts";
 import { read } from "@xenon-ssg/thunks";
 
-const Now = makeMdxPage(import.meta.resolve("./pages/Now.mdx"));
-const Bookmarks = makeMdxPage(import.meta.resolve("./pages/Bookmarks.mdx"));
-const Licenses = makeMdxPage(import.meta.resolve("./pages/Licenses.mdx"));
+// Not `import.meta.resolve`, which the dev server counts as an import: it would
+// evaluate this module again whenever a page changes.
+const Now = makeMdxPage(new URL("./pages/Now.mdx", import.meta.url).href);
+const Bookmarks = makeMdxPage(
+  new URL("./pages/Bookmarks.mdx", import.meta.url).href,
+);
+const Licenses = makeMdxPage(
+  new URL("./pages/Licenses.mdx", import.meta.url).href,
+);
 
 /**
  * When a page was published and last modified, for its meta tags and the sitemap.

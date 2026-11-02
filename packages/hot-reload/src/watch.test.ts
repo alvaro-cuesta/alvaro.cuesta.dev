@@ -66,6 +66,22 @@ describe("watchInDev", () => {
     expect(changes).toBeGreaterThanOrEqual(2);
   });
 
+  it("reports one write once, however many events it gives", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    await using folder = await fs.mkdtempDisposable(
+      path.join(os.tmpdir(), "xenon-watch-once-"),
+    );
+    const filePath = path.join(folder.path, "watched.txt");
+    await fs.writeFile(filePath, "");
+    let changes = 0;
+
+    using _watch = watchInDev(filePath, () => changes++);
+    await fs.writeFile(filePath, "changed");
+    await setTimeout(200);
+
+    expect(changes).toBe(1);
+  });
+
   it("sees a file that doesn't exist yet being created", async () => {
     vi.stubEnv("NODE_ENV", "development");
     await using folder = await fs.mkdtempDisposable(

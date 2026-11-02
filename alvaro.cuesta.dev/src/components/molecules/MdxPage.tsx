@@ -9,19 +9,37 @@ import { contentFile } from "../../utils/content-file.ts";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
 import { routeHome } from "../../routes.ts";
 import { read } from "@xenon-ssg/thunks";
+import {
+  assertHasMdxDefaultExport,
+  assertIsModule,
+  assertOptionalString,
+  assertRequiredArray,
+} from "../../utils/item-module-assertions.ts";
 
 type MdxPageModule = {
   default: MDXContent;
-  title: string | undefined;
-  description: string | undefined;
+  title?: string | undefined;
+  description?: string | undefined;
   /**
    * The page's `og:type`.
    *
    * `"website"` (the default) or `"article"`.
    */
-  openGraphType: string | undefined;
+  openGraphType?: string | undefined;
   tableOfContents: Toc;
 };
+
+function assertIsMdxPageModule(
+  module: unknown,
+  label: string,
+): asserts module is MdxPageModule {
+  assertIsModule(module, label);
+  assertHasMdxDefaultExport(module, label);
+  assertOptionalString(module, "title", label);
+  assertOptionalString(module, "description", label);
+  assertOptionalString(module, "openGraphType", label);
+  assertRequiredArray(module, "tableOfContents", label);
+}
 
 type MdxPageProps = {
   siteRenderMeta: SiteRenderMeta;
@@ -40,13 +58,16 @@ export function makeMdxPage(contentFileUrl: string) {
   };
 
   async function MdxPage({ siteRenderMeta }: MdxPageProps) {
+    const { module } = await read(page);
+    assertIsMdxPageModule(module, `MdxPage module at ${contentFileUrl}`);
+
     const {
       default: Content,
       title,
       description,
       openGraphType = "website",
       tableOfContents,
-    } = (await read(page)).module as MdxPageModule;
+    } = module;
 
     if (title === undefined) {
       throw new Error(

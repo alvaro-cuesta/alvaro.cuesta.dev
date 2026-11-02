@@ -21,11 +21,6 @@
       "types": "./dist/url.d.ts",
       "default": "./dist/url.js"
     },
-    "./watch": {
-      "@xenon-ssg/source": "./src/watch.ts",
-      "types": "./dist/watch.d.ts",
-      "default": "./dist/watch.js"
-    },
     "./page": {
       "@xenon-ssg/source": "./src/page.tsx",
       "types": "./dist/page.d.ts",

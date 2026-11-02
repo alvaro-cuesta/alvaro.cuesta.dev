@@ -1,16 +1,13 @@
 import type { MDXContent } from "mdx/types.js";
 import { isItemModuleDate, type ItemModuleDate } from "./item-dates.ts";
 
-const getField = (module: NodeModule, field: string): unknown =>
+const getField = (module: object, field: string): unknown =>
   (module as unknown as Record<string, unknown>)[field];
 
 /**
  * Assert that a module has a valid MDX default export.
  */
-export function assertHasMdxDefaultExport(
-  module: NodeModule,
-  label: string,
-): void {
+export function assertHasMdxDefaultExport(module: object, label: string): void {
   if (!("default" in module)) {
     throw new Error(`${label} module does not have a default export.`);
   }
@@ -36,7 +33,7 @@ export function assertHasMdxDefaultExport(
  * Assert that an optional date field is a valid ItemModuleDate.
  */
 export function assertOptionalDate(
-  module: NodeModule,
+  module: object,
   field: string,
   label: string,
 ): void {
@@ -52,7 +49,7 @@ export function assertOptionalDate(
  * Assert that an optional boolean field is valid.
  */
 export function assertOptionalBoolean(
-  module: NodeModule,
+  module: object,
   field: string,
   label: string,
 ): void {
@@ -68,7 +65,7 @@ export function assertOptionalBoolean(
  * Assert that an optional string field is valid.
  */
 export function assertOptionalString(
-  module: NodeModule,
+  module: object,
   field: string,
   label: string,
 ): void {
@@ -84,7 +81,7 @@ export function assertOptionalString(
  * Assert that a required array field is present and valid.
  */
 export function assertRequiredArray(
-  module: NodeModule,
+  module: object,
   field: string,
   label: string,
 ): void {
@@ -104,7 +101,7 @@ export function assertRequiredArray(
  * Assert that an optional string array field is valid.
  */
 export function assertOptionalStringArray(
-  module: NodeModule,
+  module: object,
   field: string,
   label: string,
 ): void {
@@ -119,7 +116,20 @@ export function assertOptionalStringArray(
   }
 }
 
-export type ContentItemModule = NodeModule & {
+/**
+ * Assert that what an `import()` gave is a module, i.e. an object of its
+ * exports, for the other assertions to read them.
+ */
+export function assertIsModule(
+  module: unknown,
+  label: string,
+): asserts module is object {
+  if (typeof module !== "object" || module === null) {
+    throw new Error(`${label} is not a module.`);
+  }
+}
+
+export type ContentItemModule = {
   default: MDXContent;
   creationDate?: ItemModuleDate | undefined;
   publicationDate?: ItemModuleDate | undefined;
@@ -138,9 +148,10 @@ export type ContentItemModule = NodeModule & {
  * `asserts` here declares the full narrowed type.
  */
 export function assertIsContentItemModule(
-  m: NodeModule,
+  m: unknown,
   label: string,
 ): asserts m is ContentItemModule {
+  assertIsModule(m, label);
   assertHasMdxDefaultExport(m, label);
   assertOptionalDate(m, "creationDate", label);
   assertOptionalDate(m, "publicationDate", label);

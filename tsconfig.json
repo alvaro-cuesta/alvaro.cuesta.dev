@@ -3,6 +3,7 @@
   "references": [
     { "path": "./packages/thunks" },
     { "path": "./packages/core" },
+    { "path": "./packages/hot-reload" },
     { "path": "./packages/express" },
     { "path": "./packages/express-plugin-favicon" },
     { "path": "./packages/express-plugin-feeds" },

@@ -95,6 +95,25 @@ describe("cell", () => {
     expect(await read(getValue)).toBe(2);
   });
 
+  it("can be made from a source that loads its value and invalidates it", async () => {
+    let value = 1;
+    let invalidate = () => {};
+    const getValue = cell({
+      load: () => Promise.resolve(value),
+      subscribe: (newInvalidate) => {
+        invalidate = newInvalidate;
+        return { [Symbol.dispose]: () => {} };
+      },
+    });
+
+    expect(await read(getValue)).toBe(1);
+
+    value = 2;
+    invalidate();
+
+    expect(await read(getValue)).toBe(2);
+  });
+
   it("stops what it's subscribed to once disposed, and isn't subscribed again", async () => {
     const dispose = vi.fn();
     const subscribe = vi.fn(() => ({ [Symbol.dispose]: dispose }));

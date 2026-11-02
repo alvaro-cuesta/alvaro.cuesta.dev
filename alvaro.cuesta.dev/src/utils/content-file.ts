@@ -1,7 +1,6 @@
-import fs from "node:fs/promises";
 import url from "node:url";
 import { cell, derived, type Thunk } from "@xenon-ssg/thunks";
-import { watchInDev } from "@xenon-ssg/core/watch";
+import { hotImport } from "@xenon-ssg/hot-reload";
 import { gitFileDates, type GitFileDates } from "./git.ts";
 
 /** A content file: the module it compiles to, and when git says it was created and last modified. */
@@ -13,46 +12,32 @@ export type ContentFile = {
 /**
  * A content file, read again whenever what it's made from changes.
  *
- * In development, its module is imported again whenever the file changes. Its dates are read again whenever `HEAD`
- * moves or the ignored commits change.
+ * In development, its module is imported again whenever the dev server says it changed: when the file, or anything it
+ * imports, does. Its dates are read again whenever `HEAD` moves or the ignored commits change.
  *
- * Disposing it stops watching the file.
+ * Disposing it stops handling changes to the module, and nothing else handles them: a hot import's module has no
+ * importer to reload instead (see `hotImport`). The dev server ignores them, until something imports the module again
+ * and gets its latest version.
  *
  * @param fileUrl The file's URL.
  * @returns The content file.
  */
 export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
-  const isDev = process.env["NODE_ENV"] === "development";
   const filePath = url.fileURLToPath(fileUrl);
 
-  // The file's version on disk. In nanoseconds, so no two saves share one.
-  const mtime = cell(
-    async () => (await fs.stat(filePath, { bigint: true })).mtimeNs,
-    (invalidate) => watchInDev(filePath, invalidate),
-  );
+  // Only this cell is invalidated when the file changes, instead of the module
+  // that makes the content file, and the whole site with it.
+  const module = cell(hotImport(() => import(fileUrl)));
 
-  const module = derived(async (get): Promise<unknown> => {
-    // Node caches modules by URL and never frees them, so in dev the URL
-    // carries the file's version: an edit gets a new URL, and so a fresh
-    // module, but reading the same version again reuses the cached one instead
-    // of leaking another copy. In production each file is imported once, so
-    // the bare URL will do, and the file is never stat'd.
-    const importUrl = isDev ? `${fileUrl}?${await get(mtime)}` : fileUrl;
-
-    return import(importUrl);
-  });
-
-  // Disposed along with the content file: nothing else reads them.
-  const owned = new DisposableStack();
-  owned.use(mtime);
-  owned.use(module);
-
+  // Disposed along with the content file: nothing else reads it.
   return derived(async (get) => {
+    // Together: the path is known before the import, so git needn't wait for
+    // the file to compile.
     const [fileModule, gitDates] = await Promise.all([
       get(module),
       get(gitFileDates(filePath)),
     ]);
 
     return { module: fileModule, gitDates };
-  }, owned);
+  }, module);
 }

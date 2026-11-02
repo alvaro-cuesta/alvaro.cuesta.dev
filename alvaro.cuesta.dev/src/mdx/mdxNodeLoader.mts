@@ -1,9 +1,14 @@
 import type { LoadHookSync } from "node:module";
+import { fileURLToPath } from "node:url";
 import {
   MessageChannel,
   receiveMessageOnPort,
   Worker,
 } from "node:worker_threads";
+import {
+  restartOnChangeInDev,
+  restartOnWorkerChangeInDev,
+} from "@xenon-ssg/hot-reload/supervisor";
 import {
   SIGNAL,
   type MdxCompilerRequest,
@@ -46,6 +51,20 @@ const supervisor = new Worker(supervisorUrl, {
 });
 // Don't keep the process alive, e.g. once a build is done.
 supervisor.unref();
+
+// Hot reload can't reload this module, nor the threads': Node loads this one
+// before its hooks, and the threads' on threads of their own. So a change to
+// them restarts the dev server instead.
+restartOnChangeInDev(
+  [
+    import.meta.url,
+    "./mdxCompilerProtocol.mts",
+    "./mdxCompilerSupervisor.mts",
+    "./mdxCompilerWorker.mts",
+  ].map((specifier) => fileURLToPath(new URL(specifier, import.meta.url))),
+);
+// The supervisor relays the compiler's reports.
+restartOnWorkerChangeInDev(supervisor);
 
 // Once it dies, for every compile after.
 let compilerDeath: Error | undefined;

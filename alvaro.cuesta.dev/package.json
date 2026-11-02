@@ -9,9 +9,9 @@
     "#components/*": "./src/components/*.tsx"
   },
   "scripts": {
-    "build": "NODE_ENV=production tsx --config-file=node.config.json --tsconfig ../tsconfig.base.json ./bin/build.ts",
+    "build": "NODE_ENV=production TSX_TSCONFIG_PATH=../tsconfig.base.json node --config-file=node.config.json ./bin/build.ts",
     "build:serve": "serve ./dist",
-    "dev": "NODE_ENV=development tsx watch --include ./src/mdx --config-file=node.config.json --tsconfig ../tsconfig.base.json ./bin/dev.ts",
+    "dev": "NODE_ENV=development TSX_TSCONFIG_PATH=../tsconfig.base.json node --conditions=@xenon-ssg/source ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint:tsc": "tsc -b"
@@ -39,6 +39,7 @@
     "@xenon-ssg/express-plugin-sitemap": "workspace:*",
     "@xenon-ssg/express-plugin-static-file": "workspace:*",
     "@xenon-ssg/express-plugin-static-folder": "workspace:*",
+    "@xenon-ssg/hot-reload": "workspace:*",
     "@xenon-ssg/thunks": "workspace:*",
     "classnames": "^2.5.1",
     "estree-walker": "^3.0.3",

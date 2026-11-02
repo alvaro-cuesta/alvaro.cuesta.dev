@@ -97,6 +97,9 @@ importers:
       '@xenon-ssg/express-plugin-static-folder':
         specifier: workspace:*
         version: link:../packages/express-plugin-static-folder
+      '@xenon-ssg/hot-reload':
+        specifier: workspace:*
+        version: link:../packages/hot-reload
       '@xenon-ssg/thunks':
         specifier: workspace:*
         version: link:../packages/thunks
@@ -268,6 +271,9 @@ importers:
       '@xenon-ssg/core':
         specifier: workspace:*
         version: link:../core
+      '@xenon-ssg/hot-reload':
+        specifier: workspace:*
+        version: link:../hot-reload
       express:
         specifier: 'catalog:'
         version: 5.2.1
@@ -395,6 +401,18 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
+
+  packages/hot-reload:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.4(@types/node@26.6.6)(vite@7.3.2(@types/node@26.6.6)(lightningcss@1.32.0)(tsx@4.23.15))
 
   packages/thunks:
     devDependencies:

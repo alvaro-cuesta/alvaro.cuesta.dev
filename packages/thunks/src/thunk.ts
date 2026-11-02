@@ -70,10 +70,21 @@ export function brand<T>(
  * Inside a derived thunk's `make`, read through `get` instead: a read through `read` doesn't make
  * it run again when the thunk changes.
  *
+ * Throws a `TypeError` if `thunk` isn't one this copy of the package made, e.g. one from a second
+ * copy of it, which has a brand of its own.
+ *
  * @param thunk The thunk to read.
  * @returns The thunk's promise.
  */
 export function read<T>(thunk: Thunk<T>): Promise<T> {
+  // Its type says it's always there, but two copies of this package (e.g. two installed
+  // versions) each brand their own thunks, and without this the error would only say that
+  // `thunk[thunkBrand]` isn't a function.
+  if (typeof thunk[thunkBrand] !== "function") {
+    throw new TypeError(
+      "Read something that isn't a thunk from this copy of `@xenon-ssg/thunks`. Is it loaded twice?",
+    );
+  }
   return thunk[thunkBrand]();
 }
 

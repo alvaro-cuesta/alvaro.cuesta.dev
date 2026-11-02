@@ -22,6 +22,7 @@
     { "path": "../packages/express-plugin-single-lightningcss/tsconfig.package.json" },
     { "path": "../packages/express-plugin-static-file/tsconfig.package.json" },
     { "path": "../packages/express-plugin-static-folder/tsconfig.package.json" },
+    { "path": "../packages/hot-reload/tsconfig.package.json" },
     { "path": "../packages/thunks/tsconfig.package.json" }
   ]
 }

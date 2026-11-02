@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import { contentFile } from "./content-file.ts";
 import { cell, derived, family, type Thunk } from "@xenon-ssg/thunks";
-import { watchInDev } from "@xenon-ssg/core/watch";
+import { watchInDev } from "@xenon-ssg/hot-reload";
 import {
   analyzeItems,
   type AnalyzedItems,
@@ -15,7 +15,7 @@ type InferredMetadata = {
 
 type ParseModule<TModuleParsed> = (
   filename: string,
-  rawModule: NodeModule,
+  rawModule: unknown,
   inferredMetadata: InferredMetadata,
 ) => TModuleParsed;
 
@@ -43,13 +43,14 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
     (invalidate) => watchInDev(contentFolderPath, invalidate),
   );
 
-  // Each file watches itself, so only the ones that changed are read again.
+  // One content file per file, so a change only imports again the files it
+  // reaches (see `contentFile`).
   const fileFor = family((filename: string) =>
     contentFile(new URL(filename, contentFolderUrl).href),
   );
 
-  // Disposed along with the loader, which stops watching the folder and its
-  // files: nothing else reads them.
+  // Disposed along with the loader, which stops watching the folder and
+  // handling changes to its files: nothing else reads them.
   const owned = new DisposableStack();
   owned.use(files);
   owned.use(fileFor);
@@ -57,13 +58,13 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   return derived(async (get) => {
     const filelist = await get(files);
 
-    // Removed files stop being watched.
+    // Changes to removed files stop being handled.
     fileFor.retain(filelist);
 
     const importedItems = await Promise.all(
       filelist.map(async (filename) => {
         const { module: rawModule, gitDates } = await get(fileFor(filename));
-        const module = parseModule(filename, rawModule as NodeModule, {
+        const module = parseModule(filename, rawModule, {
           lastModificationDate: gitDates?.lastModifiedAt ?? null,
         });
 

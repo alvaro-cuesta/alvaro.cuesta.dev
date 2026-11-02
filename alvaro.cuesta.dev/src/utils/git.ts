@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { cell, derived, family, thunk } from "@xenon-ssg/thunks";
-import { watchInDev } from "@xenon-ssg/core/watch";
+import { moduleStack, watchInDev } from "@xenon-ssg/hot-reload";
 
 const runGitCommand = async (
   args: string[],
@@ -19,6 +19,9 @@ const runGitCommand = async (
     });
   });
 };
+
+// This copy of the module's thunks, disposed once a reload replaces it.
+const moduleOwned = moduleStack(import.meta);
 
 const COMMIT_LINE_PREFIX = "commit ";
 
@@ -52,16 +55,20 @@ const readIgnoredRevs = async (
  *
  * It's read once per directory: a directory doesn't move between worktrees.
  */
-const worktreeRoot = family((cwd: string) =>
-  thunk(() => runGitCommand(["rev-parse", "--show-toplevel"], cwd)),
+const worktreeRoot = moduleOwned.use(
+  family((cwd: string) =>
+    thunk(() => runGitCommand(["rev-parse", "--show-toplevel"], cwd)),
+  ),
 );
 
 /** A worktree's ignored commits, read once, and again in development whenever they change. */
-const ignoredRevsOf = family((root: string) =>
-  cell(
-    () => readIgnoredRevs(root),
-    (invalidate) =>
-      watchInDev(path.join(root, IGNORE_REVS_FILENAME), invalidate),
+const ignoredRevsOf = moduleOwned.use(
+  family((root: string) =>
+    cell(
+      () => readIgnoredRevs(root),
+      (invalidate) =>
+        watchInDev(path.join(root, IGNORE_REVS_FILENAME), invalidate),
+    ),
   ),
 );
 
@@ -75,11 +82,13 @@ const ignoredRevsOf = family((root: string) =>
  *
  * It's read once per worktree, and again in development whenever it changes. There are none outside a worktree.
  */
-export const ignoredRevs = family((cwd: string) =>
-  derived(async (get) => {
-    const root = await get(worktreeRoot(cwd));
-    return root === null ? new Set<string>() : get(ignoredRevsOf(root));
-  }),
+export const ignoredRevs = moduleOwned.use(
+  family((cwd: string) =>
+    derived(async (get) => {
+      const root = await get(worktreeRoot(cwd));
+      return root === null ? new Set<string>() : get(ignoredRevsOf(root));
+    }),
+  ),
 );
 
 const NOT_WATCHING: Disposable = { [Symbol.dispose]: () => {} };
@@ -104,37 +113,39 @@ const watchGitFileInDev = async (
 };
 
 /** A worktree's `HEAD`, read once, and again in development whenever it moves. */
-const headOf = family((root: string) => {
-  // The branch `HEAD` is on, like `refs/heads/main`, or `null` when it's detached. It changes on checkouts.
-  const branch = cell(
-    () => runGitCommand(["symbolic-ref", "-q", "HEAD"], root),
-    (invalidate) => watchGitFileInDev(root, "HEAD", invalidate),
-  );
+const headOf = moduleOwned.use(
+  family((root: string) => {
+    // The branch `HEAD` is on, like `refs/heads/main`, or `null` when it's detached. It changes on checkouts.
+    const branch = cell(
+      () => runGitCommand(["symbolic-ref", "-q", "HEAD"], root),
+      (invalidate) => watchGitFileInDev(root, "HEAD", invalidate),
+    );
 
-  // The commit a ref points to. It changes on commits, resets…
-  const commitOf = family((ref: string) =>
-    cell(
-      () => runGitCommand(["rev-parse", ref], root),
-      (invalidate) => watchGitFileInDev(root, ref, invalidate),
-    ),
-  );
+    // The commit a ref points to. It changes on commits, resets…
+    const commitOf = family((ref: string) =>
+      cell(
+        () => runGitCommand(["rev-parse", ref], root),
+        (invalidate) => watchGitFileInDev(root, ref, invalidate),
+      ),
+    );
 
-  // Disposed along with the worktree's `HEAD`, which stops watching its git
-  // files: nothing else reads them.
-  const owned = new DisposableStack();
-  owned.use(branch);
-  owned.use(commitOf);
+    // Disposed along with the worktree's `HEAD`, which stops watching its git
+    // files: nothing else reads them.
+    const owned = new DisposableStack();
+    owned.use(branch);
+    owned.use(commitOf);
 
-  return derived(async (get) => {
-    // Detached, `HEAD` holds the commit itself, so it's what moves.
-    const ref = (await get(branch)) ?? "HEAD";
+    return derived(async (get) => {
+      // Detached, `HEAD` holds the commit itself, so it's what moves.
+      const ref = (await get(branch)) ?? "HEAD";
 
-    // Only the ref `HEAD` is on moves it, so stop watching the ones it left.
-    commitOf.retain([ref]);
+      // Only the ref `HEAD` is on moves it, so stop watching the ones it left.
+      commitOf.retain([ref]);
 
-    return get(commitOf(ref));
-  }, owned);
-});
+      return get(commitOf(ref));
+    }, owned);
+  }),
+);
 
 /**
  * The commit `HEAD` points to, in the worktree a directory is in.
@@ -143,11 +154,13 @@ const headOf = family((root: string) => {
  *
  * It's read once per worktree, and again in development whenever `HEAD` moves: on commits, checkouts, resets…
  */
-export const gitHead = family((cwd: string) =>
-  derived(async (get) => {
-    const root = await get(worktreeRoot(cwd));
-    return root === null ? null : get(headOf(root));
-  }),
+export const gitHead = moduleOwned.use(
+  family((cwd: string) =>
+    derived(async (get) => {
+      const root = await get(worktreeRoot(cwd));
+      return root === null ? null : get(headOf(root));
+    }),
+  ),
 );
 
 const parseGitDate = (iso8601: string): Temporal.Instant | null => {
@@ -251,15 +264,17 @@ const readGitFileDates = async (
  *
  * It's read again whenever `HEAD` moves or the ignored commits change, in the file's worktree.
  */
-export const gitFileDates = family((filePath: string) =>
-  derived(async (get) => {
-    // Git finds the worktree from any folder in it, so the file's own will do.
-    const folder = path.dirname(filePath);
-    const [head, revs] = await Promise.all([
-      get(gitHead(folder)),
-      get(ignoredRevs(folder)),
-    ]);
+export const gitFileDates = moduleOwned.use(
+  family((filePath: string) =>
+    derived(async (get) => {
+      // Git finds the worktree from any folder in it, so the file's own will do.
+      const folder = path.dirname(filePath);
+      const [head, revs] = await Promise.all([
+        get(gitHead(folder)),
+        get(ignoredRevs(folder)),
+      ]);
 
-    return readGitFileDates(filePath, head, revs);
-  }),
+      return readGitFileDates(filePath, head, revs);
+    }),
+  ),
 );

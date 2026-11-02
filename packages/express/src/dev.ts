@@ -1,23 +1,47 @@
-import type { AddressInfo } from "node:net";
-import express, { type Express, type Router } from "express";
-import morgan from "morgan";
-import { type XenonExpressSite, makeSiteMeta } from "./index.tsx";
-import { makeXenonDevRouter } from "./dev-router.ts";
+// Runs in the dev server's supervisor too, which has no loader: import nothing
+// from `.tsx` here but types, which Node strips, and nothing that registers
+// hot reload's hooks (see `dev-server.ts`).
+
+import { superviseDevServer } from "@xenon-ssg/hot-reload/supervisor";
 import type { UnknownRecord } from "type-fest";
+import type { XenonExpressSiteModule } from "./index.tsx";
 
 const DEFAULT_DEV_PORT = 31337;
 
+type StartXenonExpressDevAppOptions = {
+  /** Where a change starts the dev server again after it fails. */
+  watchRoot: string;
+  /** Node options for the dev server, e.g. the loaders the site needs. */
+  nodeArgs?: string[];
+  port?: number;
+  /**
+   * Where to serve the site, if not at the root (e.g. `/repo`), to try it where
+   * a build for it would be deployed.
+   */
+  basepath?: string | undefined;
+};
+
 /**
- * Start a dev server for the site `loadSite` returns.
+ * Start a dev server for the site the module `loadSite` imports makes with its
+ * `makeSite` export (see `XenonExpressSiteModule`). `loadSite` must make just
+ * that `import()`, right away (e.g. `() => import("./site.tsx")`), to import
+ * it again when it changes (see `hotImport` in `@xenon-ssg/hot-reload`).
+ *
+ * Runs it in a child process, which runs the calling script again, and
+ * restarts it when its own modules change, or once a file in `watchRoot`
+ * changes after it fails (see `superviseDevServer` in
+ * `@xenon-ssg/hot-reload/supervisor`). So the script must call this before
+ * doing anything else, as everything before it runs in both.
  *
  * Listens before the site loads: loading a site imports all its modules, which
- * blocks the thread for a while, so `loadSite` only runs once the port is
- * bound. Requests that arrive in the meantime wait for the site instead of
- * failing to connect, and if it fails to load, every request responds with the
- * error.
+ * blocks the thread for a while, so it only starts once the port is bound.
+ * Requests that arrive in the meantime wait for the site instead of failing to
+ * connect, and if it fails to load, every request responds with the error.
  *
- * Serves the site at `basepath`, if given (e.g. `/repo`), to try it where a
- * build for it would be deployed.
+ * Hot reloads the site: when a module changes, it evaluates that module again
+ * along with what imports it, and loads the site again if that reaches it (see
+ * `watchForReload` in `@xenon-ssg/hot-reload/reload`, for what that asks of
+ * the site's modules). Requests use the latest site.
  *
  * To serve it from a server of your own instead (e.g. with other sites, or
  * behind a proxy), see `makeXenonDevRouter`.
@@ -25,50 +49,22 @@ const DEFAULT_DEV_PORT = 31337;
 export async function startXenonExpressDevApp<
   PageMetadata extends UnknownRecord,
 >(
-  loadSite: () => Promise<XenonExpressSite<PageMetadata>>,
-  port: number = DEFAULT_DEV_PORT,
-  basepath: string = "",
-): Promise<Express> {
-  const app = express();
-  const siteRouter = Promise.withResolvers<Router>();
-  // Avoid an unhandled rejection: the error is logged below and reported to
-  // every request.
-  siteRouter.promise.catch(() => {});
-
-  app.use(morgan("dev"));
-
-  // At the base path, where the site's root is.
-  app.use(basepath || "/", async (req, res, next) => {
-    let resolvedSiteRouter: Router;
-    try {
-      resolvedSiteRouter = await siteRouter.promise;
-    } catch (error) {
-      next(error);
-      return;
-    }
-    resolvedSiteRouter(req, res, next);
+  loadSite: () => Promise<XenonExpressSiteModule<PageMetadata>>,
+  {
+    watchRoot,
+    nodeArgs = [],
+    port = DEFAULT_DEV_PORT,
+    basepath = "",
+  }: StartXenonExpressDevAppOptions,
+): Promise<void> {
+  await superviseDevServer({
+    watchRoot,
+    nodeArgs,
+    serve: async () => {
+      // Only here, as it registers hot reload's hooks, which the supervisor
+      // must not.
+      const { serveXenonExpressSite } = await import("./dev-server.ts");
+      await serveXenonExpressSite(loadSite, port, basepath);
+    },
   });
-
-  const origin = await new Promise<string>((resolve, reject) => {
-    const server = app.listen(port, "127.0.0.1", (error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      // The port it's bound to, which isn't `port` when that's 0.
-      const { port: boundPort } = server.address() as AddressInfo;
-      resolve(`http://localhost:${boundPort}`);
-    });
-  });
-  const siteMeta = makeSiteMeta(origin, basepath);
-  console.log(`Listening on ${siteMeta.baseUrl}/`);
-
-  try {
-    siteRouter.resolve(makeXenonDevRouter(await loadSite(), siteMeta));
-  } catch (error) {
-    console.error(error);
-    siteRouter.reject(error);
-  }
-
-  return app;
 }

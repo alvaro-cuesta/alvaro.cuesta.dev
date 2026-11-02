@@ -32,6 +32,14 @@ export type XenonExpressSite<
 };
 
 /**
+ * The module a site is in, for the dev server and the build: they import it
+ * themselves, so the dev server can import it again when it changes.
+ */
+export type XenonExpressSiteModule<PageMetadata extends UnknownRecord> = {
+  makeSite: () => XenonExpressSite<PageMetadata>;
+};
+
+/**
  * The site meta for a site served at `basepath` (e.g. `/repo`, or `""` for the
  * root) of `origin` (e.g. `https://example.com`).
  *

@@ -4,5 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "references": [{ "path": "../core/tsconfig.package.json" }]
+  "references": [
+    { "path": "../core/tsconfig.package.json" },
+    { "path": "../hot-reload/tsconfig.package.json" }
+  ]
 }

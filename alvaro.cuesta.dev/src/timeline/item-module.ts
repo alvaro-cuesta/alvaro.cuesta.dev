@@ -13,7 +13,7 @@ import {
   assertOptionalStringArray,
 } from "../utils/item-module-assertions.ts";
 
-type TimelineItemModule = NodeModule & {
+type TimelineItemModule = {
   default: MDXContent;
 
   // Known properties exportable from the MDX file
@@ -36,7 +36,7 @@ type TimelineItemModule = NodeModule & {
 };
 
 function assertIsTimelineItemModule(
-  module: NodeModule,
+  module: unknown,
 ): asserts module is TimelineItemModule {
   const label = "timeline post";
 
@@ -71,7 +71,7 @@ type TimelineItemModuleInferredMetadata = {
 
 export const parseTimelineItemModuleFromImportModule = (
   filename: string,
-  module: NodeModule,
+  module: unknown,
   inferredMetadata: TimelineItemModuleInferredMetadata,
 ): TimelineItemModuleParsed => {
   assertIsTimelineItemModule(module);

@@ -15,7 +15,8 @@ take it as one.
 - `cell(make, subscribe?)` is a thunk that can be invalidated: the next read after that runs `make`
   again. It's for values that come from outside, like files, which only whoever watches them knows
   have changed. `subscribe` starts that watcher on the first read, handing it `invalidate`, and
-  disposing the cell stops it.
+  disposing the cell stops it. `cell({ load, subscribe? })` is the same, for something that has
+  both, like a hot import.
 - `derived(make, owned?)` makes its value from other thunks, read through `get`, and runs `make`
   again once any of them gives a new promise. It can't be invalidated: it only changes when what it
   read does. Disposing it disposes `owned`, e.g. the cells it made to read.

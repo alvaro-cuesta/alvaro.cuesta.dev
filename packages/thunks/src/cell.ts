@@ -34,6 +34,26 @@ export type Subscribe = (
 ) => Disposable | Promise<Disposable>;
 
 /**
+ * What a cell can be made from, when one thing both loads a value and knows when it changes,
+ * e.g. a hot import (`hotImport` in `@xenon-ssg/hot-reload`).
+ *
+ * Its functions are called on their own, like {@link cell}'s arguments, not as its methods.
+ */
+export type CellSource<T> = {
+  /** Like {@link cell}'s `make`. */
+  load: () => Promise<T>;
+  /** Like {@link cell}'s `subscribe`. */
+  subscribe?: Subscribe | undefined;
+};
+
+/**
+ * A cell made from `source`: the same as `cell(source.load, source.subscribe)`.
+ *
+ * @param source Loads the cell's value, and starts what invalidates it.
+ * @returns The cell.
+ */
+export function cell<T>(source: CellSource<T>): Cell<T>;
+/**
  * A cell that runs `make` the first time it's read, and again on the first read after each
  * time it's invalidated.
  *
@@ -47,10 +67,16 @@ export type Subscribe = (
  *   changes.
  * @returns The cell.
  */
+export function cell<T>(make: () => Promise<T>, subscribe?: Subscribe): Cell<T>;
 export function cell<T>(
-  make: () => Promise<T>,
+  makeOrSource: (() => Promise<T>) | CellSource<T>,
   subscribe?: Subscribe,
 ): Cell<T> {
+  if (typeof makeOrSource !== "function") {
+    return cell(makeOrSource.load, makeOrSource.subscribe);
+  }
+  const make = makeOrSource;
+
   let current = thunk(make);
   const invalidate = () => {
     current = thunk(make);

@@ -16,6 +16,14 @@ describe("Thunk", () => {
     expect(() => value()).toThrow(TypeError);
     expect(await read(value)).toBe(1);
   });
+
+  it("can't be read by another copy of this package", async () => {
+    const value = thunk(async () => 1);
+    vi.resetModules();
+    const otherCopy = await import("./thunk.ts");
+
+    expect(() => otherCopy.read(value)).toThrow(/loaded twice/);
+  });
 });
 
 describe("thunk", () => {

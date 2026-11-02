@@ -79,6 +79,7 @@
   },
   "peerDependencies": {
     "@xenon-ssg/core": "workspace:^",
+    "@xenon-ssg/hot-reload": "workspace:^",
     "express": "catalog:",
     "react": "catalog:",
     "@types/express": "catalog:",
@@ -86,6 +87,9 @@
     "@types/react": "catalog:"
   },
   "peerDependenciesMeta": {
+    "@xenon-ssg/hot-reload": {
+      "optional": true
+    },
     "@types/express": {
       "optional": true
     },
@@ -102,6 +106,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@xenon-ssg/core": "workspace:*",
+    "@xenon-ssg/hot-reload": "workspace:*",
     "express": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:"

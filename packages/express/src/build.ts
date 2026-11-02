@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { generateStaticSite } from "@xenon-ssg/core/generate/generate";
-import { type XenonExpressSite, makeSiteMeta } from "./index.tsx";
-import { getTagsFromInjectableRaw, type Plugin } from "./plugin.tsx";
+import { type XenonExpressSiteModule, makeSiteMeta } from "./index.tsx";
+import { getTagsFromInjectableRaw } from "./plugin.tsx";
 import type { UnknownRecord } from "type-fest";
 
 type BuildXenonSiteOptions = {
@@ -22,10 +22,12 @@ type BuildXenonSiteOptions = {
 };
 
 /**
- * Builds a Xenon site.
+ * Builds the site the module `loadSite` imports makes with its `makeSite`
+ * export (see `XenonExpressSiteModule`), like `startXenonExpressDevApp` serves
+ * it.
  */
 export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
-  site: XenonExpressSite<PageMetadata, Plugin<unknown, PageMetadata>[]>,
+  loadSite: () => Promise<XenonExpressSiteModule<PageMetadata>>,
   {
     origin,
     basepath,
@@ -33,6 +35,9 @@ export async function buildXenonExpressSite<PageMetadata extends UnknownRecord>(
     entryPaths = ["/"],
   }: BuildXenonSiteOptions,
 ): Promise<void> {
+  const { makeSite } = await loadSite();
+  const site = makeSite();
+
   await fs.rm(outputDir, {
     recursive: true,
     force: true,

@@ -4,7 +4,7 @@
 // loop of the thread that started it. Nor can the compiler: some deaths (e.g.
 // running out of memory) end it before any of its code runs.
 
-import { Worker, workerData } from "node:worker_threads";
+import { parentPort, Worker, workerData } from "node:worker_threads";
 import {
   SIGNAL,
   type MdxCompilerSupervisorData,
@@ -18,8 +18,15 @@ const compiler = new Worker(
   {
     workerData: { port, signal } satisfies MdxCompilerWorkerData,
     transferList: [port],
+    // Workers don't inherit it: without it, the compiler would import the
+    // workspace packages from `dist/`.
+    execArgv: ["--conditions=@xenon-ssg/source"],
   },
 );
+
+// E.g. `reportImportsInDev`'s reports, for the main thread: this thread can't
+// restart the dev server.
+compiler.on("message", (message: unknown) => parentPort?.postMessage(message));
 
 // Emitted before `exit`, when it dies of an error.
 let error: unknown;

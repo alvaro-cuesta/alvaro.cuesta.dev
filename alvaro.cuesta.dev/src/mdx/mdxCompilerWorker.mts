@@ -2,6 +2,7 @@
 
 import { fileURLToPath } from "node:url";
 import { workerData } from "node:worker_threads";
+import { reportImportsInDev } from "@xenon-ssg/hot-reload/supervisor";
 import {
   SIGNAL,
   type MdxCompilerRequest,
@@ -10,6 +11,10 @@ import {
 } from "./mdxCompilerProtocol.mts";
 
 const { port, signal } = workerData as MdxCompilerWorkerData;
+
+// For the main thread to restart the dev server when they change: nothing
+// reloads this thread's modules.
+reportImportsInDev();
 
 // Start loading right away, while the main thread starts the app.
 const compilerPromise = import("./mdxCompiler.mts");

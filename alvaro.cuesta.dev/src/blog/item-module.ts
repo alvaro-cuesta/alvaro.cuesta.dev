@@ -15,7 +15,7 @@ import {
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
 import { VALID_SLUG_REGEX } from "../utils/slug.ts";
 
-type BlogItemModule = NodeModule & {
+type BlogItemModule = {
   // The default export of the MDX file
   default: MDXContent;
 
@@ -42,7 +42,7 @@ type BlogItemModule = NodeModule & {
 };
 
 function assertIsBlogItemModule(
-  module: NodeModule,
+  module: unknown,
 ): asserts module is BlogItemModule {
   const label = "blog post";
 
@@ -85,7 +85,7 @@ const unslugify = (slug: string): string => {
 
 export const parseBlogItemModuleFromImportModule = (
   filename: string,
-  module: NodeModule,
+  module: unknown,
   inferredMetadata: BlogItemModuleInferredMetadata,
 ): BlogItemModuleParsed => {
   assertIsBlogItemModule(module);

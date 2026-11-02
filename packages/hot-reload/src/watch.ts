@@ -1,11 +1,28 @@
 import { statSync } from "node:fs";
 import fs, { type FileChangeInfo } from "node:fs/promises";
 import path from "node:path";
+import { isDevelopment } from "./env.ts";
+
+/**
+ * What the file at `filePath` looks like on disk: its modification time, in
+ * nanoseconds so no two saves share one, and its size. Empty if it doesn't
+ * exist.
+ */
+const stampOf = (filePath: string): string => {
+  const stats = statSync(filePath, { bigint: true, throwIfNoEntry: false });
+  return stats === undefined ? "" : `${stats.mtimeNs}:${stats.size}`;
+};
 
 /**
  * In **development only**, fire-and-forget watch the given file or directory
- * and call `onChange` with every change event. Does nothing in production
- * (`NODE_ENV !== "development"`).
+ * and call `onChange` whenever a file in it changes. Does nothing in
+ * production (`NODE_ENV !== "development"`).
+ *
+ * Only changes count: an event for a file that looks the same as at its last
+ * one (same modification time and size) is dropped. One write gives more than
+ * one event (two on Windows), and callers would otherwise do their work once
+ * per event. A watched file is compared with how it looked when the watch
+ * started.
  *
  * A file is watched through its directory, and only its own events count:
  * editors, and git with its own files, may save a file by renaming another one
@@ -36,7 +53,7 @@ export function watchInDev(
 ): Disposable {
   const controller = new AbortController();
   const watch = { [Symbol.dispose]: () => controller.abort() };
-  if (process.env["NODE_ENV"] !== "development") return watch;
+  if (!isDevelopment()) return watch;
 
   // Synchronously, so the watch still starts before this returns, and sees
   // changes the caller makes right after.
@@ -45,17 +62,32 @@ export function watchInDev(
   const directory = isDirectory ? watchPath : path.dirname(watchPath);
   const fileName = isDirectory ? null : path.basename(watchPath);
 
+  // How each file looked at its last change.
+  const stamps = new Map<string, string>();
+  if (!isDirectory) stamps.set(watchPath, stampOf(watchPath));
+  const isChange = (filename: string) => {
+    const filePath = path.join(directory, filename);
+    const stamp = stampOf(filePath);
+    if (stamps.get(filePath) === stamp) return false;
+    stamps.set(filePath, stamp);
+    return true;
+  };
+
   void (async () => {
     try {
       for await (const event of fs.watch(directory, {
         signal: controller.signal,
       })) {
-        if (fileName === null || event.filename === fileName) onChange(event);
+        if (fileName !== null && event.filename !== fileName) continue;
+        // Without a name there's nothing to compare, so it counts.
+        if (event.filename !== null && !isChange(event.filename)) continue;
+        onChange(event);
       }
     } catch (err) {
       if (controller.signal.aborted) return;
       console.warn(`[watchInDev] watch on ${watchPath} aborted:`, err);
     }
   })();
+
   return watch;
 }

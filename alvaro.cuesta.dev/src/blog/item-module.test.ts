@@ -20,7 +20,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
         default: createMdxComponent(),
         summary: "Manual summary",
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: null,
       },
@@ -37,7 +37,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
           default: createMdxComponent(),
           summary: 123,
           tableOfContents: [],
-        } as unknown as NodeModule,
+        },
         {
           lastModificationDate: null,
         },
@@ -51,7 +51,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
       {
         default: createMdxComponent(),
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: Temporal.Instant.from("2026-03-15T09:30:00Z"),
       },
@@ -70,7 +70,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
         default: createMdxComponent(),
         lastModificationDate: Temporal.PlainDate.from("2026-03-20"),
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: Temporal.Instant.from("2026-03-15T09:30:00Z"),
       },
@@ -89,7 +89,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
         default: createMdxComponent(),
         publicationDate: Temporal.PlainDateTime.from("2026-03-16T12:00:00"),
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: Temporal.Instant.from("2026-03-15T09:30:00Z"),
       },
@@ -104,7 +104,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
       {
         default: createMdxComponent(),
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: Temporal.Instant.from("2026-03-14T18:00:00Z"),
       },
@@ -123,7 +123,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
         default: createMdxComponent(),
         lastModificationDate: Temporal.PlainDate.from("2026-03-14"),
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: null,
       },
@@ -140,7 +140,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
           default: createMdxComponent(),
           lastModificationDate: Temporal.PlainDate.from("2026-03-13"),
           tableOfContents: [],
-        } as unknown as NodeModule,
+        },
         {
           lastModificationDate: null,
         },
@@ -156,7 +156,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
           default: createMdxComponent(),
           publicationDate: new Date("2026-03-15T09:30:00Z"),
           tableOfContents: [],
-        } as unknown as NodeModule,
+        },
         {
           lastModificationDate: null,
         },
@@ -171,7 +171,7 @@ describe("parseBlogItemModuleFromImportModule", () => {
         default: createMdxComponent(),
         publicationDate: Temporal.Instant.from("2026-03-15T09:30:00Z"),
         tableOfContents: [],
-      } as unknown as NodeModule,
+      },
       {
         lastModificationDate: null,
       },

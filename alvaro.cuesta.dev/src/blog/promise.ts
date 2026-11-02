@@ -3,27 +3,33 @@ import { pathToFileURL } from "node:url";
 import { parseBlogItemModuleFromImportModule } from "./item-module.ts";
 import { createContentLoader } from "../utils/content-loader.ts";
 import { derived } from "@xenon-ssg/thunks";
+import { moduleStack } from "@xenon-ssg/hot-reload";
 import { SITE_ROOT_FOLDER } from "../../config.ts";
+
+// This copy of the module's thunks, disposed once a reload replaces it.
+const moduleOwned = moduleStack(import.meta);
 
 const BLOG_FOLDER = path.join(SITE_ROOT_FOLDER, "blog");
 
 const UNCATEGORIZED_TAG = "uncategorized";
 
-export const blog = createContentLoader({
-  contentFolderPath: BLOG_FOLDER,
-  contentFolderUrl: pathToFileURL(BLOG_FOLDER + path.sep),
-  parseModule: parseBlogItemModuleFromImportModule,
-  analyzeOptions: {
-    getSlug: (item) => item.module.slug,
-    getPublicationDate: (item) => item.module.publicationDate,
-    getTags: (item) => {
-      const tags = item.module.tags;
-      return tags.length === 0
-        ? [UNCATEGORIZED_TAG]
-        : tags.map((tag) => tag.slug);
+export const blog = moduleOwned.use(
+  createContentLoader({
+    contentFolderPath: BLOG_FOLDER,
+    contentFolderUrl: pathToFileURL(BLOG_FOLDER + path.sep),
+    parseModule: parseBlogItemModuleFromImportModule,
+    analyzeOptions: {
+      getSlug: (item) => item.module.slug,
+      getPublicationDate: (item) => item.module.publicationDate,
+      getTags: (item) => {
+        const tags = item.module.tags;
+        return tags.length === 0
+          ? [UNCATEGORIZED_TAG]
+          : tags.map((tag) => tag.slug);
+      },
     },
-  },
-});
+  }),
+);
 
 // One thunk for all slugs, not one per slug: slugs come from requests, so
 // there'd be no end to them.
@@ -32,16 +38,18 @@ export const blog = createContentLoader({
  *
  * The function throws when there's none.
  */
-export const findBlogItem = derived(async (get) => {
-  const { bySlug } = await get(blog);
+export const findBlogItem = moduleOwned.use(
+  derived(async (get) => {
+    const { bySlug } = await get(blog);
 
-  return (slug: string) => {
-    const item = bySlug.get(slug);
+    return (slug: string) => {
+      const item = bySlug.get(slug);
 
-    if (item === undefined) {
-      throw new Error(`Article ${slug} not found`);
-    }
+      if (item === undefined) {
+        throw new Error(`Article ${slug} not found`);
+      }
 
-    return item;
-  };
-});
+      return item;
+    };
+  }),
+);
