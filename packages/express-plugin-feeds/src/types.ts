@@ -51,6 +51,10 @@ export type FeedPage = {
   description?: string;
   baseUrl: string;
   homePageUrl?: string;
+  /**
+   * When the page's content last changed: a publication on it or on any page
+   * before it, or an edit on it.
+   */
   updated?: Temporal.Instant;
   authors?: FeedAuthor[];
   items: FeedItem[];

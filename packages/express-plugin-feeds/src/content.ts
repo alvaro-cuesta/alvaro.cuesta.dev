@@ -35,17 +35,17 @@ const summaryTextToHtml = (summary: string): string => {
     .join("");
 };
 
-const getPageUpdatedAt = (items: FeedItem[]): FeedItem["datePublished"] => {
-  const timestamps = items.flatMap((item) => {
-    return [item.datePublished, item.dateModified].filter(
-      Boolean,
-    ) as NonNullable<FeedItem["datePublished"]>[];
-  });
-
-  return timestamps.reduce((latest, candidate) => {
-    return Temporal.Instant.compare(candidate, latest) > 0 ? candidate : latest;
-  });
-};
+const getLatest = (
+  instants: (Temporal.Instant | undefined)[],
+): Temporal.Instant | undefined =>
+  instants.reduce<Temporal.Instant | undefined>(
+    (latest, candidate) =>
+      candidate !== undefined &&
+      (latest === undefined || Temporal.Instant.compare(candidate, latest) > 0)
+        ? candidate
+        : latest,
+    undefined,
+  );
 
 const toFeedItemModel = async (
   baseUrl: string,
@@ -130,8 +130,19 @@ export const compileFeedPageModels = async ({
   const homePageUrl = toAbsoluteUrl(baseUrl, homePagePathname);
 
   const pagedItems = chunk(sourceItems, itemsPerPage);
+  // A publication pushes the items after it down, so it changes its page and
+  // every page after it.
+  let latestPublished: Temporal.Instant | undefined;
   const pages: Promise<FeedPage>[] = pagedItems.map((items, index) => {
     const currentPage = index + 1;
+    latestPublished = getLatest([
+      latestPublished,
+      ...items.map((item) => item.datePublished),
+    ]);
+    const updated = getLatest([
+      latestPublished,
+      ...items.map((item) => item.dateModified),
+    ]);
     const routes: FeedPageRoutes = {
       jsonfeed: getFeedFormatRoute(
         mountPointFragments,
@@ -146,8 +157,6 @@ export const compileFeedPageModels = async ({
     );
 
     return pageItems.then((resolvedPageItems) => {
-      const updated = getPageUpdatedAt(resolvedPageItems);
-
       return {
         currentPage,
         totalPages: pagedItems.length,

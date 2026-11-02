@@ -81,7 +81,7 @@ const getMdxPageDates = async (
  *
  * They only mean something relative to each other.
  */
-const SITEMAP_PRIORITY = {
+export const SITEMAP_PRIORITY = {
   home: 1.0,
   /** Like Now. */
   highSignal: 0.9,
@@ -100,7 +100,7 @@ const SITEMAP_PRIORITY = {
  *
  * The first page gets `firstPagePriority`, and the rest `SITEMAP_PRIORITY.pagination`.
  */
-const getPaginatedSitemapPriority = (
+export const getPaginatedSitemapPriority = (
   page: number | null,
   firstPagePriority: number,
 ): number =>

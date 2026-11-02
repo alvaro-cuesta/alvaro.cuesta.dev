@@ -20,9 +20,7 @@
 - Pinned/featured posts in frontpage (or timeline posts, or both?)
 - Latest blog posts in frontpage (or timeline posts, or both?)
 - Wiki
-- Sitemap improvements
-  - Add last modified to feeds? Inferred from latest post last-modified?
-  - Add priority to feeds?
+- Drop the feeds from the sitemap? Google reads a feed itself when it's submitted as a sitemap (in Search Console, or a `Sitemap:` line in `robots.txt`), and recommends both, not one inside the other
 - Blog posts
   - Comments from GH issues?
   - Add reading time https://github.com/rehypejs/rehype-infer-reading-time-meta

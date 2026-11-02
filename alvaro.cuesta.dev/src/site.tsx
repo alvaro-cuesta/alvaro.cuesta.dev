@@ -23,7 +23,12 @@ import { moduleStack, watchInDev } from "@xenon-ssg/hot-reload";
 import pkg from "../package.json" with { type: "json" };
 const version = pkg.version;
 import type { PluginInjectableLink } from "@xenon-ssg/express/plugin";
-import { resolvePage, type PageDates } from "./Root.tsx";
+import {
+  getPaginatedSitemapPriority,
+  resolvePage,
+  SITEMAP_PRIORITY,
+  type PageDates,
+} from "./Root.tsx";
 import {
   sitemapPlugin,
   sitemapPluginKey,
@@ -35,7 +40,11 @@ import {
   routeHome,
   routeTimelineList,
 } from "./routes.ts";
-import { feedsPlugin, type FeedFormat } from "@xenon-ssg/express-plugin-feeds";
+import {
+  feedsPlugin,
+  type FeedFormat,
+  type FeedPage,
+} from "@xenon-ssg/express-plugin-feeds";
 import { getBlogFeedSourceItems } from "./blog/feed-source.tsx";
 import { getTimelineFeedSourceItems } from "./timeline/feed-source.tsx";
 import { makeTitle } from "./utils/meta.ts";
@@ -185,12 +194,23 @@ const starryNightCss = singleLightningCssPlugin({
 // Only one format, as the others are the same feed.
 const feedFileMetadata = ({
   format,
+  page,
 }: {
   format: FeedFormat;
+  page: FeedPage;
 }): SitemapPluginMetadata | undefined =>
   format === "atom"
     ? // `satisfies`, so the feeds plugin still takes the site's metadata type.
-      ({ [sitemapPluginKey]: {} } satisfies SitemapPluginStaticFileMetadata)
+      ({
+        [sitemapPluginKey]: {
+          lastModified: page.updated,
+          // Low, as feeds are for feed readers rather than search results.
+          priority: getPaginatedSitemapPriority(
+            page.currentPage,
+            SITEMAP_PRIORITY.genericRoute,
+          ),
+        },
+      } satisfies SitemapPluginStaticFileMetadata)
     : undefined;
 
 const blogFeeds = feedsPlugin({
