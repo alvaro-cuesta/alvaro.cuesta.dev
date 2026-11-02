@@ -41,6 +41,14 @@ A module's state must come from nothing but its imports, and from cells that wat
 reads, e.g. with `watchInDev`. What it owns goes in its `moduleStack`, or it outlives the copy that
 made it. See `watchForReload` for the details.
 
+A module keeps its instance, and its state, until a change reaches it: its own, or one to something
+it imports. So to keep something across reloads, e.g. a database pool or a browser that's slow to
+start, give it a module of its own that imports little: editing what uses it then doesn't make a new
+one. If a second one would break things (e.g. it holds a port), also `declineInDev` it, so that
+editing it restarts the dev server instead. There's no API yet to hand state to a module's next
+copy: a free-form one (like webpack's `module.hot.data`) would go stale whenever what it was made
+from changed.
+
 `hotImport` relies on something Node doesn't document: that it resolves an `import()` before the
 call that makes it returns. That's how the hooks tell which module a `hotImport` imported. If Node
 ever stops doing it, `hotImport` fails as it loads, rather than serving stale modules
