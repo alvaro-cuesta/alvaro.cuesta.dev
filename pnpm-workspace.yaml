@@ -26,6 +26,10 @@ overrides:
   # For its denial of service fix: serve pins an exact version, and its latest
   # (14.2.6) still pins the vulnerable one.
   serve>compression: ^1.8.2
+  # For its prototype pollution fix: rehype-katex and micromark-extension-math's
+  # latest still ask for 0.16, but none of 0.17 and 0.18's breaking changes
+  # touch what they use. Not 0.19, which changes what `strict` reports.
+  katex: ^0.18.2
 
 patchedDependencies:
   "@wooorm/starry-night": patches/@wooorm__starry-night.patch
