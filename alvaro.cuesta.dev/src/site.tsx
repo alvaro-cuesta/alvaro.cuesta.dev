@@ -259,6 +259,13 @@ const sitemap = sitemapPlugin({
     path.join(import.meta.dirname, "robots.txt"),
     "utf-8",
   ),
+  // Every feed, as each has posts the others don't (only the timeline's has
+  // its implicit posts). Only Atom, as the other formats are the same feeds.
+  robotsTxtSitemapPathnames: [
+    allFeeds.relativeUrls.atom,
+    blogFeeds.relativeUrls.atom,
+    timelineFeeds.relativeUrls.atom,
+  ],
   outputFilename: "sitemap.xml",
 });
 

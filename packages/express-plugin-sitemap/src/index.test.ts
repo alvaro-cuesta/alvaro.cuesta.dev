@@ -71,7 +71,7 @@ describe("sitemapPlugin", () => {
     expect(sitemapXml).not.toContain("<loc>https://example.com/404.html</loc>");
   });
 
-  it("writes robots.txt at the site's root, wherever the sitemap is", async () => {
+  it("writes robots.txt at the site's root, wherever the sitemap is, with the other sitemaps", async () => {
     using virtualFs = vfs.create({ emitExperimentalWarning: false });
     const baseOutputFolder = virtualFs.mount();
 
@@ -85,6 +85,7 @@ describe("sitemapPlugin", () => {
       outputFilename: "sitemap.xml",
       mountPointFragments: ["sitemaps"],
       robotsTxtContent: "User-agent: *\nAllow: /\n",
+      robotsTxtSitemapPathnames: ["/atom.xml"],
     })(siteMeta, NO_CONTEXT);
 
     await runnable?.buildPost?.({
@@ -98,7 +99,7 @@ describe("sitemapPlugin", () => {
     expect(
       await fs.readFile(path.join(baseOutputFolder, "robots.txt"), "utf8"),
     ).toBe(
-      "User-agent: *\nAllow: /\n\nSitemap: https://example.com/sitemaps/sitemap.xml\n",
+      "User-agent: *\nAllow: /\n\nSitemap: https://example.com/sitemaps/sitemap.xml\nSitemap: https://example.com/atom.xml\n",
     );
   });
 

@@ -18,6 +18,11 @@ type SitemapPluginOptions = {
    * root. The build logs the `Sitemap:` line for them instead.
    */
   robotsTxtContent?: string;
+  /**
+   * Other sitemaps for `robots.txt`, after this one: e.g. feeds, which search
+   * engines also read as sitemaps of recent changes.
+   */
+  robotsTxtSitemapPathnames?: string[];
   outputFilename: string;
   /**
    * The folder the sitemap is in. Per the sitemaps protocol, it can only list
@@ -79,6 +84,7 @@ const toSitemapLoc = (baseUrl: string, pathname: string): string => {
 export const sitemapPlugin =
   ({
     robotsTxtContent,
+    robotsTxtSitemapPathnames = [],
     outputFilename,
     mountPointFragments = [],
     disableInjectMetaTag,
@@ -176,11 +182,14 @@ export const sitemapPlugin =
       await fs.writeFile(outputFilepath, xml);
 
       // Absolute, as the robots.txt spec requires.
-      const sitemapLine = `Sitemap: ${siteMeta.baseUrl}${pathname}`;
+      const sitemapLines = [pathname, ...robotsTxtSitemapPathnames].map(
+        (sitemapPathname) =>
+          `Sitemap: ${toSitemapLoc(siteMeta.baseUrl, sitemapPathname)}`,
+      );
 
       if (servedRobotsTxtContent) {
         const realRobotsTxtContent = `${servedRobotsTxtContent}
-${servedRobotsTxtContent.endsWith("\n") ? "" : "\n"}${sitemapLine}\n`;
+${servedRobotsTxtContent.endsWith("\n") ? "" : "\n"}${sitemapLines.join("\n")}\n`;
 
         // At the site's root, wherever the sitemap is.
         const robotsTxtOutputFilepath = path.join(
@@ -191,7 +200,7 @@ ${servedRobotsTxtContent.endsWith("\n") ? "" : "\n"}${sitemapLine}\n`;
         await fs.writeFile(robotsTxtOutputFilepath, realRobotsTxtContent);
       } else if (robotsTxtContent) {
         console.warn(
-          `[Sitemap] No robots.txt under a base path (${siteMeta.basepath}): crawlers only read the origin's. Add this to it instead:\n  ${sitemapLine}`,
+          `[Sitemap] No robots.txt under a base path (${siteMeta.basepath}): crawlers only read the origin's. Add this to it instead:\n  ${sitemapLines.join("\n  ")}`,
         );
       }
     };
