@@ -106,7 +106,7 @@ export function Homepage({ siteRenderMeta }: HomepageProps) {
         <article>
           This page is <strong>currently under construction</strong> 🚧 with my
           own static site generator,{" "}
-          <Link href="https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/core">
+          <Link href="https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/core">
             Xenon SSG
           </Link>
           . Please be patient while I finish it!
@@ -167,7 +167,7 @@ export function Homepage({ siteRenderMeta }: HomepageProps) {
         <ul>
           <Project
             name="Xenon SSG"
-            codeLink="https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/core"
+            codeLink="https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/core"
           >
             A React static site generator written in TypeScript. It powers this
             very website!

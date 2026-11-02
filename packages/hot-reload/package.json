@@ -61,7 +61,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/hot-reload#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/hot-reload#readme",
   "peerDependencies": {
     "@types/node": ">=26"
   },

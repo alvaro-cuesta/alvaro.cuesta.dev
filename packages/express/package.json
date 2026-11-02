@@ -72,7 +72,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/express#readme",
   "dependencies": {
     "morgan": "^1.12.1",
     "type-fest": "catalog:"

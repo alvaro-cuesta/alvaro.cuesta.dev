@@ -73,7 +73,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/core#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/core#readme",
   "dependencies": {
     "type-fest": "catalog:"
   },

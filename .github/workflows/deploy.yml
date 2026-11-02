@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: [master]
+    branches: [main]
     paths-ignore:
       - "**/README.md"
       - "**/TODO.md"
@@ -27,10 +27,10 @@ permissions:
 # newer one's.
 concurrency:
   # One run at a time, and one waiting: a newer push replaces the waiting run, so the last push always runs last.
-  # Per ref, so a pull request's runs never replace a deploy waiting on master.
+  # Per ref, so a pull request's runs never replace a deploy waiting on main.
   group: pages-${{ github.ref }}
   # Pull requests: a newer push makes the older runs pointless.
-  # Not master:
+  # Not main:
   # - the newer run may fail, and the older one would have deployed something newer than what's live;
   # - pushing faster than a run takes would cancel every run, and nothing would deploy;
   # - cancelling deploy-pages midway isn't safe (GitHub's Pages starter workflow warns against it).
@@ -165,8 +165,8 @@ jobs:
 
   # Not grouped on its own: see `concurrency`.
   deploy:
-    # Only master is the site: pull requests and manual runs on other branches stop after the build.
-    if: ${{ github.ref == 'refs/heads/master' }}
+    # Only main is the site: pull requests and manual runs on other branches stop after the build.
+    if: ${{ github.ref == 'refs/heads/main' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

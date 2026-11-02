@@ -45,7 +45,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express-plugin-sitemap#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/express-plugin-sitemap#readme",
   "dependencies": {
     "xmlbuilder2": "catalog:"
   },

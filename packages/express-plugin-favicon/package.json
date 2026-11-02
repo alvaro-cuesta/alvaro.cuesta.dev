@@ -42,7 +42,7 @@
   "bugs": {
     "url": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/issues"
   },
-  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/master/packages/express-plugin-favicon#readme",
+  "homepage": "https://github.com/alvaro-cuesta/alvaro.cuesta.dev/tree/main/packages/express-plugin-favicon#readme",
   "dependencies": {
     "favicons": "^7.3.1"
   },

@@ -2,7 +2,7 @@
 # refactors or reformatting). `git blame` can skip them, and the site doesn't
 # count them as modifications of its content (see `getGitFileDates`).
 #
-# Add a commit's full hash once it's in `master`. To have `git blame` skip them
+# Add a commit's full hash once it's in `main`. To have `git blame` skip them
 # too: `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
 # style: adjust TOC styles
