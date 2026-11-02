@@ -1,18 +1,7 @@
-import { fileURLToPath } from "node:url";
 import { VERSION_PARAM } from "./version.ts";
 
-/** Each versioned copy's stack, by the copy's URL, until a change retires it. */
+/** Each versioned copy's stack, by the copy's URL, until it's retired. */
 const stacks = new Map<string, DisposableStack>();
-/**
- * The version each module a change reached is at: copies of older versions
- * are out of date.
- */
-const latestVersions = new Map<string, number>();
-/**
- * The URLs of the copies that were already out of date when they were
- * evaluated, for the next change to retire.
- */
-const lateUrls = new Set<string>();
 
 /**
  * What the copy of the module `importMeta` belongs to owns, to dispose once a
@@ -48,45 +37,40 @@ export function moduleStack(importMeta: ImportMeta): DisposableStack {
   if (stack === undefined) {
     stack = new DisposableStack();
     stacks.set(url.href, stack);
-
-    // Out of date already, e.g. evaluated by a load that started before a
-    // change, which a newer load replaces: the change couldn't retire it.
-    const latestVersion = latestVersions.get(fileURLToPath(url));
-    if (latestVersion !== undefined && Number(version) < latestVersion) {
-      lateUrls.add(url.href);
-    }
   }
   return stack;
 }
 
 /**
- * For the dev server: retires the copies of the modules at `modulePaths`,
- * which a change made out of date.
+ * For the dev server: retires the copies `isRetired` tells, e.g. those a change
+ * made out of date, or those nothing in use imports anymore (see `isOutOfDate`
+ * and `copiesInUse` in `hooks.ts`).
  *
- * @param modulePaths The modules the change reached.
- * @param versionOf The version each of them is at now.
+ * Told which with a function, rather than asking the hooks: apps import this
+ * module, and importing the hooks registers them.
+ *
+ * A copy that's already out of date when it asks for its stack (e.g. one a
+ * load that started before a change evaluates after it) gets one all the
+ * same, which the next call retires, as it's still out of date. So nothing
+ * needs to remember it until then.
+ *
+ * @param isRetired Whether to retire the copy at a URL.
  * @returns What those copies own, for the dev server to dispose once nothing
- *   uses them. Also what the copies that were already out of date when they
- *   were evaluated, since the change before, own.
+ *   uses them, if any of them owns anything.
  */
-export function retireModules(
-  modulePaths: ReadonlySet<string>,
-  versionOf: (modulePath: string) => number | undefined,
-): DisposableStack {
-  for (const modulePath of modulePaths) {
-    const version = versionOf(modulePath);
-    if (version !== undefined) latestVersions.set(modulePath, version);
-  }
-
+export function retireCopies(
+  isRetired: (url: string) => boolean,
+): DisposableStack | undefined {
   // Out of `stacks` too, so a copy that asks for its stack again after this
   // gets a new one, not one that's disposed.
   //
   // TODO: once Node can drop a module from its cache
   // (https://github.com/nodejs/node/pull/61767, `Module.clearCache`), drop
-  // every copy this retires too, deferred on `retired`, so it happens once
-  // nothing uses them. Every one, not only those with a stack. That frees
-  // them, once their stacks are disposed: until then, what they own (e.g. a
-  // watcher) still reaches them. Then `MAX_RSS_BYTES` in `reload.ts` can go.
+  // every copy that's out of date or out of use too, deferred on `retired`, so
+  // it happens once nothing uses them. Every one, not only those with a stack,
+  // which are all this sees. That frees them, once their stacks are disposed:
+  // until then, what they own (e.g. a watcher) still reaches them. Then
+  // `MAX_RSS_BYTES` in `reload.ts` can go.
   //
   // Then investigate what being freed makes unnecessary, as it may simplify
   // disposal: what only holds memory (e.g. a cell's large value) would go with
@@ -105,14 +89,13 @@ export function retireModules(
   // frees a cycle nothing reaches, but not one that goes through a copy that's
   // still alive, and maybe not one Node's own references keep (the PR mentions
   // some it doesn't clear yet, from a module's record to those it imports).
-  const retired = new DisposableStack();
+  let retired: DisposableStack | undefined;
   for (const [url, stack] of stacks) {
-    if (!lateUrls.has(url) && !modulePaths.has(fileURLToPath(url))) continue;
+    if (!isRetired(url)) continue;
 
     stacks.delete(url);
+    retired ??= new DisposableStack();
     retired.use(stack);
   }
-  lateUrls.clear();
-
   return retired;
 }

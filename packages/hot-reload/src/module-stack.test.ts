@@ -1,7 +1,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it, vi } from "vitest";
-import { moduleStack, retireModules } from "./module-stack.ts";
+import { moduleStack, retireCopies } from "./module-stack.ts";
 
 const pathOf = (name: string) => path.resolve("app", `${name}.ts`);
 // Copies' URLs as the hooks version them, without loading them: only the
@@ -32,52 +32,43 @@ describe("moduleStack", () => {
   });
 });
 
-describe("retireModules", () => {
-  it("hands over what the copies of the modules a change reached own", () => {
-    const changed = owning(moduleStack(copyOf("changed", 0)));
-    const unchanged = owning(moduleStack(copyOf("unchanged", 0)));
+describe("retireCopies", () => {
+  // Every other test's copies are kept, so this only retires its own.
+  const only = (name: string) => (url: string) =>
+    url.startsWith(pathToFileURL(pathOf(name)).href);
 
-    const retired = retireModules(new Set([pathOf("changed")]), () => 1);
+  it("hands over what the copies it's told to retire own, once", () => {
+    const retiredCopy = owning(moduleStack(copyOf("retired", 0)));
+    const keptCopy = owning(moduleStack(copyOf("kept", 0)));
 
-    expect(changed).not.toHaveBeenCalled();
+    const retired = retireCopies(only("retired"));
 
-    retired.dispose();
+    expect(retiredCopy).not.toHaveBeenCalled();
 
-    expect(changed).toHaveBeenCalledOnce();
-    expect(unchanged).not.toHaveBeenCalled();
+    retired?.dispose();
+    retireCopies(only("retired"))?.dispose();
+
+    expect(retiredCopy).toHaveBeenCalledOnce();
+    expect(keptCopy).not.toHaveBeenCalled();
   });
 
-  it("only retires a copy once", () => {
-    const dispose = owning(moduleStack(copyOf("once", 0)));
+  it("hands over nothing when it retires nothing", () => {
+    moduleStack(copyOf("none", 0));
 
-    retireModules(new Set([pathOf("once")]), () => 1).dispose();
-    retireModules(new Set([pathOf("once")]), () => 2).dispose();
-
-    expect(dispose).toHaveBeenCalledOnce();
+    expect(retireCopies(() => false)).toBeUndefined();
   });
 
-  it("retires a copy evaluated after it was out of date with the next change", () => {
-    retireModules(new Set([pathOf("late")]), () => 2).dispose();
-    const late = owning(moduleStack(copyOf("late", 1)));
-    const latest = owning(moduleStack(copyOf("latest", 2)));
+  // E.g. one a load that started before a change evaluates after it: it's
+  // still out of date, so the next call retires it too.
+  it("gives a copy a new stack once its stack is retired", () => {
+    const retiredStack = moduleStack(copyOf("again", 1));
+    retireCopies(only("again"))?.dispose();
 
-    retireModules(new Set(), () => undefined).dispose();
-
-    expect(late).toHaveBeenCalledOnce();
-    expect(latest).not.toHaveBeenCalled();
-  });
-
-  it("gives a copy a new stack once its late one is retired", () => {
-    retireModules(new Set([pathOf("late-again")]), () => 2).dispose();
-    const retiredStack = moduleStack(copyOf("late-again", 1));
-    retireModules(new Set(), () => undefined).dispose();
-
-    const stack = moduleStack(copyOf("late-again", 1));
+    const stack = moduleStack(copyOf("again", 1));
     expect(stack).not.toBe(retiredStack);
     const late = owning(stack);
 
-    // Still out of date, so the next change retires it too.
-    retireModules(new Set(), () => undefined).dispose();
+    retireCopies(only("again"))?.dispose();
     expect(late).toHaveBeenCalledOnce();
   });
 });

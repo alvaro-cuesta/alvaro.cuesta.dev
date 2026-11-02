@@ -31,6 +31,22 @@ const versions = new Map<string, number>();
  */
 const importers = new Map<string, Set<string>>();
 const shellPaths = new Set<string>();
+/**
+ * For each versioned copy, by its URL, the versioned copies it imports, but
+ * for the hot imports'.
+ */
+const copyImports = new Map<string, Set<string>>();
+/**
+ * For each module that makes hot imports (a copy, by its URL, or a shell
+ * module), the copy each of them last loaded, by the imported module's path.
+ */
+const loadedHotImports = new Map<string, Map<string, string>>();
+/**
+ * For each module that makes hot imports, the copies they're loading, and how
+ * many times: until those settle, they count as in use.
+ */
+const loadingHotImports = new Map<string, Map<string, number>>();
+const settledListeners = new Set<() => void>();
 // This package's modules are never versioned: the dev server and the app talk
 // to each other through them (e.g. `hotImport` keeps its subscriptions in
 // one), so they must share one instance. Its root whether this runs from `src`
@@ -43,6 +59,8 @@ type Claim = {
   resolved: boolean;
   importerUrl: string | undefined;
   modulePath: string | undefined;
+  /** The URL of the copy it imports, if it's versioned. */
+  moduleUrl: string | undefined;
   /** Imports made from the same module after the first: there must be none. */
   extraSpecifiers: string[];
 };
@@ -127,8 +145,10 @@ registerHooks({
       versions.set(modulePath, 0);
     }
     warnIfShared(modulePath);
+    url.searchParams.set(VERSION_PARAM, String(versions.get(modulePath)));
     if (isClaimed && currentClaim !== undefined) {
       currentClaim.modulePath = modulePath;
+      currentClaim.moduleUrl = url.href;
     } else if (parentIsVersioned) {
       const parentPath = fileURLToPath(parentUrl);
       let moduleImporters = importers.get(modulePath);
@@ -137,12 +157,73 @@ registerHooks({
         importers.set(modulePath, moduleImporters);
       }
       moduleImporters.add(parentPath);
+
+      let parentImports = copyImports.get(parentUrl);
+      if (parentImports === undefined) {
+        parentImports = new Set();
+        copyImports.set(parentUrl, parentImports);
+      }
+      parentImports.add(url.href);
     }
 
-    url.searchParams.set(VERSION_PARAM, String(versions.get(modulePath)));
     return { ...resolved, url: url.href };
   },
 });
+
+const versionOfUrl = (url: string) =>
+  Number(new URL(url).searchParams.get(VERSION_PARAM));
+
+// Counts the copy as in use while it loads, as what it imports may already be
+// evaluated, and owning things, then as what the hot import uses once it has.
+const trackHotImportLoad = (
+  importerUrl: string,
+  modulePath: string,
+  moduleUrl: string,
+  result: unknown,
+) => {
+  let loading = loadingHotImports.get(importerUrl);
+  if (loading === undefined) {
+    loading = new Map();
+    loadingHotImports.set(importerUrl, loading);
+  }
+  const importerLoading = loading;
+  importerLoading.set(moduleUrl, (importerLoading.get(moduleUrl) ?? 0) + 1);
+
+  const settle = (isLoaded: boolean) => {
+    const count = (importerLoading.get(moduleUrl) ?? 1) - 1;
+    if (count === 0) {
+      importerLoading.delete(moduleUrl);
+    } else {
+      importerLoading.set(moduleUrl, count);
+    }
+
+    if (isLoaded) {
+      let loaded = loadedHotImports.get(importerUrl);
+      if (loaded === undefined) {
+        loaded = new Map();
+        loadedHotImports.set(importerUrl, loaded);
+      }
+      // Not if a newer one settled first: that's the one in use.
+      const previousUrl = loaded.get(modulePath);
+      if (
+        previousUrl === undefined ||
+        versionOfUrl(previousUrl) <= versionOfUrl(moduleUrl)
+      ) {
+        loaded.set(modulePath, moduleUrl);
+      }
+    }
+
+    for (const listener of settledListeners) {
+      listener();
+    }
+  };
+  // A failure is still whoever loads it's to report: the promise they get is
+  // the same one.
+  Promise.resolve(result).then(
+    () => settle(true),
+    () => settle(false),
+  );
+};
 
 setClaimImport((load) => {
   const previousClaim = claim;
@@ -150,6 +231,7 @@ setClaimImport((load) => {
     resolved: false,
     importerUrl: undefined,
     modulePath: undefined,
+    moduleUrl: undefined,
     extraSpecifiers: [],
   };
   claim = currentClaim;
@@ -171,7 +253,14 @@ setClaimImport((load) => {
     );
   }
 
-  const { importerUrl, modulePath } = currentClaim;
+  const { importerUrl, modulePath, moduleUrl } = currentClaim;
+  if (
+    importerUrl !== undefined &&
+    modulePath !== undefined &&
+    moduleUrl !== undefined
+  ) {
+    trackHotImportLoad(importerUrl, modulePath, moduleUrl, result);
+  }
   return {
     result,
     modulePath,
@@ -190,11 +279,18 @@ export const isVersionedModule = (modulePath: string): boolean =>
   versions.has(modulePath);
 
 /**
- * The version the next import of the module at `modulePath` gets, if it's
- * versioned.
+ * Whether the copy at `url` is out of date: a change reached its module since
+ * it was imported, so importing the module again gives a newer copy, and
+ * nothing gets this one anymore.
+ *
+ * From the copy's version, rather than from the modules each change reached:
+ * that also tells a copy that was out of date already when it was evaluated
+ * (e.g. by a load that started before the change), whichever change it was.
  */
-export const versionOf = (modulePath: string): number | undefined =>
-  versions.get(modulePath);
+export const isOutOfDate = (url: string): boolean => {
+  const version = versions.get(fileURLToPath(url));
+  return version !== undefined && versionOfUrl(url) < version;
+};
 
 /**
  * Calls `listener` with the path of every module imported so far (versioned or
@@ -205,6 +301,51 @@ export const onModulePath = (listener: (modulePath: string) => void): void => {
     listener(modulePath);
   }
   pathListeners.add(listener);
+};
+
+// The copies the hot imports of the module (or copy) at `importerUrl` use, or
+// are loading.
+const hotImportsFrom = (importerUrl: string): string[] => [
+  ...(loadedHotImports.get(importerUrl)?.values() ?? []),
+  ...(loadingHotImports.get(importerUrl)?.keys() ?? []),
+];
+
+/**
+ * The URLs of the versioned copies in use: those the shell's hot imports use,
+ * or are loading, and those they import, directly or not, through hot imports
+ * too.
+ *
+ * Every other copy is out of date, or no longer imported, e.g. after an edit
+ * removed its last import, which no change reaches.
+ *
+ * A hot import counts until a newer copy replaces it, even if what made it is
+ * gone: e.g. a post's, after the post is deleted.
+ */
+export const copiesInUse = (): Set<string> => {
+  const inUse = new Set<string>();
+  const pending: string[] = [];
+  for (const importerUrl of new Set([
+    ...loadedHotImports.keys(),
+    ...loadingHotImports.keys(),
+  ])) {
+    if (!isVersionedParent(importerUrl)) {
+      pending.push(...hotImportsFrom(importerUrl));
+    }
+  }
+  for (let url; (url = pending.pop()) !== undefined; ) {
+    if (inUse.has(url)) continue;
+    inUse.add(url);
+    pending.push(...(copyImports.get(url) ?? []), ...hotImportsFrom(url));
+  }
+  return inUse;
+};
+
+/**
+ * Calls `listener` whenever a hot import settles, i.e. whenever the copies in
+ * use (see {@link copiesInUse}) may have changed.
+ */
+export const onHotImportSettled = (listener: () => void): void => {
+  settledListeners.add(listener);
 };
 
 /**

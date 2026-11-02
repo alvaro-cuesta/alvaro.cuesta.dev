@@ -32,7 +32,8 @@ Everything else keeps its instance, and its state.
   `reportImportsInDev()`.
 - `@xenon-ssg/hot-reload/reload` is for the dev server. `watchForReload(onRetire)` watches what the
   app imports, calls the subscribers of the hot imports each change reaches, and then hands
-  `onRetire` the stacks of the copies the change replaced, to dispose once nothing uses them.
+  `onRetire` the stacks of the copies the change replaced, to dispose once nothing uses them. Also
+  those of the copies nothing in use imports anymore, e.g. after an edit removed their last import.
 
 Outside the dev server (in production, or in tests), nothing is versioned: `hotImport` just imports,
 `watchInDev` does nothing, and module stacks are never disposed.

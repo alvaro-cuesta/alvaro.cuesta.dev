@@ -2,14 +2,16 @@ import path from "node:path";
 import { isDeclined } from "./decline.ts";
 import { isDevelopment } from "./env.ts";
 import {
+  copiesInUse,
   invalidate,
+  isOutOfDate,
   isShellModule,
   isVersionedModule,
+  onHotImportSettled,
   onModulePath,
-  versionOf,
 } from "./hooks.ts";
 import { hotImportsOf } from "./hot-import.ts";
-import { retireModules } from "./module-stack.ts";
+import { retireCopies } from "./module-stack.ts";
 import { restartDevServer } from "./supervisor.ts";
 import { watchInDev } from "./watch.ts";
 
@@ -19,7 +21,7 @@ const CHANGE_DEBOUNCE_MS = 50;
 
 // Node never frees a module, so every reload keeps the old instances of the
 // modules it evaluates again. Past this, restart instead, which frees them.
-// TODO: drop once retired copies are freed (see `retireModules`).
+// TODO: drop once retired copies are freed (see `retireCopies`).
 const MAX_RSS_BYTES = 1024 * 1024 * 1024;
 
 const relativePath = (filePath: string) =>
@@ -62,7 +64,9 @@ const isDebug = Boolean(process.env["DEBUG"]);
  * `moduleStack`), after calling the hot imports' subscribers, for the dev
  * server to dispose once nothing uses them: e.g. once what it was serving when
  * the change came is done, and whatever the subscribers load again replaces
- * it.
+ * it. So does each hot import that loads, for the copies no change reached
+ * but that nothing in use imports anymore, e.g. one whose last import an edit
+ * removed.
  *
  * Needs the hooks (`@xenon-ssg/hot-reload/hooks`), which `superviseDevServer`
  * loads. Does nothing in production (`NODE_ENV !== "development"`).
@@ -107,7 +111,13 @@ export function watchForReload(
         `Restarting: ${relativePath(declined)} can't be reloaded, and ${reason}`,
       );
     }
-    const retired = retireModules(invalidated, versionOf);
+    // Only what's out of date, not what's out of use too: what the subscribers
+    // load again hasn't imported anything yet, so what it will import again
+    // (e.g. the modules the change didn't reach) would look out of use. But
+    // done now, not left for when that loads: a hot import only loads again
+    // when it's read (e.g. by a cell over it), which may never happen, and
+    // until then its last copy counts as in use. So does it if the load fails.
+    const retired = retireCopies(isOutOfDate);
     const hotImports = hotImportsOf(invalidated);
 
     if (isDebug) {
@@ -144,7 +154,7 @@ export function watchForReload(
     }
 
     // After the subscribers, so whatever they load again is already loading.
-    onRetire(retired);
+    if (retired !== undefined) onRetire(retired);
   };
 
   onModulePath((modulePath) => {
@@ -159,5 +169,16 @@ export function watchForReload(
       changedPaths.add(path.join(folderPath, filename));
       scheduleChanges();
     });
+  });
+
+  // Once a load replaces what a hot import used, what only the old one
+  // imported is out of use, though no change reached it. Out of date too: a
+  // load that started before a change may have evaluated copies after it, which
+  // the change couldn't retire, and which still count as in use if that load
+  // is the last one that settled.
+  onHotImportSettled(() => {
+    const inUse = copiesInUse();
+    const retired = retireCopies((url) => isOutOfDate(url) || !inUse.has(url));
+    if (retired !== undefined) onRetire(retired);
   });
 }

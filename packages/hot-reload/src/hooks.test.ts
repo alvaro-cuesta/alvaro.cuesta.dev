@@ -87,7 +87,7 @@ describe("hooks", () => {
     });
   });
 
-  it("retire what the copies a change replaced own", async () => {
+  it("retire what the copies a change made out of date own", async () => {
     const result = await runWithHooks({
       ...FIXTURES,
       "page.mjs": `
@@ -98,35 +98,101 @@ describe("hooks", () => {
         moduleStack(import.meta).use({
           [Symbol.dispose]: () => globalThis.disposed.push(evaluation),
         });
+        export const url = import.meta.url;
         export { dep };
       `,
       "main.mjs": `
         import { fileURLToPath } from "node:url";
         import { hotImport } from "${HOT_IMPORT_URL}";
-        import { invalidate, versionOf } from "${HOOKS_URL}";
-        import { retireModules } from "${MODULE_STACK_URL}";
+        import { invalidate, isOutOfDate } from "${HOOKS_URL}";
+        import { retireCopies } from "${MODULE_STACK_URL}";
         import { loadPage } from "./writer.mjs";
 
         globalThis.disposed = [];
         const page = hotImport(loadPage);
-        await page.load();
+        const { url: oldUrl } = await page.load();
+        const outOfDateBeforeChange = isOutOfDate(oldUrl);
 
-        const retired = retireModules(
-          invalidate([fileURLToPath(new URL("./dep.mjs", import.meta.url))]),
-          versionOf,
-        );
-        await page.load();
+        invalidate([fileURLToPath(new URL("./dep.mjs", import.meta.url))]);
+        const retired = retireCopies(isOutOfDate);
+        const { url: newUrl } = await page.load();
         const beforeDisposal = [...globalThis.disposed];
-        retired.dispose();
+        retired?.dispose();
 
         console.log(JSON.stringify({
+          outOfDateBeforeChange,
+          outOfDateAfterChange: [isOutOfDate(oldUrl), isOutOfDate(newUrl)],
           beforeDisposal,
           afterDisposal: globalThis.disposed,
         }));
       `,
     });
 
-    expect(result).toEqual({ beforeDisposal: [], afterDisposal: [1] });
+    expect(result).toEqual({
+      outOfDateBeforeChange: false,
+      outOfDateAfterChange: [true, false],
+      beforeDisposal: [],
+      afterDisposal: [1],
+    });
+  });
+
+  it("count as in use what the hot imports use or are loading, and nothing an edit stopped importing", async () => {
+    const result = await runWithHooks({
+      ...FIXTURES,
+      "page.mjs": `import "./widget.mjs";`,
+      "widget.mjs": `
+        import { moduleStack } from "${MODULE_STACK_URL}";
+        moduleStack(import.meta).use({
+          [Symbol.dispose]: () => globalThis.disposed.push("widget"),
+        });
+      `,
+      "main.mjs": `
+        import fs from "node:fs";
+        import { fileURLToPath } from "node:url";
+        import { hotImport } from "${HOT_IMPORT_URL}";
+        import { copiesInUse, invalidate } from "${HOOKS_URL}";
+        import { retireCopies } from "${MODULE_STACK_URL}";
+        import { loadPage } from "./writer.mjs";
+
+        globalThis.disposed = [];
+        const uses = (urls, name) => [...urls].some((url) => url.includes(name));
+        const retire = () => {
+          const inUse = copiesInUse();
+          const retired = retireCopies((url) => !inUse.has(url));
+          retired?.dispose();
+          return retired !== undefined;
+        };
+
+        const page = hotImport(loadPage);
+        const loading = page.load();
+        const usesPageWhileLoading = uses(copiesInUse(), "page.mjs");
+        await loading;
+        const retiredBeforeEdit = retire();
+
+        const pageUrl = new URL("./page.mjs", import.meta.url);
+        fs.writeFileSync(pageUrl, "export {};");
+        invalidate([fileURLToPath(pageUrl)]);
+        await page.load();
+        const usesWidgetAfterEdit = uses(copiesInUse(), "widget.mjs");
+        const retiredAfterEdit = retire();
+
+        console.log(JSON.stringify({
+          usesPageWhileLoading,
+          retiredBeforeEdit,
+          usesWidgetAfterEdit,
+          retiredAfterEdit,
+          disposed: globalThis.disposed,
+        }));
+      `,
+    });
+
+    expect(result).toEqual({
+      usesPageWhileLoading: true,
+      retiredBeforeEdit: false,
+      usesWidgetAfterEdit: false,
+      retiredAfterEdit: true,
+      disposed: ["widget"],
+    });
   });
 
   it("reject a hot import that doesn't make exactly one import as it runs", async () => {
