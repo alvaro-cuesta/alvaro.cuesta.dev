@@ -22,5 +22,10 @@ catalog:
   vitest: ^4.1.12
   xmlbuilder2: ^4.0.3
 
+overrides:
+  # For its denial of service fix: serve pins an exact version, and its latest
+  # (14.2.6) still pins the vulnerable one.
+  serve>compression: ^1.8.2
+
 patchedDependencies:
   "@wooorm/starry-night": patches/@wooorm__starry-night.patch
