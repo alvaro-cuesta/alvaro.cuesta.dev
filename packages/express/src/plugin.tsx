@@ -61,6 +61,8 @@ export type PluginInjectableLink = {
   title?: string | undefined;
   sizes?: string | undefined;
   media?: string | undefined;
+  /** E.g. `use-credentials`, for a manifest behind a login. */
+  crossOrigin?: "anonymous" | "use-credentials" | undefined;
   /** A site path, served at the base path for you, or any other href. */
   href: string;
   cachebust?: boolean;
@@ -215,6 +217,7 @@ function renderInjectableRaw(
           title={tag.title}
           sizes={tag.sizes}
           media={tag.media}
+          crossOrigin={tag.crossOrigin}
           href={toServedHref(tag.href, basepath)}
         />
       );
