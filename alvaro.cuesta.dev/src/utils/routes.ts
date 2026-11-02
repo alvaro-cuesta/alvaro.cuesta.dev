@@ -1,9 +1,11 @@
 import { match, compile, type ParamData } from "path-to-regexp";
 import { NeedsTrailingSlashError } from "@xenon-ssg/core";
 
+type RouteBuildOptions = { hash?: string };
+
 type Route<Params> = {
   match: (path: string) => Params | null;
-  build: (params: Params, options?: { hash?: string }) => string;
+  build: (params: Params, options?: RouteBuildOptions) => string;
   isActive: (pathname: string) => boolean;
 };
 
@@ -94,7 +96,10 @@ export function makeRoute<Params extends ParamData, ParsedParams>(
       return parseMatched(matched.params);
     },
 
-    build: (params: ParsedParams, { hash } = {}) => {
+    // Typed, as TypeScript 7.1's beta no longer infers it from `Route`.
+    // @todo Drop the type once https://github.com/microsoft/TypeScript/issues/64974
+    // is fixed.
+    build: (params: ParsedParams, { hash }: RouteBuildOptions = {}) => {
       const path = buildFn(
         serialize
           ? serialize(params)

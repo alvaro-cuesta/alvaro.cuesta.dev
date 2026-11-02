@@ -44,7 +44,9 @@ catalog:
   react: ^19.3.1
   react-dom: ^19.3.1
   type-fest: ^5.5.0
-  typescript: ^7.0.2
+  # The beta, for `declare module ... with { ... }` (types by import attributes).
+  # Exact, as a range wouldn't move on to the stable 7.1.
+  typescript: 7.1.0-beta
   vitest: ^5.0.5
   xmlbuilder2: ^4.0.3
 
