@@ -18,6 +18,7 @@
 // Dependencies are never versioned (see `isOwnModule`).
 
 import { registerHooks } from "node:module";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { isOwnModule } from "./files.ts";
 import { setClaimImport } from "./hot-import.ts";
@@ -61,6 +62,25 @@ const notifyNewPath = (modulePath: string) => {
   }
 };
 
+// Each once: it stays imported from both for as long as the process runs.
+const sharedPaths = new Set<string>();
+// The shell's instance and the app's are two, which breaks whatever relies on
+// there being one (e.g. a React context both use), and only says so by
+// misbehaving.
+const warnIfShared = (modulePath: string) => {
+  if (
+    sharedPaths.has(modulePath) ||
+    !shellPaths.has(modulePath) ||
+    !versions.has(modulePath)
+  ) {
+    return;
+  }
+  sharedPaths.add(modulePath);
+  console.warn(
+    `[hot-reload] ${path.relative(process.cwd(), modulePath)} is imported by both the dev server and the app, so each has its own instance. If it must be one (e.g. a React context), import it only from the app's side, with \`hotImport\`.`,
+  );
+};
+
 registerHooks({
   resolve(specifier, context, nextResolve) {
     const resolved = nextResolve(specifier, context);
@@ -98,6 +118,7 @@ registerHooks({
     ) {
       notifyNewPath(modulePath);
       shellPaths.add(modulePath);
+      warnIfShared(modulePath);
       return resolved;
     }
 
@@ -105,6 +126,7 @@ registerHooks({
     if (!versions.has(modulePath)) {
       versions.set(modulePath, 0);
     }
+    warnIfShared(modulePath);
     if (isClaimed && currentClaim !== undefined) {
       currentClaim.modulePath = modulePath;
     } else if (parentIsVersioned) {
