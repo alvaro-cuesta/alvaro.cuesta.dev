@@ -100,7 +100,9 @@ jobs:
       - lint
       - test
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    # A build takes under half a minute, but after a lockfile change pnpm/setup also saves a new dependency cache, which
+    # can take over a minute.
+    timeout-minutes: 5
     steps:
       - *checkout
       - *setup
