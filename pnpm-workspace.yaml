@@ -5,9 +5,24 @@ packages:
 # Runs scripts with pnpm's own shell, so `NAME=value command` works on Windows too.
 shellEmulator: true
 
+# Install scripts run whatever they like, so each is allowed for one version:
+# another version's script fails the install (`strictDepBuilds`) until it's
+# looked at and its version written here.
 allowBuilds:
-  esbuild: true
-  sharp: true
+  # Its postinstall swaps its JS shim for the platform's binary, which starts faster.
+  esbuild@0.28.2: true
+
+# A week, like Dependabot's cooldown, for a compromised release to be caught and
+# pulled first. Set explicitly to make it strict: fail rather than take a younger
+# version.
+minimumReleaseAge: 10080
+# npm dates every version, so an undated one is suspect: fail instead of skipping
+# its age and trust checks.
+minimumReleaseAgeIgnoreMissingTime: false
+
+# Fails on a release with less trust than the ones before it (e.g. without their
+# provenance), which is what a stolen publish token tends to look like.
+trustPolicy: no-downgrade
 
 catalog:
   "@types/express": ^5.0.6
