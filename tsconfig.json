@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/thunks" },
+    { "path": "./packages/import-url" },
     { "path": "./packages/core" },
     { "path": "./packages/hot-reload" },
     { "path": "./packages/express" },

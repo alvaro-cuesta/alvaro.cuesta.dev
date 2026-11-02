@@ -2,6 +2,10 @@
   "$schema": "https://nodejs.org/dist/v26.13.0/docs/node-config-schema.json",
   "nodeOptions": {
     "conditions": ["@xenon-ssg/source"],
-    "import": ["tsx", "./src/mdx/mdxNodeLoaderRegister.mts"]
+    "import": [
+      "tsx",
+      "./src/mdx/mdxNodeLoaderRegister.mts",
+      "@xenon-ssg/import-url/hooks"
+    ]
   }
 }

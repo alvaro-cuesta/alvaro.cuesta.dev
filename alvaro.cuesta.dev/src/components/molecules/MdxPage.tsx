@@ -9,6 +9,7 @@ import { contentFile } from "../../utils/content-file.ts";
 import { instantToBlogItemDate } from "../../utils/item-dates.ts";
 import { routeHome } from "../../routes.ts";
 import { read } from "@xenon-ssg/thunks";
+import type { FileUrl } from "@xenon-ssg/import-url";
 import {
   assertHasMdxDefaultExport,
   assertIsModule,
@@ -45,8 +46,8 @@ type MdxPageProps = {
   siteRenderMeta: SiteRenderMeta;
 };
 
-export function makeMdxPage(contentFileUrl: string) {
-  const page = contentFile(contentFileUrl);
+export function makeMdxPage(file: FileUrl) {
+  const page = contentFile(file);
 
   // A page that was never edited was last updated when it was created. No git history means it isn't committed yet,
   // i.e. it's being written right now.
@@ -59,7 +60,7 @@ export function makeMdxPage(contentFileUrl: string) {
 
   async function MdxPage({ siteRenderMeta }: MdxPageProps) {
     const { module } = await read(page);
-    assertIsMdxPageModule(module, `MdxPage module at ${contentFileUrl}`);
+    assertIsMdxPageModule(module, `MdxPage module at ${file.href}`);
 
     const {
       default: Content,
@@ -71,17 +72,17 @@ export function makeMdxPage(contentFileUrl: string) {
 
     if (title === undefined) {
       throw new Error(
-        `MdxPage module at ${contentFileUrl} is missing required \`title\` export.`,
+        `MdxPage module at ${file.href} is missing required \`title\` export.`,
       );
     }
     if (description === undefined) {
       throw new Error(
-        `MdxPage module at ${contentFileUrl} is missing required \`description\` export.`,
+        `MdxPage module at ${file.href} is missing required \`description\` export.`,
       );
     }
     if (openGraphType !== "website" && openGraphType !== "article") {
       throw new Error(
-        `MdxPage module at ${contentFileUrl} has an unknown \`openGraphType\` export: ${openGraphType}.`,
+        `MdxPage module at ${file.href} has an unknown \`openGraphType\` export: ${openGraphType}.`,
       );
     }
 

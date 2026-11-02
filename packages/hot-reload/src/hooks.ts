@@ -104,6 +104,15 @@ registerHooks({
     const resolved = nextResolve(specifier, context);
     const parentUrl = context.parentURL;
 
+    // It only names the file (see `@xenon-ssg/import-url`), so its importer
+    // doesn't depend on what's in it: not versioned, nor counted as an import.
+    // `?.`: a `require()` has none, whatever Node's docs and types say.
+    // @todo Drop it if Node passes `{}` instead:
+    // https://github.com/nodejs/node/issues/67209
+    if (context.importAttributes?.["type"] === "url") {
+      return resolved;
+    }
+
     // While a hot import's `load` runs, the first import resolved is its own:
     // Node resolves an `import()` before it returns. The modules it imports in
     // turn may be resolved before it returns too, but after it, and from it.

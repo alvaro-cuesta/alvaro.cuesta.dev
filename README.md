@@ -15,6 +15,9 @@ You are probably interested in one of these packages:
   [single LightningCSS](./packages/express-plugin-single-lightningcss/),
   [static file](./packages/express-plugin-static-file/) and [static folder](./packages/express-plugin-static-folder/).
 
+- [@xenon-ssg/import-url](./packages/import-url/) — Import a file's URL instead of its module, with
+  `with { type: "url" }`, in Node and TypeScript. Not Xenon-specific.
+
 - [@xenon-ssg/thunks](./packages/thunks/) — Values you get later: lazy, shared promises, and cells that can be
   invalidated. Not Xenon-specific.
 

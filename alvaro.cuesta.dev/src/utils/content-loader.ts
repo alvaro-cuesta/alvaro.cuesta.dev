@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import { contentFile } from "./content-file.ts";
 import { cell, derived, family, type Thunk } from "@xenon-ssg/thunks";
 import { watchInDev } from "@xenon-ssg/hot-reload";
+import { toFileUrl } from "@xenon-ssg/import-url";
 import {
   analyzeItems,
   type AnalyzedItems,
@@ -46,7 +47,7 @@ export function createContentLoader<TModuleParsed extends { draft: boolean }>(
   // One content file per file, so a change only imports again the files it
   // reaches (see `contentFile`).
   const fileFor = family((filename: string) =>
-    contentFile(new URL(filename, contentFolderUrl).href),
+    contentFile(toFileUrl(new URL(filename, contentFolderUrl))),
   );
 
   // Disposed along with the loader, which stops watching the folder and

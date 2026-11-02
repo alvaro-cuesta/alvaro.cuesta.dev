@@ -1,6 +1,7 @@
 import url from "node:url";
 import { cell, derived, type Thunk } from "@xenon-ssg/thunks";
 import { hotImport } from "@xenon-ssg/hot-reload";
+import type { FileUrl } from "@xenon-ssg/import-url";
 import { gitFileDates, type GitFileDates } from "./git.ts";
 
 /** A content file: the module it compiles to, and when git says it was created and last modified. */
@@ -19,15 +20,15 @@ export type ContentFile = {
  * importer to reload instead (see `hotImport`). The dev server ignores them, until something imports the module again
  * and gets its latest version.
  *
- * @param fileUrl The file's URL.
+ * @param file The file.
  * @returns The content file.
  */
-export function contentFile(fileUrl: string): Thunk<ContentFile> & Disposable {
-  const filePath = url.fileURLToPath(fileUrl);
+export function contentFile(file: FileUrl): Thunk<ContentFile> & Disposable {
+  const filePath = url.fileURLToPath(file);
 
   // Only this cell is invalidated when the file changes, instead of the module
   // that makes the content file, and the whole site with it.
-  const module = cell(hotImport(() => import(fileUrl)));
+  const module = cell(hotImport(() => import(file.href)));
 
   // Disposed along with the content file: nothing else reads it.
   return derived(async (get) => {

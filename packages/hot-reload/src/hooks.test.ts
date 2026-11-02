@@ -195,6 +195,59 @@ describe("hooks", () => {
     });
   });
 
+  it("leave alone the files a module only names", async () => {
+    const result = await runWithHooks({
+      ...FIXTURES,
+      "page.mjs": `
+        import data from "./data.txt" with { type: "url" };
+        globalThis.evaluations = (globalThis.evaluations ?? 0) + 1;
+        export const evaluation = globalThis.evaluations;
+        export { data };
+      `,
+      "data.txt": "Some data.",
+      "main.mjs": `
+        import { registerHooks } from "node:module";
+        import { fileURLToPath } from "node:url";
+        import { hotImport, hotImportsOf } from "${HOT_IMPORT_URL}";
+        import { invalidate, isVersionedModule } from "${HOOKS_URL}";
+        import { loadPage } from "./writer.mjs";
+
+        // Like \`@xenon-ssg/import-url/hooks\`.
+        registerHooks({
+          load: (url, context, nextLoad) =>
+            context.importAttributes.type === "url"
+              ? {
+                  format: "module",
+                  source: \`export default new URL(\${JSON.stringify(url)});\`,
+                  shortCircuit: true,
+                }
+              : nextLoad(url, context),
+        });
+
+        const page = hotImport(loadPage);
+        const { evaluation: first, data } = await page.load();
+        const dataPath = fileURLToPath(data);
+        const isVersioned = isVersionedModule(dataPath) || data.search !== "";
+        const invalidated = invalidate([dataPath]);
+        const { evaluation: afterChange } = await page.load();
+
+        console.log(JSON.stringify({
+          first,
+          afterChange,
+          isVersioned,
+          subscribed: hotImportsOf(invalidated).length,
+        }));
+      `,
+    });
+
+    expect(result).toEqual({
+      first: 1,
+      afterChange: 1,
+      isVersioned: false,
+      subscribed: 0,
+    });
+  });
+
   it("reject a hot import that doesn't make exactly one import as it runs", async () => {
     const result = await runWithHooks({
       ...FIXTURES,

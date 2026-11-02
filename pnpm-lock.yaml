@@ -260,6 +260,9 @@ importers:
       '@xenon-ssg/hot-reload':
         specifier: workspace:*
         version: link:../packages/hot-reload
+      '@xenon-ssg/import-url':
+        specifier: workspace:*
+        version: link:../packages/import-url
       '@xenon-ssg/thunks':
         specifier: workspace:*
         version: link:../packages/thunks
@@ -563,6 +566,18 @@ importers:
         version: 7.1.0-beta
 
   packages/hot-reload:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.5
+      typescript:
+        specifier: 'catalog:'
+        version: 7.1.0-beta
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@26.6.5)(vite@7.3.7(@types/node@26.6.5)(lightningcss@1.33.0)(tsx@4.23.15))
+
+  packages/import-url:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

@@ -41,16 +41,15 @@ import {
   type BlogItemDate,
 } from "./utils/item-dates.ts";
 import { read } from "@xenon-ssg/thunks";
+// Files, not modules: so a page's module and git dates start from it at once,
+// and editing it doesn't evaluate this module again (see `contentFile`).
+import nowFile from "./pages/Now.mdx" with { type: "url" };
+import bookmarksFile from "./pages/Bookmarks.mdx" with { type: "url" };
+import licensesFile from "./pages/Licenses.mdx" with { type: "url" };
 
-// Not `import.meta.resolve`, which the dev server counts as an import: it would
-// evaluate this module again whenever a page changes.
-const Now = makeMdxPage(new URL("./pages/Now.mdx", import.meta.url).href);
-const Bookmarks = makeMdxPage(
-  new URL("./pages/Bookmarks.mdx", import.meta.url).href,
-);
-const Licenses = makeMdxPage(
-  new URL("./pages/Licenses.mdx", import.meta.url).href,
-);
+const Now = makeMdxPage(nowFile);
+const Bookmarks = makeMdxPage(bookmarksFile);
+const Licenses = makeMdxPage(licensesFile);
 
 /**
  * When a page was published and last modified, for its meta tags and the sitemap.

@@ -52,6 +52,9 @@ editing it restarts the dev server instead. There's no API yet to hand state to 
 copy: a free-form one (like webpack's `module.hot.data`) would go stale whenever what it was made
 from changed.
 
+An import `with { type: "url" }` (see `@xenon-ssg/import-url`) only names a file, so it doesn't
+count as one: editing the file doesn't evaluate the module that names it again.
+
 `hotImport` relies on something Node doesn't document: that it resolves an `import()` before the
 call that makes it returns. That's how the hooks tell which module a `hotImport` imported. If Node
 ever stops doing it, `hotImport` fails as it loads, rather than serving stale modules
