@@ -1,8 +1,12 @@
 {
-  // TypeScript 6, aliased: TypeScript 7 has no tsserver yet, which the MDX
-  // TypeScript plugin needs. Builds use TypeScript 7.
-  "js/ts.tsdk.path": "./node_modules/typescript6/lib",
-  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  // The workspace's TypeScript 7, through its extension (see
+  // `extensions.json`): VS Code's own only runs TypeScript 6.
+  "js/ts.experimental.useTsgo": true,
+  "js/ts.tsdk.path": "./node_modules/typescript",
+  // So "Select Version" offers it (as "Use Custom Version"): its workspace
+  // version is only ever `@typescript/native-preview`. Picking it is needed
+  // once, as the extension won't run a workspace binary until then.
+  "js/ts.tsdk.additionalLocations": ["./node_modules/typescript"],
   // For node.config.json's schema.
   "json.schemaDownload.trustedDomains": {
     "https://nodejs.org/dist/": true

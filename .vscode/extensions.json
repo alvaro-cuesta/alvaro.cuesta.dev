@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    // TypeScript 7 (see `settings.json`).
+    "TypeScriptTeam.native-preview",
+    "unifiedjs.vscode-mdx"
+  ]
+}

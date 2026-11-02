@@ -14,7 +14,7 @@
     "dev": "NODE_ENV=development TSX_TSCONFIG_PATH=../tsconfig.base.json node --conditions=@xenon-ssg/source ./bin/dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint:tsc": "tsc -b"
+    "lint:tsc": "tsc -b --runExternalCode"
   },
   "repository": {
     "type": "git",
@@ -67,7 +67,6 @@
     "vfile-reporter": "^8.1.1"
   },
   "devDependencies": {
-    "@mdx-js/typescript-plugin": "^0.1.4",
     "@types/estree": "^1.0.9",
     "@types/express": "catalog:",
     "@types/hast": "^3.0.5",
@@ -78,6 +77,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/unist": "^3.0.3",
+    "mdx-content-mapper": "github:remcohaszing/mdx-content-mapper#ae7e9a0a609f00ee1fbb873ec69dfef89f0cec5e",
     "serve": "^14.2.4",
     "tsx": "^4.23.15",
     "typescript": "catalog:",

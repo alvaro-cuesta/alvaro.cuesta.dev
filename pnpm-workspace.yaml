@@ -25,15 +25,9 @@ minimumReleaseAgeIgnoreMissingTime: false
 trustPolicy: no-downgrade
 
 # Fails instead of warning when a dependency gets a peer version it doesn't
-# support, so the mismatch is fixed or accepted below, not just scrolled past.
+# support, so the mismatch is fixed or accepted (`peerDependencyRules`), not
+# just scrolled past.
 strictPeerDependencies: true
-
-peerDependencyRules:
-  allowedVersions:
-    # They only take TypeScript's types from it: the editor hands them its own
-    # TypeScript (6, see `.vscode/settings.json`).
-    "@volar/typescript>typescript": "7"
-    "@volar/language-service>typescript": "7"
 
 catalog:
   "@types/express": ^5.0.6

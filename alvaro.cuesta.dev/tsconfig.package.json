@@ -5,12 +5,23 @@
   "compilerOptions": {
     "noEmit": true,
     "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.package.tsbuildinfo",
-    "types": ["node", "mdx", "@xenon-ssg/import-url/types"],
-    // Editor-only: TypeScript completion/diagnostics inside .mdx files (tsc
-    // ignores it). The VS Code MDX extension already registers it; listing it
-    // here pins its version and enables it in other TypeScript-based editors.
-    "plugins": [{ "name": "@mdx-js/typescript-plugin" }]
+    "types": ["node", "mdx", "@xenon-ssg/import-url/types"]
   },
+  // TypeScript in .mdx files: the editor runs it once you allow it, and `tsc`
+  // only with `--runExternalCode`. Installed from a commit, as its latest
+  // release (0.0.2) fails on any Markdown link: back to a version once one has
+  // the fix (remcohaszing/mdx-content-mapper#1). It runs the `node` on the
+  // PATH, so an editor started outside a shell needs one there (with fnm, its
+  // `aliases/default` folder), or it fails with TS18099.
+  // @todo Drop the PATH note once VS Code runs it with its own Node:
+  // https://github.com/microsoft/TypeScript/issues/65114
+  "contentMappers": [
+    {
+      "package": "mdx-content-mapper",
+      "extensions": [".mdx"],
+      "options": {}
+    }
+  ],
   "include": ["bin/**/*", "src/**/*", "config.ts"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "references": [
