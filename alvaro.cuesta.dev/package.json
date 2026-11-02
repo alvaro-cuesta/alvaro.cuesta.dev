@@ -48,7 +48,7 @@
     "hast-util-to-string": "^3.0.1",
     "html-to-text": "^10.0.1",
     "levenshtein-edit-distance": "^3.0.1",
-    "path-to-regexp": "^8.2.0",
+    "path-to-regexp": "^9.0.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "recma-mdx-is-mdx-component": "^2.0.0",

@@ -285,8 +285,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       path-to-regexp:
-        specifier: ^8.2.0
-        version: 8.4.2
+        specifier: ^9.0.0
+        version: 9.0.0
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -2318,6 +2318,9 @@ packages:
 
   path-to-regexp@8.4.2:
     resolution: {integrity: sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA==}
+
+  path-to-regexp@9.0.0:
+    resolution: {integrity: sha512-kfo5HIFCfEH24bcHSWEFIfrwiCsm/DXR+j1fc0696VIdWkICdAcKH2LxRClvz5HQcG4iCQpb4qBZ7pttGPG/dA==}
 
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
@@ -4790,6 +4793,8 @@ snapshots:
   path-to-regexp@3.3.0: {}
 
   path-to-regexp@8.4.2: {}
+
+  path-to-regexp@9.0.0: {}
 
   pathe@2.0.3: {}
 
