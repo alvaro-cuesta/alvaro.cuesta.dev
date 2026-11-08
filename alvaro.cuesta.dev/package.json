@@ -67,7 +67,7 @@
     "vfile-reporter": "^8.1.1"
   },
   "devDependencies": {
-    "@types/estree": "^1.0.9",
+    "@types/estree": "^1.0.10",
     "@types/express": "catalog:",
     "@types/hast": "^3.0.5",
     "@types/html-to-text": "^9.0.4",
