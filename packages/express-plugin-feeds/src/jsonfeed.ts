@@ -151,6 +151,10 @@ const toJsonFeed = (
     ...(page.homePageUrl ? { home_page_url: page.homePageUrl } : {}),
     feed_url: toAbsoluteUrl(page.baseUrl, feedRoute.pathname),
     ...(page.description ? { description: page.description } : {}),
+    // The one image for both: JSON Feed only tells them apart by size.
+    ...(page.iconUrl !== undefined
+      ? { icon: page.iconUrl, favicon: page.iconUrl }
+      : {}),
     ...(nextRoute
       ? {
           next_url: toAbsoluteUrl(page.baseUrl, nextRoute.pathname),

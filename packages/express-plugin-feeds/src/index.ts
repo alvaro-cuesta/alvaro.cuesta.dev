@@ -92,6 +92,12 @@ export type FeedsPluginOptions<
 > = {
   getItems: FeedItemsResolver<TMetadata>;
   homePagePathname: FeedValueResolver<string>;
+  /**
+   * The site path of a square image that stands for the feed (e.g. the site's
+   * icon), which readers show next to it. Without one, they guess from the
+   * site's pages, often picking a tiny icon.
+   */
+  iconPathname?: FeedValueResolver<string>;
   title: string;
   description: string;
   authors?: FeedValueResolver<FeedAuthor[]>;
@@ -174,6 +180,7 @@ type CompileFeedsInput<TMetadata = unknown> = {
   title: string;
   description: string;
   homePagePathname: string;
+  iconPathname: string | undefined;
   authors: FeedAuthor[];
   generator: FeedGeneratorConfig;
   content: Required<FeedContentOptions>;
@@ -190,6 +197,7 @@ async function compileFeeds<TMetadata = unknown>({
   title,
   description,
   homePagePathname,
+  iconPathname,
   authors,
   generator,
   content,
@@ -203,6 +211,7 @@ async function compileFeeds<TMetadata = unknown>({
     title,
     description,
     homePagePathname,
+    iconPathname,
     authors,
     content,
   });
@@ -225,6 +234,7 @@ export function feedsPlugin<
 >({
   getItems,
   homePagePathname,
+  iconPathname,
   title,
   description,
   authors = [],
@@ -271,6 +281,10 @@ export function feedsPlugin<
         homePagePathname,
         context,
       );
+      const resolvedIconPathname =
+        iconPathname === undefined
+          ? undefined
+          : resolveContextValue(iconPathname, context);
       const resolvedAuthors = resolveContextValue(authors, context);
 
       const buildPre: PluginBuildPreFunction<
@@ -281,6 +295,7 @@ export function feedsPlugin<
           baseUrl,
           getItems,
           homePagePathname: resolvedHomePagePathname,
+          iconPathname: resolvedIconPathname,
           authors: resolvedAuthors,
           mountPointFragments,
           itemsPerPage,
@@ -315,6 +330,7 @@ export function feedsPlugin<
             baseUrl,
             getItems,
             homePagePathname: resolvedHomePagePathname,
+            iconPathname: resolvedIconPathname,
             authors: resolvedAuthors,
             mountPointFragments,
             itemsPerPage,

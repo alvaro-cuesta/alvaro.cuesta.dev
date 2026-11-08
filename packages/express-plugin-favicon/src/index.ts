@@ -152,6 +152,21 @@ const serveMetaContents = (
       : tag,
   );
 
+// Browsers and other tools ask for these by name at the origin's root, without
+// a link, so they're also written there unhashed.
+const ASKED_FOR_BY_NAME: ReadonlySet<string> = new Set([
+  // The HTML standard's fallback for a document without an icon link (e.g. a
+  // feed opened in a tab), which services that look up a site's icon ask for
+  // too.
+  "favicon.ico",
+  // Only de facto, as Safari asks for it only from pages that link no touch
+  // icon: some tools still ask for it whatever the page links.
+  "apple-touch-icon.png",
+  // Only de facto too: its suffix was how Safari before iOS 7 knew not to add
+  // effects, and some tools still ask for it.
+  "apple-touch-icon-precomposed.png",
+]);
+
 type FaviconPluginOptions = {
   /**
    * The SVG's path. Read once if it's a `string`.
@@ -177,6 +192,9 @@ type FaviconPluginOptions = {
    * - `string` to manually control fragment
    * - `false` to disable cache busting
    * - `undefined` to calculate from input file hash
+   *
+   * The images asked for by name (e.g. `favicon.ico`) are also written
+   * unhashed, if the site is at the origin's root, where they're asked for.
    */
   cacheBustingFragment?: string | false | undefined;
 };
@@ -399,6 +417,7 @@ export const faviconPlugin = ({
   };
 
   const buildPre: PluginBuildPreFunction<FaviconPluginBuildPreResult> = async ({
+    siteMeta,
     baseOutputFolder,
     emitStaticPathname,
   }) => {
@@ -435,6 +454,19 @@ export const faviconPlugin = ({
       // source actually reference. The cache-busted variant only shows up
       // in injected `<link>` tags, which don't go through the crawler.
       emitStaticPathname(toPathname(image.name));
+
+      // Unhashed too, as it's asked for by name. Links still get the hashed
+      // one, which can be cached for good.
+      if (
+        realOutputFilename !== image.name &&
+        siteMeta.basepath === "" &&
+        mountPointFragments.length === 0 &&
+        ASKED_FOR_BY_NAME.has(image.name)
+      ) {
+        const unhashedFilepath = path.join(outputFolder, image.name);
+        console.debug(`[Favicon Image] /${image.name} -> ${unhashedFilepath}`);
+        await fs.writeFile(unhashedFilepath, image.contents);
+      }
     }
 
     for (const file of files) {

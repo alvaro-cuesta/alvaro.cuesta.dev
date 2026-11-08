@@ -198,12 +198,14 @@ const toRssDocument = (
     });
   }
 
+  const homePageUrl = requireFeedField(
+    page.homePageUrl,
+    "RSS feeds require a channel link.",
+  );
+
   return {
     title: page.title,
-    link: requireFeedField(
-      page.homePageUrl,
-      "RSS feeds require a channel link.",
-    ),
+    link: homePageUrl,
     description: requireFeedField(
       page.description,
       "RSS feeds require a channel description.",
@@ -211,6 +213,12 @@ const toRssDocument = (
     language,
     ...(page.updated ? { lastBuildDate: instantToRfc822(page.updated) } : {}),
     generator,
+    ...(page.iconUrl !== undefined
+      ? {
+          // The channel's title and link, as RSS says they should be.
+          image: { url: page.iconUrl, title: page.title, link: homePageUrl },
+        }
+      : {}),
     ...(atomLinks.length ? { atomLinks } : {}),
     ...(page.currentPage > 1 ? { historyArchive: true } : {}),
     items: page.items.map((item) => toRssItemDocument(item)),
@@ -245,6 +253,15 @@ export const serializeRssDocument = (
 
   if (document.generator) {
     channel.ele("generator").txt(document.generator);
+  }
+
+  if (document.image) {
+    const image = channel.ele("image");
+    image.ele("url").txt(document.image.url);
+    image.ele("title").txt(document.image.title);
+    if (document.image.link) {
+      image.ele("link").txt(document.image.link);
+    }
   }
 
   if (document.historyArchive) {

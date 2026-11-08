@@ -181,9 +181,14 @@ const starryNightCss = singleLightningCssPlugin({
   critical: true,
 });
 
+// The copy the favicon plugin writes unhashed, for the tools that ask for it by
+// name: only its build knows the hashed names.
+const FEED_ICON_PATHNAME = "/apple-touch-icon.png";
+
 const blogFeeds = feedsPlugin({
   getItems: ({ baseUrl }) => getBlogFeedSourceItems(baseUrl),
   homePagePathname: routeBlogArticleList.build({ page: null }),
+  iconPathname: FEED_ICON_PATHNAME,
   mountPointFragments: ["blog"],
   title: makeTitle(["Blog"], { disableReverse: true }),
   description: BLOG_BLURB_DESCRIPTION,
@@ -203,6 +208,7 @@ const blogFeeds = feedsPlugin({
 const timelineFeeds = feedsPlugin({
   getItems: ({ baseUrl }) => getTimelineFeedSourceItems(baseUrl),
   homePagePathname: routeTimelineList.build({ page: null }),
+  iconPathname: FEED_ICON_PATHNAME,
   mountPointFragments: ["timeline"],
   title: makeTitle(["Timeline"], { disableReverse: true }),
   description: TIMELINE_BLURB_DESCRIPTION,
@@ -238,6 +244,7 @@ const allFeeds = feedsPlugin({
     );
   },
   homePagePathname: routeHome.build({}),
+  iconPathname: FEED_ICON_PATHNAME,
   mountPointFragments: [],
   title: makeTitle(["All"], { disableReverse: true }),
   description: SITE_SHORT_DESCRIPTION,

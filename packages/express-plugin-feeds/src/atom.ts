@@ -225,6 +225,7 @@ const toAtomDocument = (
         }
       : {}),
     ...(links.length ? { links } : {}),
+    ...(page.iconUrl !== undefined ? { icon: page.iconUrl } : {}),
     ...(page.authors?.length
       ? {
           authors: page.authors.map((author) => toAtomPerson(author)),
@@ -272,6 +273,10 @@ export const serializeAtomDocument = (
         ...(document.generator.uri ? { uri: document.generator.uri } : {}),
       })
       .txt(document.generator.value);
+  }
+
+  if (document.icon) {
+    feed.ele("icon").txt(document.icon);
   }
 
   if (page.currentPage > 1) {

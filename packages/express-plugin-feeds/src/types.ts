@@ -51,6 +51,8 @@ export type FeedPage = {
   description?: string;
   baseUrl: string;
   homePageUrl?: string;
+  /** A square image that stands for the feed, e.g. the site's icon. */
+  iconUrl?: string;
   /**
    * When the page's content last changed: a publication on it or on any page
    * before it, or an edit on it.

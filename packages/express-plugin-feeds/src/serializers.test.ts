@@ -239,4 +239,32 @@ describe("feed serializers", () => {
     expect(itemMatch?.[1]).not.toContain("<content:encoded>");
     expect(itemMatch?.[1]).not.toContain("<category>");
   });
+
+  it("writes the feed's icon in every format", () => {
+    const page: FeedPage = {
+      currentPage: 1,
+      totalPages: 1,
+      title: "Example Feed",
+      description: "Example description.",
+      baseUrl: "https://example.com",
+      homePageUrl: "https://example.com/blog",
+      iconUrl: "https://example.com/icon.png",
+      updated: Temporal.Instant.from("2026-03-14T00:00:00Z"),
+      items: [],
+      routes,
+      previousPage: null,
+      nextPage: null,
+    };
+
+    expect(
+      serializeAtomDocument(page, "en", { value: "Example Generator" }),
+    ).toContain("<icon>https://example.com/icon.png</icon>");
+    expect(serializeRssDocument(page, "en", "Example Generator")).toContain(
+      "<image><url>https://example.com/icon.png</url><title>Example Feed</title><link>https://example.com/blog</link></image>",
+    );
+    expect(JSON.parse(serializeJsonDocuments(page, "en"))).toMatchObject({
+      icon: "https://example.com/icon.png",
+      favicon: "https://example.com/icon.png",
+    });
+  });
 });

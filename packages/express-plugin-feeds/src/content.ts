@@ -111,6 +111,7 @@ export const compileFeedPageModels = async ({
   title,
   description,
   homePagePathname,
+  iconPathname,
   authors,
   content,
   getItems,
@@ -121,6 +122,7 @@ export const compileFeedPageModels = async ({
   title: string;
   description: string;
   homePagePathname: string;
+  iconPathname?: string | undefined;
   authors: FeedAuthor[];
   content: Required<FeedContentOptions>;
   getItems: (context: { baseUrl: string }) => Promise<FeedSourceItem[]>;
@@ -128,6 +130,10 @@ export const compileFeedPageModels = async ({
   const sourceItems = await getItems({ baseUrl });
   const pageAuthors = authors.length ? authors : undefined;
   const homePageUrl = toAbsoluteUrl(baseUrl, homePagePathname);
+  const iconUrl =
+    iconPathname === undefined
+      ? undefined
+      : toAbsoluteUrl(baseUrl, iconPathname);
 
   const pagedItems = chunk(sourceItems, itemsPerPage);
   // A publication pushes the items after it down, so it changes its page and
@@ -164,6 +170,7 @@ export const compileFeedPageModels = async ({
         description,
         baseUrl,
         homePageUrl,
+        ...(iconUrl !== undefined ? { iconUrl } : {}),
         ...(updated ? { updated } : {}),
         ...(pageAuthors ? { authors: pageAuthors } : {}),
         items: resolvedPageItems,
