@@ -60,7 +60,7 @@
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
     "source-map": "^0.8.0",
-    "tldts": "^7.4.19",
+    "tldts": "^7.5.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.2.0",
     "vfile": "^6.0.3",
@@ -78,7 +78,7 @@
     "@types/react-dom": "catalog:",
     "@types/unist": "^3.0.3",
     "mdx-content-mapper": "github:remcohaszing/mdx-content-mapper#ae7e9a0a609f00ee1fbb873ec69dfef89f0cec5e",
-    "serve": "^14.2.4",
+    "serve": "^14.2.8",
     "tsx": "^4.23.15",
     "typescript": "catalog:",
     "vitest": "catalog:"

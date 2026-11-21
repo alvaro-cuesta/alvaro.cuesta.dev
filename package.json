@@ -6,7 +6,7 @@
     "lint:tsc": "tsc -b --runExternalCode"
   },
   "devDependencies": {
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "typescript": "catalog:"
   }
 }
