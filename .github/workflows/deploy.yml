@@ -63,7 +63,7 @@ jobs:
       # pnpm at the version `package.json` pins, Node.js at `.nvmrc`'s, then the dependencies.
       - &setup
         name: Set up pnpm, Node.js and dependencies
-        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         with:
           cache: true
           # pnpm already won't change the lockfile in CI, but without one it would resolve from the registry.
